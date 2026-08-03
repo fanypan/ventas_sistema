@@ -1,0 +1,9 @@
+{
+    "Customers": true,
+    "Products": true,
+    "Sales": true,
+    "Suppliers": true,
+    "Financials": true,
+    "Purchases": true,
+    "Credits": true
+}

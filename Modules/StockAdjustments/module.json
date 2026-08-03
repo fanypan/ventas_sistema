@@ -1,0 +1,11 @@
+{
+    "name": "StockAdjustments",
+    "alias": "stockadjustments",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\StockAdjustments\\Providers\\StockAdjustmentsServiceProvider"
+    ],
+    "files": []
+}
