@@ -1,0 +1,106 @@
+# Desarrollo local únicamente.
+# El servicio `app` ejecuta `php artisan serve` (PHP CLI). No incluye nginx ni php-fpm.
+# Producción: docker compose -f docker-compose.prod.yml up -d --build
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    ports:
+      - "${APP_PUBLISH_PORT:-8090}:8000"
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:${APP_PUBLISH_PORT:-8090}
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-admin_lte3}
+      DB_USERNAME: ${DB_USERNAME:-ventas}
+      DB_PASSWORD: ${DB_PASSWORD:-ventas}
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_DRIVER: file
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_ENCRYPTION: ""
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      RUN_SEED: ${RUN_SEED:-true}
+      WWWUSER: ${WWWUSER:-1000}
+      WWWGROUP: ${WWWGROUP:-1000}
+      COMPOSER_HOME: /tmp/composer
+      COMPOSER_CACHE_DIR: /tmp/composer/cache
+      npm_config_cache: /tmp/npm-cache
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ventas
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-admin_lte3}
+      MYSQL_USER: ${DB_USERNAME:-ventas}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-ventas}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    ports:
+      - "${DB_PUBLISH_PORT:-3307}:3306"
+    volumes:
+      # Las credenciales MYSQL_* solo se aplican la primera vez que se crea este volumen.
+      - mysql_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    networks:
+      - ventas
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PUBLISH_PORT:-6381}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - ventas
+
+  mailhog:
+    image: axllent/mailpit
+    ports:
+      - "${MAILHOG_UI_PORT:-8025}:8025"
+      - "${MAILHOG_SMTP_PORT:-1026}:1025"
+    networks:
+      - ventas
+
+networks:
+  ventas:
+    driver: bridge
+
+volumes:
+  mysql_data:
