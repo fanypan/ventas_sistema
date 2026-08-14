@@ -1,0 +1,25 @@
+# Graphify corpus: Laravel modular + legacy PHP only
+*
+!app/
+!app/**
+!Modules/
+!Modules/**
+!routes/
+!routes/**
+!config/
+!config/**
+!database/
+!database/**
+!resources/
+!resources/**
+!Sistemaventas/
+!Sistemaventas/sistema/
+!Sistemaventas/sistema/**
+Sistemaventas/sistema/pdf/vendor/
+Sistemaventas/sistema/factura/fonts/
+Sistemaventas/sistema/factura/img/
+Sistemaventas/sistema/img/
+Sistemaventas/sistema/fonts/
+Sistemaventas/sistema/js/
+Sistemaventas/sistema/diag_output.txt
+graphify-out/

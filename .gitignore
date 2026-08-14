@@ -25,3 +25,6 @@ list_tables.php
 # SQL dumps (opcional - comentar si querés incluir el backup)
 *.sql
 storage/app/.docker_seeded
+
+# Graphify (salida regenerable)
+graphify-out/
