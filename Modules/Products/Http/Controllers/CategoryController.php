@@ -5,9 +5,17 @@ namespace Modules\Products\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 
 class CategoryController extends Controller
 {
+    use AuthorizesCrud;
+
+    public function __construct()
+    {
+        $this->authorizeCrud('category');
+    }
+
     /**
      * Display a listing of the resource.
      * @return Renderable

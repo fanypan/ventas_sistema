@@ -5,9 +5,17 @@ namespace Modules\Customers\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 
 class CustomerController extends Controller
 {
+    use AuthorizesCrud;
+
+    public function __construct()
+    {
+        $this->authorizeCrud('customer');
+    }
+
     /**
      * Display a listing of the resource.
      * @return Renderable

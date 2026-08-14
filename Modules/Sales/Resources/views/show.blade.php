@@ -14,6 +14,13 @@
                     <a href="{{ route('sales.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Volver al Listado
                     </a>
+                    @if($sale->status != 0)
+                    @can('update sale')
+                    <a href="{{ route('sales.edit', $sale->id) }}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    @endcan
+                    @endif
                 </div>
             </div>
         </div>

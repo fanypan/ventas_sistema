@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Products\Entities\Brand;
 use Illuminate\Support\Str;
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 
 class BrandController extends Controller
 {
+    use AuthorizesCrud;
+
+    public function __construct()
+    {
+        $this->authorizeCrud('brand', extraUpdate: ['changeStatus']);
+    }
+
     public function index()
     {
         $brands = Brand::latest()->get();

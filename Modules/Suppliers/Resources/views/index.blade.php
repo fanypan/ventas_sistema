@@ -11,9 +11,11 @@
                 <h1 class="m-0">Lista de Proveedores</h1>
             </div>
             <div class="col-sm-6 text-right">
+                @can('create supplier')
                 <a href="{{ route('suppliers.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nuevo Proveedor
                 </a>
+                @endcan
             </div>
         </div>
     </div>
@@ -41,12 +43,20 @@
                             <td>{{ $supplier->phone }}</td>
                             <td>{{ $supplier->email }}</td>
                             <td>
-                                <a href="#" class="btn btn-info btn-sm">
+                                @can('update supplier')
+                                <a href="{{ route('suppliers.edit', $supplier->id) }}" class="btn btn-info btn-sm">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <button class="btn btn-danger btn-sm">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                @endcan
+                                @can('delete supplier')
+                                <form action="{{ route('suppliers.destroy', $supplier->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar este proveedor?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                @endcan
                             </td>
                         </tr>
                         @endforeach

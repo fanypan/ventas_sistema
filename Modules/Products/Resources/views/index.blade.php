@@ -26,15 +26,22 @@
                     <div class="card-header">
                         <h3 class="card-title">Listado de Productos</h3>
                         <div class="card-tools">
+                            @can('read report')
                             <a href="{{ route('reports.products.pdf') }}" class="btn btn-warning btn-sm" target="_blank">
                                 <i class="fas fa-file-pdf"></i> Exportar PDF
                             </a>
                             <a href="{{ route('reports.products.excel') }}" class="btn btn-success btn-sm">
                                 <i class="fas fa-file-excel"></i> Exportar Excel
                             </a>
+                            @endcan
+                            <a href="{{ route('products.zero') }}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-box-open"></i> Stock 0
+                            </a>
+                            @can('create product')
                             <a href="{{ route('products.create') }}" class="btn btn-primary btn-sm ml-2">
                                 <i class="fas fa-plus"></i> Nuevo Producto
                             </a>
+                            @endcan
                         </div>
                     </div>
                     <div class="card-body">
@@ -81,9 +88,17 @@
                                     </td>
                                     <td>
                                         <div class="btn-group">
+                                            @if($product->code)
+                                            <a href="{{ route('products.barcode', $product->id) }}" class="btn btn-secondary btn-sm" title="Imprimir código de barras" target="_blank">
+                                                <i class="fas fa-barcode"></i>
+                                            </a>
+                                            @endif
+                                            @can('update product')
                                             <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            @endcan
+                                            @can('delete product')
                                             <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -91,6 +106,7 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

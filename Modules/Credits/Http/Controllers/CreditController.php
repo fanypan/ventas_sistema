@@ -5,9 +5,30 @@ namespace Modules\Credits\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 
 class CreditController extends Controller
 {
+    use AuthorizesCrud;
+
+    public function __construct()
+    {
+        $this->authorizeCrud('credit');
+        $this->middleware('permission:read credit')->only([
+            'receivables',
+            'customerKardex',
+            'customerKardexPdf',
+            'printReceipt',
+        ]);
+        $this->middleware('permission:read supplier')->only([
+            'payables',
+            'supplierKardex',
+            'supplierKardexPdf',
+        ]);
+        $this->middleware('permission:create credit|update purchase')->only(['storeAbono']);
+        $this->middleware('permission:create credit')->only(['payInstallment']);
+    }
+
     /**
      * Display a listing of the resource.
      * @return Renderable
@@ -92,6 +113,174 @@ class CreditController extends Controller
             ->paginate(10);
             
         return view('credits::payables', compact('purchases'));
+    }
+
+    public function customerKardex(Request $request, $id)
+    {
+        $customer = \Modules\Customers\Entities\Customer::findOrFail($id);
+        $from = $request->input('from');
+        $to = $request->input('to');
+        $movements = $this->buildCustomerMovements($customer->id, $from, $to);
+        $saldo = $movements->last()['saldo'] ?? 0;
+
+        return view('credits::kardex_customer', compact('customer', 'movements', 'from', 'to', 'saldo'));
+    }
+
+    public function customerKardexPdf(Request $request, $id)
+    {
+        $customer = \Modules\Customers\Entities\Customer::findOrFail($id);
+        $from = $request->input('from');
+        $to = $request->input('to');
+        $movements = $this->buildCustomerMovements($customer->id, $from, $to);
+        $saldo = $movements->last()['saldo'] ?? 0;
+        $settings = \App\Models\Setting::all()->pluck('value', 'key');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+            'credits::pdf.kardex_customer',
+            compact('customer', 'movements', 'from', 'to', 'saldo', 'settings')
+        )->setPaper('a4', 'portrait');
+
+        return $pdf->stream('estado_cuenta_cliente_'.$customer->id.'.pdf');
+    }
+
+    public function supplierKardex(Request $request, $id)
+    {
+        $supplier = \Modules\Suppliers\Entities\Supplier::findOrFail($id);
+        $from = $request->input('from');
+        $to = $request->input('to');
+        $movements = $this->buildSupplierMovements($supplier->id, $from, $to);
+        $saldo = $movements->last()['saldo'] ?? 0;
+
+        return view('credits::kardex_supplier', compact('supplier', 'movements', 'from', 'to', 'saldo'));
+    }
+
+    public function supplierKardexPdf(Request $request, $id)
+    {
+        $supplier = \Modules\Suppliers\Entities\Supplier::findOrFail($id);
+        $from = $request->input('from');
+        $to = $request->input('to');
+        $movements = $this->buildSupplierMovements($supplier->id, $from, $to);
+        $saldo = $movements->last()['saldo'] ?? 0;
+        $settings = \App\Models\Setting::all()->pluck('value', 'key');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+            'credits::pdf.kardex_supplier',
+            compact('supplier', 'movements', 'from', 'to', 'saldo', 'settings')
+        )->setPaper('a4', 'portrait');
+
+        return $pdf->stream('estado_cuenta_proveedor_'.$supplier->id.'.pdf');
+    }
+
+    private function buildCustomerMovements(int $customerId, $from = null, $to = null)
+    {
+        $sales = \Modules\Sales\Entities\Sale::with(['abonos.user', 'creator'])
+            ->where('customer_id', $customerId)
+            ->where(function ($q) {
+                $q->where('payment_type', 'credito')
+                    ->orWhereIn('status', [2, 3])
+                    ->orWhereHas('abonos');
+            })
+            ->orderBy('created_at')
+            ->get();
+
+        $rows = collect();
+        foreach ($sales as $sale) {
+            $rows->push([
+                'date' => $sale->created_at,
+                'type' => 'factura',
+                'ref' => $sale->id,
+                'description' => 'Venta #' . $sale->id,
+                'cargo' => (float) $sale->total,
+                'abono' => 0,
+                'user' => $sale->creator->name ?? '-',
+                'abono_id' => null,
+            ]);
+            foreach ($sale->abonos as $abono) {
+                $rows->push([
+                    'date' => $abono->payment_date ?? $abono->created_at,
+                    'type' => 'abono',
+                    'ref' => $sale->id,
+                    'description' => 'Abono venta #' . $sale->id . ($abono->payment_method ? ' (' . $abono->payment_method . ')' : ''),
+                    'cargo' => 0,
+                    'abono' => (float) $abono->amount,
+                    'user' => $abono->user->name ?? '-',
+                    'abono_id' => $abono->id,
+                ]);
+            }
+        }
+
+        $rows = $rows->sortBy(function ($r) {
+            return \Carbon\Carbon::parse($r['date'])->timestamp;
+        })->values();
+
+        if ($from) {
+            $rows = $rows->filter(fn ($r) => \Carbon\Carbon::parse($r['date'])->toDateString() >= $from)->values();
+        }
+        if ($to) {
+            $rows = $rows->filter(fn ($r) => \Carbon\Carbon::parse($r['date'])->toDateString() <= $to)->values();
+        }
+
+        $saldo = 0;
+        return $rows->map(function ($row) use (&$saldo) {
+            $saldo += $row['cargo'] - $row['abono'];
+            $row['saldo'] = $saldo;
+            return $row;
+        });
+    }
+
+    private function buildSupplierMovements(int $supplierId, $from = null, $to = null)
+    {
+        $purchases = \Modules\Purchases\Entities\Purchase::with(['abonos.user', 'creator'])
+            ->where('supplier_id', $supplierId)
+            ->where(function ($q) {
+                $q->where('status', 2)->orWhereHas('abonos');
+            })
+            ->orderBy('created_at')
+            ->get();
+
+        $rows = collect();
+        foreach ($purchases as $purchase) {
+            $rows->push([
+                'date' => $purchase->created_at,
+                'type' => 'compra',
+                'ref' => $purchase->id,
+                'description' => 'Compra #' . $purchase->id,
+                'cargo' => (float) $purchase->total,
+                'abono' => 0,
+                'user' => $purchase->creator->name ?? '-',
+                'abono_id' => null,
+            ]);
+            foreach ($purchase->abonos as $abono) {
+                $rows->push([
+                    'date' => $abono->payment_date ?? $abono->created_at,
+                    'type' => 'pago',
+                    'ref' => $purchase->id,
+                    'description' => 'Pago compra #' . $purchase->id . ($abono->payment_method ? ' (' . $abono->payment_method . ')' : ''),
+                    'cargo' => 0,
+                    'abono' => (float) $abono->amount,
+                    'user' => $abono->user->name ?? '-',
+                    'abono_id' => $abono->id,
+                ]);
+            }
+        }
+
+        $rows = $rows->sortBy(function ($r) {
+            return \Carbon\Carbon::parse($r['date'])->timestamp;
+        })->values();
+
+        if ($from) {
+            $rows = $rows->filter(fn ($r) => \Carbon\Carbon::parse($r['date'])->toDateString() >= $from)->values();
+        }
+        if ($to) {
+            $rows = $rows->filter(fn ($r) => \Carbon\Carbon::parse($r['date'])->toDateString() <= $to)->values();
+        }
+
+        $saldo = 0;
+        return $rows->map(function ($row) use (&$saldo) {
+            $saldo += $row['cargo'] - $row['abono'];
+            $row['saldo'] = $saldo;
+            return $row;
+        });
     }
 
     public function storeAbono(Request $request)

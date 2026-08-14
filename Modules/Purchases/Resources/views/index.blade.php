@@ -10,9 +10,11 @@
                 <h1 class="m-0">Historial de Compras</h1>
             </div>
             <div class="col-sm-6 text-right">
+                @can('create purchase')
                 <a href="{{ route('purchases.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nueva Compra
                 </a>
+                @endcan
             </div>
         </div>
     </div>
@@ -71,6 +73,7 @@
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @if($purchase->status != 0)
+                                @can('delete purchase')
                                 <form action="{{ route('purchases.destroy', $purchase->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
@@ -78,6 +81,7 @@
                                         <i class="fas fa-ban"></i>
                                     </button>
                                 </form>
+                                @endcan
                                 @endif
                             </td>
                         </tr>

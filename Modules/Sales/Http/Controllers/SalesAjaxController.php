@@ -15,6 +15,12 @@ use Carbon\Carbon;
 
 class SalesAjaxController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:create sale')->except(['storeCustomer']);
+        $this->middleware('permission:create customer')->only(['storeCustomer']);
+    }
+
     public function searchProduct(Request $request)
     {
         $term = $request->term;

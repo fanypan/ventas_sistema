@@ -7,5 +7,6 @@
     "providers": [
         "Modules\\Financials\\Providers\\FinancialsServiceProvider"
     ],
-    "files": []
+    "files": [],
+    "permissions": ["cash", "expense", "insumo"]
 }

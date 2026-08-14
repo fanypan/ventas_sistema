@@ -10,6 +10,15 @@ use Modules\Sales\Entities\SaleDetail;
 
 class DashboardController extends Controller
 {
+    public function welcome()
+    {
+        if (auth()->check()) {
+            return redirect()->route('dashboard');
+        }
+
+        return view('welcome');
+    }
+
     public function index(Request $request)
     {
         $x['title'] = 'Dashboard';
@@ -22,6 +31,7 @@ class DashboardController extends Controller
 
         $x['total_products']  = \Modules\Products\Entities\Product::where('status', 1)->count();
         $x['low_stock']       = \Modules\Products\Entities\Product::where('status', 1)->where('stock', '<=', 5)->count();
+        $x['zero_stock']      = \Modules\Products\Entities\Product::where('status', 1)->where('stock', '<=', 0)->count();
         $x['total_customers'] = \Modules\Customers\Entities\Customer::count();
 
         $x['sales_today']     = \Modules\Sales\Entities\Sale::whereDate('created_at', $today)->sum('total');
@@ -60,6 +70,11 @@ class DashboardController extends Controller
             ->orderBy('stock', 'asc')
             ->take(6)
             ->get(['description', 'stock']);
+
+        $x['chart_top_labels'] = $x['top_products']->map(fn ($p) => $p->product->description ?? ('#'.$p->product_id))->values();
+        $x['chart_top_qty'] = $x['top_products']->pluck('total_qty')->map(fn ($v) => (float) $v)->values();
+        $x['chart_low_labels'] = $x['low_stock_products']->pluck('description')->values();
+        $x['chart_low_qty'] = $x['low_stock_products']->pluck('stock')->map(fn ($v) => (float) $v)->values();
 
         return view('admin.dashboard', $x);
     }

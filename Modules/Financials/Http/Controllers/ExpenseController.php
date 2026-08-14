@@ -7,9 +7,17 @@ use Illuminate\Routing\Controller;
 use Modules\Financials\Entities\Gasto;
 use Modules\Financials\Entities\Insumo;
 use Modules\Financials\Entities\Caja;
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 
 class ExpenseController extends Controller
 {
+    use AuthorizesCrud;
+
+    public function __construct()
+    {
+        $this->authorizeCrud('expense', extraCreate: ['searchInsumo']);
+    }
+
     public function index()
     {
         $expenses = Gasto::with(['user', 'insumo'])->latest()->paginate(10);

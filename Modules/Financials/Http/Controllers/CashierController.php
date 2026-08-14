@@ -5,9 +5,17 @@ namespace Modules\Financials\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Financials\Entities\Caja;
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 
 class CashierController extends Controller
 {
+    use AuthorizesCrud;
+
+    public function __construct()
+    {
+        $this->authorizeCrud('cash', ['history', 'arqueo'], extraUpdate: ['close']);
+    }
+
     public function index()
     {
         $cajas = Caja::latest()->paginate(10);
@@ -83,5 +91,46 @@ class CashierController extends Controller
         \Log::info("Caja ID: " . $id . " cerrada correctamente.");
 
         return redirect()->route('financials.cajas.index')->with('success', 'Caja cerrada con éxito');
+    }
+
+    public function history(Request $request)
+    {
+        $from = $request->input('from', now()->toDateString());
+        $to = $request->input('to', now()->toDateString());
+
+        if ($request->filled('month')) {
+            $from = $request->month . '-01';
+            $to = \Carbon\Carbon::parse($from)->endOfMonth()->toDateString();
+        }
+
+        $cajas = Caja::with(['user', 'sales', 'abonos', 'expenses'])
+            ->whereDate('opened_at', '>=', $from)
+            ->whereDate('opened_at', '<=', $to)
+            ->orderByDesc('opened_at')
+            ->get();
+
+        $resumen = [
+            'inicio' => $cajas->sum('opening_amount'),
+            'efectivo' => 0,
+            'transferencia' => 0,
+            'qr' => 0,
+            'tarjeta' => 0,
+            'credito' => 0,
+            'abonos' => $cajas->sum(fn ($c) => $c->abonos->sum('amount')),
+            'egresos' => $cajas->sum(fn ($c) => $c->expenses->sum('amount')),
+        ];
+
+        foreach ($cajas as $caja) {
+            $sales = $caja->sales->where('status', '!=', 0);
+            $resumen['efectivo'] += $sales->where('payment_type', 'efectivo')->sum('total');
+            $resumen['transferencia'] += $sales->where('payment_type', 'transferencia')->sum('total');
+            $resumen['qr'] += $sales->where('payment_type', 'qr')->sum('total');
+            $resumen['tarjeta'] += $sales->where('payment_type', 'tarjeta')->sum('total');
+            $resumen['credito'] += $sales->where('payment_type', 'credito')->sum('total');
+        }
+
+        $expectedCash = $resumen['inicio'] + $resumen['efectivo'] + $resumen['abonos'] - $resumen['egresos'];
+
+        return view('financials::cajas.history', compact('cajas', 'resumen', 'from', 'to', 'expectedCash'));
     }
 }

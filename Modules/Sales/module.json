@@ -7,5 +7,6 @@
     "providers": [
         "Modules\\Sales\\Providers\\SalesServiceProvider"
     ],
-    "files": []
+    "files": [],
+    "permissions": ["sale"]
 }

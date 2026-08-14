@@ -8,10 +8,15 @@ use Modules\Products\Entities\Product;
 use Modules\Sales\Entities\Sale;
 use Modules\Sales\Entities\SaleDetail;
 use Modules\Purchases\Entities\Purchase;
-use Modules\Financials\Entities\Expense;
+use Modules\Financials\Entities\Gasto;
 
 class ReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:read report');
+    }
+
     public function index()
     {
         $lowStockCount = Product::where('status', 1)->where('stock', '<=', 5)->count();
@@ -125,9 +130,7 @@ class ReportController extends Controller
 
         $salesTotal     = Sale::whereDate('created_at', $date)->where('status', 1)->sum('total');
         $purchasesTotal = Purchase::whereDate('created_at', $date)->sum('total');
-        $expensesTotal  = class_exists('\Modules\Financials\Entities\Expense')
-            ? Expense::whereDate('date', $date)->sum('amount')
-            : 0;
+        $expensesTotal  = Gasto::whereDate('date', $date)->sum('amount');
         $net = $salesTotal - $purchasesTotal - $expensesTotal;
 
         $pdf = Pdf::loadView('admin.reports.cash_pdf',
@@ -144,9 +147,7 @@ class ReportController extends Controller
         $salesTotal     = Sale::whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
                               ->where('status', 1)->sum('total');
         $purchasesTotal = Purchase::whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])->sum('total');
-        $expensesTotal  = class_exists('\Modules\Financials\Entities\Expense')
-            ? Expense::whereBetween('date', [$startDate, $endDate])->sum('amount')
-            : 0;
+        $expensesTotal  = Gasto::whereBetween('date', [$startDate, $endDate])->sum('amount');
 
         $utilidadBruta = $salesTotal - $purchasesTotal;
         $utilidadNeta  = $utilidadBruta - $expensesTotal;
@@ -154,5 +155,27 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('admin.reports.financial_status_pdf',
                     compact('startDate', 'endDate', 'salesTotal', 'purchasesTotal', 'expensesTotal', 'utilidadBruta', 'utilidadNeta'));
         return $pdf->stream('estado_resultados.pdf');
+    }
+
+    public function expensesPdf(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
+        $endDate   = $request->end_date   ?? now()->toDateString();
+
+        $expenses = Gasto::with(['user', 'insumo'])
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date')
+            ->get();
+
+        $totalGeneral = $expenses->where('type', 'gasto')->sum('amount');
+        $totalInsumos = $expenses->where('type', 'insumo')->sum('amount');
+        $totalEgresos = $expenses->sum('amount');
+
+        $pdf = Pdf::loadView(
+            'admin.reports.expenses_pdf',
+            compact('expenses', 'startDate', 'endDate', 'totalGeneral', 'totalInsumos', 'totalEgresos')
+        )->setPaper('a4', 'portrait');
+
+        return $pdf->stream('reporte_egresos.pdf');
     }
 }

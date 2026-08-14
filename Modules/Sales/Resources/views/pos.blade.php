@@ -268,7 +268,9 @@
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-primary" type="button" id="btn_search_customer"><i class="fas fa-search"></i></button>
                                     <button class="btn btn-outline-info" type="button" id="btn_list_customers" title="Seleccionar de la lista"><i class="fas fa-list"></i></button>
+                                    @can('create customer')
                                     <button class="btn btn-success" type="button" data-toggle="modal" data-target="#modalNewCustomer"><i class="fas fa-plus"></i></button>
+                                    @endcan
                                 </div>
                             </div>
                             <div class="mt-2 text-sm d-flex justify-content-between" id="customer_info_panel" style="display:none;">
@@ -489,7 +491,9 @@
             <div class="modal-body p-0">
                 <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
                     <input type="text" id="search_customer_table" class="form-control w-50" placeholder="Filtrar por nombre o NIT...">
+                    @can('create customer')
                     <button class="btn btn-success" id="btn_new_customer_modal"><i class="fas fa-plus mr-1"></i> Nuevo Cliente</button>
+                    @endcan
                 </div>
                 <div style="max-height: 400px; overflow-y: auto;">
                     <table class="table table-hover m-0">
@@ -512,6 +516,7 @@
 </div>
 
 <!-- MODAL: NUEVO CLIENTE (RÁPIDO) -->
+@can('create customer')
 <div class="modal fade" id="modalNewCustomer" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -552,6 +557,7 @@
         </div>
     </div>
 </div>
+@endcan
 
 <!-- MODAL: EDITAR ÍTEM (AJUSTE DE PRECIO) -->
 <div class="modal fade" id="modalEditItem" tabindex="-1" role="dialog" aria-hidden="true">

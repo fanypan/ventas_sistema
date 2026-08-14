@@ -334,6 +334,7 @@
                             <td data-label="Pendiente" class="text-danger"><strong>{{ number_format($sale->pending_balance(), 0, ',', '.') }} Gs.</strong></td>
                             <td data-label="Acciones">
                                 <div class="receivables-actions">
+                                @can('create credit')
                                 <button class="btn btn-primary btn-sm btn-abonar-libre @if($sale->pending_balance() <= 0) disabled @endif" 
                                     data-sale="{{ $sale->id }}" 
                                     data-pending="{{ $sale->pending_balance() }}" 
@@ -343,6 +344,12 @@
                                     @if($sale->pending_balance() <= 0) disabled @endif>
                                     <i class="fas fa-money-bill-wave"></i> Abonar
                                 </button>
+                                @endcan
+                                @if($sale->customer_id)
+                                <a href="{{ route('credits.kardex.customer', $sale->customer_id) }}" class="btn btn-outline-primary btn-sm" title="Estado de cuenta">
+                                    <i class="far fa-newspaper"></i>
+                                </a>
+                                @endif
                                 @if($sale->installments_count > 0)
                                 <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalCuotas{{ $sale->id }}">
                                     <i class="fas fa-list-ol"></i> Ver Cuotas
@@ -439,6 +446,7 @@
                                                             </td>
                                                             <td data-label="Acción">
                                                                  @if($inst->status == 0)
+                                                                @can('create credit')
                                                                 <div class="input-group input-group-sm receivables-actions">
                                                                     <select class="form-control form-control-sm" id="metodo-{{ $inst->id }}">
                                                                         <option value="Efectivo">&#x1F4B5; Efec.</option>
@@ -457,6 +465,7 @@
                                                                         </button>
                                                                     </div>
                                                                 </div>
+                                                                @endcan
                                                                  @else
                                                                      <span class="text-success"><i class="fas fa-check-circle"></i> Pagado</span>
                                                                  @endif

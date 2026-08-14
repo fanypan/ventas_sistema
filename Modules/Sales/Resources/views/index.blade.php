@@ -19,9 +19,11 @@
                 <h1 class="m-0"><i class="fas fa-receipt mr-2 text-primary"></i>Historial de Ventas</h1>
             </div>
             <div class="col-sm-6 text-right">
+                @can('create sale')
                 <a href="{{ route('sales.pos') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nueva Venta
                 </a>
+                @endcan
             </div>
         </div>
     </div>
@@ -153,12 +155,19 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         @if($sale->status != 0)
+                                        @can('update sale')
+                                        <a href="{{ route('sales.edit', $sale->id) }}" class="btn btn-warning btn-sm" title="Editar cabecera">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @endcan
+                                        @can('void sale')
                                         <form action="{{ route('sales.void', $sale->id) }}" method="POST" class="d-inline form-void">
                                             @csrf
                                             <button type="submit" class="btn btn-danger btn-sm" title="Anular Venta" onclick="return confirm('¿Está seguro de anular esta venta? El stock será devuelto y las cuotas canceladas.')">
                                                 <i class="fas fa-ban"></i>
                                             </button>
                                         </form>
+                                        @endcan
                                         @endif
                                         <a href="{{ route('sales.print_ticket', $sale->id) }}" target="_blank" class="btn btn-secondary btn-sm" title="Imprimir Ticket">
                                             <i class="fas fa-receipt"></i>

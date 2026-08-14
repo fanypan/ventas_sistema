@@ -181,6 +181,21 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="card card-outline card-secondary">
+                                        <div class="card-body">
+                                            <h6 class="font-weight-bold text-uppercase small"><i class="fas fa-file-invoice-dollar mr-1"></i> Reporte de Egresos</h6>
+                                            <p class="text-xs text-muted">Gastos generales e insumos del periodo.</p>
+                                            <form action="{{ route('reports.expenses.pdf') }}" method="GET" target="_blank">
+                                                <div class="d-flex gap-1 mb-2" style="gap:2px;">
+                                                    <input type="date" class="form-control form-control-sm" name="start_date" value="{{ date('Y-m-01') }}">
+                                                    <input type="date" class="form-control form-control-sm" name="end_date" value="{{ date('Y-m-t') }}">
+                                                </div>
+                                                <button type="submit" class="btn btn-secondary btn-sm btn-block">Generar PDF</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

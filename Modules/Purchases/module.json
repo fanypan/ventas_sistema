@@ -7,5 +7,6 @@
     "providers": [
         "Modules\\Purchases\\Providers\\PurchasesServiceProvider"
     ],
-    "files": []
+    "files": [],
+    "permissions": ["purchase"]
 }

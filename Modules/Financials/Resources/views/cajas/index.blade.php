@@ -11,9 +11,14 @@
                 <h1 class="m-0">Gestión de Cajas</h1>
             </div>
             <div class="col-sm-6 text-right">
+                <a href="{{ route('financials.cajas.history') }}" class="btn btn-outline-secondary mr-2">
+                    <i class="fas fa-history"></i> Histórico de arqueos
+                </a>
+                @can('create cash')
                 <a href="{{ route('financials.cajas.create') }}" class="btn btn-primary">
                     <i class="fas fa-unlock"></i> Abrir Nueva Caja
                 </a>
+                @endcan
             </div>
         </div>
     </div>
@@ -51,14 +56,15 @@
                                 </span>
                             </td>
                             <td>
-                                @if($caja->status == 1)
                                 <a href="{{ route('financials.cajas.arqueo', $caja->id) }}" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-balance-scale"></i> Arqueo
+                                    <i class="fas fa-balance-scale"></i> {{ $caja->status == 1 ? 'Arqueo' : 'Ver' }}
                                 </a>
+                                @if($caja->status == 1)
+                                @can('update cash')
                                 <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modalCloseCaja{{ $caja->id }}">
                                     <i class="fas fa-lock"></i> Cerrar
                                 </button>
-
+                                @endcan
                                 @endif
                             </td>
                         </tr>
@@ -76,6 +82,7 @@
 @endsection
 
 @section('modal')
+@can('update cash')
 @foreach($cajas as $caja)
     @if($caja->status == 1)
     <!-- Modal Cerrar Caja -->
@@ -104,4 +111,5 @@
     </div>
     @endif
 @endforeach
+@endcan
 @endsection

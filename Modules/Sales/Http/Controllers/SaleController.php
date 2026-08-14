@@ -5,9 +5,18 @@ namespace Modules\Sales\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 
 class SaleController extends Controller
 {
+    use AuthorizesCrud;
+
+    public function __construct()
+    {
+        $this->authorizeCrud('sale', ['printTicket', 'printInvoice'], ['pos']);
+        $this->middleware('permission:void sale')->only(['void']);
+    }
+
     /**
      * Display a listing of the resource.
      * @return Renderable
@@ -79,7 +88,16 @@ class SaleController extends Controller
      */
     public function edit($id)
     {
-        return view('sales::edit');
+        $sale = \Modules\Sales\Entities\Sale::with('customer')->findOrFail($id);
+
+        if ($sale->status == 0) {
+            return redirect()->route('sales.show', $sale->id)
+                ->with('error', 'No se puede editar una venta anulada.');
+        }
+
+        $customers = \Modules\Customers\Entities\Customer::where('status', 1)->orderBy('name')->get();
+
+        return view('sales::edit', compact('sale', 'customers'));
     }
 
     /**
@@ -90,7 +108,26 @@ class SaleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $sale = \Modules\Sales\Entities\Sale::findOrFail($id);
+
+        if ($sale->status == 0) {
+            return back()->with('error', 'No se puede editar una venta anulada.');
+        }
+
+        $request->validate([
+            'fecha' => 'required|date',
+            'customer_id' => 'required|exists:customers,id',
+            'payment_type' => 'required|in:efectivo,qr,tarjeta,transferencia,credito',
+            'status' => 'required|in:1,2,3',
+        ]);
+
+        $sale->created_at = $request->fecha;
+        $sale->customer_id = $request->customer_id;
+        $sale->payment_type = $request->payment_type;
+        $sale->status = (int) $request->status;
+        $sale->save();
+
+        return redirect()->route('sales.index')->with('success', 'Venta actualizada correctamente.');
     }
 
     /**

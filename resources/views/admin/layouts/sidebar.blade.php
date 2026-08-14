@@ -74,24 +74,38 @@
                     @endif
                 @endforeach
                 <li class="nav-header ml-2">SISTEMA VENTAS</li>
+                @can('read customer')
                 <li class="nav-item">
                     <a href="{{ route('customers.index') }}" class="nav-link {{ request()->routeIs('customers*') ? 'active':'' }}">
                         <i class="fas fa-users nav-icon"></i>
                         <p>Clientes</p>
                     </a>
                 </li>
-                <li class="nav-item {{ request()->routeIs('products*') || request()->routeIs('categories*') ? 'menu-open':'' }}">
-                    <a href="#" class="nav-link {{ request()->routeIs('products*') || request()->routeIs('categories*') ? 'active':'' }}">
+                @endcan
+                @canany(['read product', 'read category', 'read brand', 'read stock'])
+                <li class="nav-item {{ request()->routeIs('products*') || request()->routeIs('categories*') || request()->routeIs('brands*') || request()->routeIs('stock.adjustments*') ? 'menu-open':'' }}">
+                    <a href="#" class="nav-link {{ request()->routeIs('products*') || request()->routeIs('categories*') || request()->routeIs('brands*') || request()->routeIs('stock.adjustments*') ? 'active':'' }}">
                         <i class="nav-icon fas fa-box"></i>
                         <p> Inventario <i class="right fas fa-angle-left"></i> </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        @can('read category')
                         <li class="nav-item">
                             <a href="{{ route('categories.index') }}" class="nav-link {{ request()->routeIs('categories*') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Categorías</p>
                             </a>
                         </li>
+                        @endcan
+                        @can('read brand')
+                        <li class="nav-item">
+                            <a href="{{ route('brands.index') }}" class="nav-link {{ request()->routeIs('brands*') ? 'active':'' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Marcas</p>
+                            </a>
+                        </li>
+                        @endcan
+                        @can('read product')
                         <li class="nav-item">
                             <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.index') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
@@ -104,94 +118,160 @@
                                 <p>Por Vencer</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('products.zero') }}" class="nav-link {{ request()->routeIs('products.zero') ? 'active':'' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Stock 0</p>
+                            </a>
+                        </li>
+                        @endcan
+                        @can('read stock')
+                        <li class="nav-item">
+                            <a href="{{ route('stock.adjustments.index') }}" class="nav-link {{ request()->routeIs('stock.adjustments*') ? 'active':'' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Ajuste de stock</p>
+                            </a>
+                        </li>
+                        @endcan
                     </ul>
                 </li>
+                @endcanany
+                @canany(['read sale', 'create sale'])
                 <li class="nav-item {{ request()->routeIs('sales*') ? 'menu-open':'' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('sales*') ? 'active':'' }}">
                         <i class="nav-icon fas fa-shopping-cart"></i>
                         <p> Ventas <i class="right fas fa-angle-left"></i> </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        @can('create sale')
                         <li class="nav-item">
                             <a href="{{ route('sales.pos') }}" class="nav-link {{ request()->routeIs('sales.pos') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Nueva Venta</p>
                             </a>
                         </li>
+                        @endcan
+                        @can('read sale')
                         <li class="nav-item">
                             <a href="{{ route('sales.index') }}" class="nav-link {{ request()->routeIs('sales.index') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Historial</p>
                             </a>
                         </li>
+                        @endcan
                     </ul>
                 </li>
+                @endcanany
+                @canany(['read purchase', 'create purchase', 'read supplier'])
                 <li class="nav-item {{ request()->routeIs('purchases*') || request()->routeIs('suppliers*') ? 'menu-open':'' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('purchases*') || request()->routeIs('suppliers*') ? 'active':'' }}">
                         <i class="nav-icon fas fa-shopping-bag"></i>
                         <p> Compras <i class="right fas fa-angle-left"></i> </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        @can('create purchase')
                         <li class="nav-item">
                             <a href="{{ route('purchases.create') }}" class="nav-link {{ request()->routeIs('purchases.create') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Nueva Compra</p>
                             </a>
                         </li>
+                        @endcan
+                        @can('read purchase')
                         <li class="nav-item">
                             <a href="{{ route('purchases.index') }}" class="nav-link {{ request()->routeIs('purchases.index') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Historial</p>
                             </a>
                         </li>
+                        @endcan
+                        @can('read supplier')
                         <li class="nav-item">
                             <a href="{{ route('suppliers.index') }}" class="nav-link {{ request()->routeIs('suppliers*') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Proveedores</p>
                             </a>
                         </li>
+                        @endcan
                     </ul>
                 </li>
+                @endcanany
+                @canany(['read cash', 'read expense', 'consume insumo'])
                 <li class="nav-item {{ request()->routeIs('financials*') ? 'menu-open':'' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('financials*') ? 'active':'' }}">
                         <i class="nav-icon fas fa-money-bill-wave"></i>
                         <p> Finanzas <i class="right fas fa-angle-left"></i> </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        @can('read cash')
                         <li class="nav-item">
-                            <a href="{{ route('financials.cajas.index') }}" class="nav-link {{ request()->routeIs('financials.cajas*') ? 'active':'' }}">
+                            <a href="{{ route('financials.cajas.index') }}" class="nav-link {{ request()->routeIs('financials.cajas*') && !request()->routeIs('financials.cajas.history') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Cajas</p>
                             </a>
                         </li>
+                        @endcan
+                        @can('read expense')
                         <li class="nav-item">
                             <a href="{{ route('financials.expenses.index') }}" class="nav-link {{ request()->routeIs('financials.expenses*') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Gastos</p>
                             </a>
                         </li>
+                        @endcan
+                        @can('consume insumo')
+                        <li class="nav-item">
+                            <a href="{{ route('financials.insumos.consume') }}" class="nav-link {{ request()->routeIs('financials.insumos*') ? 'active':'' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Consumo de insumos</p>
+                            </a>
+                        </li>
+                        @endcan
+                        @can('read cash')
+                        <li class="nav-item">
+                            <a href="{{ route('financials.cajas.history') }}" class="nav-link {{ request()->routeIs('financials.cajas.history') ? 'active':'' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Histórico de arqueos</p>
+                            </a>
+                        </li>
+                        @endcan
                     </ul>
                 </li>
+                @endcanany
+                @canany(['read credit', 'read supplier'])
                 <li class="nav-item {{ request()->routeIs('credits*') ? 'menu-open':'' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('credits*') ? 'active':'' }}">
                         <i class="nav-icon fas fa-hand-holding-usd"></i>
                         <p> Créditos <i class="right fas fa-angle-left"></i> </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        @can('read credit')
                         <li class="nav-item">
-                            <a href="{{ route('credits.receivables') }}" class="nav-link {{ request()->routeIs('credits.receivables') ? 'active':'' }}">
+                            <a href="{{ route('credits.receivables') }}" class="nav-link {{ request()->routeIs('credits.receivables') || request()->routeIs('credits.kardex.customer*') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Cuentas por Cobrar</p>
                             </a>
                         </li>
+                        @endcan
+                        @can('read supplier')
                         <li class="nav-item">
-                            <a href="{{ route('credits.payables') }}" class="nav-link {{ request()->routeIs('credits.payables') ? 'active':'' }}">
+                            <a href="{{ route('credits.payables') }}" class="nav-link {{ request()->routeIs('credits.payables') || request()->routeIs('credits.kardex.supplier*') ? 'active':'' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Cuentas por Pagar</p>
                             </a>
                         </li>
+                        @endcan
                     </ul>
                 </li>
+                @endcanany
+                @can('read report')
+                <li class="nav-item">
+                    <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports*') ? 'active':'' }}">
+                        <i class="nav-icon fas fa-file-pdf"></i>
+                        <p>Reportes</p>
+                    </a>
+                </li>
+                @endcan
                 <li class="nav-header ml-2">ACCESS</li>
                 @can('read user')
                     <li class="nav-item">

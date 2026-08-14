@@ -100,7 +100,7 @@ class PermissionController extends Controller
 
         foreach ($modules as $module) {
             $moduleJson = json_decode(file_get_contents($module->getPath() . '/module.json', true));
-            $permissions = $moduleJson->permissions;
+            $permissions = $moduleJson->permissions ?? [];
             for ($i = 0; $i < count($permissions); $i++) {
                 $permissionMappings = ['delete', 'update', 'read', 'create'];
                 foreach ($permissionMappings as $permissionMapping) {

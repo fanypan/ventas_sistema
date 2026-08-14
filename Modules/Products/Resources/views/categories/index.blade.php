@@ -26,9 +26,11 @@
                     <div class="card-header">
                         <h3 class="card-title">Listado de Categorías</h3>
                         <div class="card-tools">
+                            @can('create category')
                             <a href="{{ route('categories.create') }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus"></i> Nueva Categoría
                             </a>
+                            @endcan
                         </div>
                     </div>
                     <div class="card-body">
@@ -55,9 +57,12 @@
                                     </td>
                                     <td>
                                         <div class="btn-group">
+                                            @can('update category')
                                             <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-warning btn-sm">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            @endcan
+                                            @can('delete category')
                                             <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display:inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -65,6 +70,7 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

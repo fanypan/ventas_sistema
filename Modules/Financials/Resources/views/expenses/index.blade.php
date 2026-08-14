@@ -11,9 +11,11 @@
                 <h1 class="m-0">Control de Egresos</h1>
             </div>
             <div class="col-sm-6 text-right">
+                @can('create expense')
                 <a href="{{ route('financials.expenses.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nuevo Egreso
                 </a>
+                @endcan
             </div>
         </div>
     </div>

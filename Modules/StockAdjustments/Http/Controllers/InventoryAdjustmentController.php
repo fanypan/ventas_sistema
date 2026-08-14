@@ -1,14 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Modules\StockAdjustments\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\InventoryAdjustment;
-use Modules\Products\Entities\Product;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Modules\Products\Entities\Category;
+use Modules\Products\Entities\Product;
 
 class InventoryAdjustmentController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:read stock')->only(['index']);
+        $this->middleware('permission:create stock')->only(['store']);
+    }
+
     public function index()
     {
         $products   = Product::where('status', 1)->get();
@@ -17,7 +24,7 @@ class InventoryAdjustmentController extends Controller
                         ->latest()
                         ->paginate(20);
 
-        return view('admin.inventory_adjustments.index', compact('products', 'categories', 'history'));
+        return view('stockadjustments::index', compact('products', 'categories', 'history'));
     }
 
     public function store(Request $request)
@@ -34,14 +41,12 @@ class InventoryAdjustmentController extends Controller
         $quantity = (int) $request->quantity;
         $type     = $request->type;
 
-        // Validate sufficient stock for exits
         if ($type === 'salida' && $product->stock < $quantity) {
             return response()->json([
                 'error' => "Stock insuficiente. Stock actual: {$product->stock}"
             ], 422);
         }
 
-        // Adjust stock
         if ($type === 'entrada') {
             $product->stock += $quantity;
         } else {
@@ -49,7 +54,6 @@ class InventoryAdjustmentController extends Controller
         }
         $product->save();
 
-        // Log the adjustment
         InventoryAdjustment::create([
             'product_id' => $product->id,
             'user_id'    => auth()->id(),

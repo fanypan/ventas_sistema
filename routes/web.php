@@ -23,12 +23,7 @@ use Spatie\Permission\Models\Role;
 |
 */
 
-Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('dashboard');
-    }
-    return view('welcome');
-})->name('index');
+Route::get('/', [DashboardController::class, 'welcome'])->name('index');
 
 Auth::routes([
     'register'  => false,
@@ -79,7 +74,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::delete('setting', 'destroy')->middleware(['permission:delete setting'])->name('setting.destroy');
     });
 
-    Route::prefix('reports')->group(function () {
+    Route::prefix('reports')->middleware(['permission:read report'])->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('reports.index');
         Route::get('products/pdf', [ReportController::class, 'productsPdf'])->name('reports.products.pdf');
         Route::get('products/excel', [ReportController::class, 'productsExcel'])->name('reports.products.excel');
@@ -88,6 +83,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('purchases', [ReportController::class, 'purchasesPdf'])->name('reports.purchases.pdf');
         Route::get('cash', [ReportController::class, 'cashPdf'])->name('reports.cash.pdf');
         Route::get('financial_status', [ReportController::class, 'financialStatusPdf'])->name('reports.financial_status.pdf');
+        Route::get('expenses', [ReportController::class, 'expensesPdf'])->name('reports.expenses.pdf');
 
         // Nuevos reportes
         Route::get('low-stock', [ReportController::class, 'lowStockPdf'])->name('reports.low_stock.pdf');
@@ -95,10 +91,5 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('sales-by-product', [ReportController::class, 'salesByProductPdf'])->name('reports.sales_by_product.pdf');
     });
 
-    // Inventory Adjustments
-    Route::prefix('stock-adjustments')->group(function () {
-        Route::get('/', [\App\Http\Controllers\InventoryAdjustmentController::class, 'index'])->name('stock.adjustments.index');
-        Route::post('/', [\App\Http\Controllers\InventoryAdjustmentController::class, 'store'])->name('stock.adjustments.store');
-    });
 });
 

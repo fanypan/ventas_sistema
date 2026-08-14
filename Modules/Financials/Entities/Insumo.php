@@ -25,4 +25,9 @@ class Insumo extends Model
     {
         return $this->hasMany(Gasto::class, 'insumo_id');
     }
+
+    public function consumptions()
+    {
+        return $this->hasMany(ConsumoInsumo::class);
+    }
 }

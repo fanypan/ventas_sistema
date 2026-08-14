@@ -9,9 +9,11 @@
                     <h1>Mantenimiento de Marcas</h1>
                 </div>
                 <div class="col-sm-6 text-right">
+                    @can('create brand')
                     <a href="{{ route('brands.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Nueva Marca
                     </a>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -56,18 +58,27 @@
                                 <td>{{ $brand->country ?? 'N/A' }}</td>
                                 <td><small class="text-muted">{{ Str::limit($brand->description, 50) }}</small></td>
                                 <td class="text-center">
+                                    @can('update brand')
                                     <form action="{{ route('brands.status', $brand->id) }}" method="POST" style="display:inline;">
                                         @csrf
                                         <button type="submit" class="btn btn-xs {{ $brand->status == 1 ? 'btn-success' : 'btn-danger' }}">
                                             {{ $brand->status == 1 ? 'Activo' : 'Inactivo' }}
                                         </button>
                                     </form>
+                                    @else
+                                    <span class="badge badge-{{ $brand->status == 1 ? 'success' : 'danger' }}">
+                                        {{ $brand->status == 1 ? 'Activo' : 'Inactivo' }}
+                                    </span>
+                                    @endcan
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group">
+                                        @can('update brand')
                                         <a href="{{ route('brands.edit', $brand->id) }}" class="btn btn-info btn-xs mr-1">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        @endcan
+                                        @can('delete brand')
                                         <form action="{{ route('brands.destroy', $brand->id) }}" method="POST" onsubmit="return confirm('¿Seguro de eliminar esta marca?');">
                                             @csrf
                                             @method('DELETE')
@@ -75,6 +86,7 @@
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

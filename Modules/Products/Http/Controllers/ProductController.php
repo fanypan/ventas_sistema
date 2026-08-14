@@ -6,9 +6,22 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 
 class ProductController extends Controller
 {
+    use AuthorizesCrud;
+
+    public function __construct()
+    {
+        $this->authorizeCrud('product', [
+            'expiringProducts',
+            'zeroStock',
+            'zeroStockExcel',
+            'printBarcode',
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      * @return Renderable
@@ -29,6 +42,36 @@ class ProductController extends Controller
             ->get();
 
         return view('products::expiring', compact('expiringBatches'));
+    }
+
+    public function zeroStock()
+    {
+        $products = \Modules\Products\Entities\Product::with('category', 'brand')
+            ->where('status', 1)
+            ->where('stock', '<=', 0)
+            ->orderBy('description')
+            ->get();
+
+        return view('products::zero', compact('products'));
+    }
+
+    public function zeroStockExcel()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ZeroStockExport,
+            'productos_sin_existencia.xlsx'
+        );
+    }
+
+    public function printBarcode($id)
+    {
+        $product = \Modules\Products\Entities\Product::findOrFail($id);
+
+        if (empty($product->code)) {
+            return back()->with('error', 'Este producto no tiene código para imprimir barras.');
+        }
+
+        return view('products::barcode', compact('product'));
     }
 
     /**

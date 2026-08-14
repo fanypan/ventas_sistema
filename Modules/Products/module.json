@@ -7,5 +7,6 @@
     "providers": [
         "Modules\\Products\\Providers\\ProductsServiceProvider"
     ],
-    "files": []
+    "files": [],
+    "permissions": ["product", "category", "brand"]
 }

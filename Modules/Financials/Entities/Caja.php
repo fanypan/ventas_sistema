@@ -18,6 +18,11 @@ class Caja extends Model
         'status',
     ];
 
+    protected $casts = [
+        'opened_at' => 'datetime',
+        'closed_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(\App\Models\User::class);
@@ -31,6 +36,11 @@ class Caja extends Model
     public function abonos()
     {
         return $this->hasMany(\Modules\Credits\Entities\Abono::class, 'cash_id');
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Gasto::class, 'cash_id');
     }
     
     protected static function newFactory()

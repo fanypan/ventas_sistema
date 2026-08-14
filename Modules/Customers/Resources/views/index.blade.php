@@ -26,9 +26,11 @@
                     <div class="card-header">
                         <h3 class="card-title">Listado de Clientes</h3>
                         <div class="card-tools">
+                            @can('create customer')
                             <a href="{{ route('customers.create') }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus"></i> Nuevo Cliente
                             </a>
+                            @endcan
                         </div>
                     </div>
                     <div class="card-body">
@@ -59,9 +61,12 @@
                                     </td>
                                     <td>
                                         <div class="btn-group">
+                                            @can('update customer')
                                             <a href="{{ route('customers.edit', $customer->id) }}" class="btn btn-warning btn-sm">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            @endcan
+                                            @can('delete customer')
                                             <form action="{{ route('customers.destroy', $customer->id) }}" method="POST" style="display:inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -69,6 +74,7 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

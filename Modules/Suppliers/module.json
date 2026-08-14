@@ -7,5 +7,6 @@
     "providers": [
         "Modules\\Suppliers\\Providers\\SuppliersServiceProvider"
     ],
-    "files": []
+    "files": [],
+    "permissions": ["supplier"]
 }

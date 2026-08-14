@@ -34,11 +34,19 @@
                             <td class="text-success">{{ number_format($purchase->total_paid(), 2) }}</td>
                             <td class="text-danger"><strong>{{ number_format($purchase->pending_balance(), 2) }}</strong></td>
                             <td>
+                                @can('update purchase')
                                 <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalAbonoP{{ $purchase->id }}">
                                     <i class="fas fa-money-bill-wave"></i> Pagar
                                 </button>
+                                @endcan
+                                @if($purchase->supplier_id)
+                                <a href="{{ route('credits.kardex.supplier', $purchase->supplier_id) }}" class="btn btn-outline-danger btn-sm" title="Estado de cuenta">
+                                    <i class="far fa-newspaper"></i>
+                                </a>
+                                @endif
 
                                 <!-- Modal Abono -->
+                                @can('update purchase')
                                 <div class="modal fade" id="modalAbonoP{{ $purchase->id }}" tabindex="-1" role="dialog">
                                     <div class="modal-dialog" role="document">
                                         <form action="{{ route('credits.abono.store') }}" method="POST">
@@ -72,6 +80,7 @@
                                         </form>
                                     </div>
                                 </div>
+                                @endcan
                             </td>
                         </tr>
                         @endforeach

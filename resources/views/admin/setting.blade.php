@@ -69,7 +69,9 @@
                                                 @endforeach
                                                 <div class="form-group row">
                                                     <div class="offset-sm-2 col-sm-10">
+                                                        @can('update setting')
                                                         <button type="submit" class="btn btn-primary">Guardar</button>
+                                                        @endcan
                                                     </div>
                                                 </div>
                                             </form>

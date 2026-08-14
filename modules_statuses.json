@@ -5,5 +5,6 @@
     "Suppliers": true,
     "Financials": true,
     "Purchases": true,
-    "Credits": true
+    "Credits": true,
+    "StockAdjustments": true
 }
