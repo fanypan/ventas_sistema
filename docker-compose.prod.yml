@@ -1,0 +1,113 @@
+# Producción: Nginx + PHP-FPM. No monta el código fuente.
+# Aislado del compose local (`name: ventas_sistema_prod`).
+#
+# Uso:
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Requiere APP_KEY y credenciales de DB en `.env`.
+# No publicar MySQL/Redis al host. Cambiar DB_PASSWORD antes de internet.
+
+name: ventas_sistema_prod
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+      target: nginx
+    ports:
+      - "${APP_PUBLISH_PORT:-80}:80"
+    volumes:
+      - storage_data:/var/www/html/storage:ro
+    depends_on:
+      php:
+        condition: service_healthy
+    networks:
+      - ventas
+    restart: unless-stopped
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+      target: app
+    env_file:
+      - .env
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: error
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-admin_lte3}
+      DB_USERNAME: ${DB_USERNAME:-ventas}
+      DB_PASSWORD: ${DB_PASSWORD:-ventas}
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: ${MAIL_MAILER:-log}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      RUN_SEED: ${RUN_SEED:-false}
+    volumes:
+      - storage_data:/var/www/html/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ventas
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-admin_lte3}
+      MYSQL_USER: ${DB_USERNAME:-ventas}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-ventas}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    networks:
+      - ventas
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - ventas
+    restart: unless-stopped
+
+networks:
+  ventas:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  storage_data:
+  redis_data:
