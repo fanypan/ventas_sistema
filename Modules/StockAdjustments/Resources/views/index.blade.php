@@ -4,36 +4,7 @@
 
 @section('content')
 <style>
-    .adj-product-card {
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    .adj-product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-        border-color: var(--warning) !important;
-    }
-    .product-img-placeholder {
-        height: 90px;
-        background: linear-gradient(135deg, #fff8e1 0%, #ffe082 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8rem;
-        color: #f9a825;
-    }
-    .category-filter { overflow-x: auto; white-space: nowrap; padding-bottom: 8px; }
-    .category-filter::-webkit-scrollbar { height: 6px; }
-    .category-filter::-webkit-scrollbar-thumb { background-color: #ffe082; border-radius: 10px; }
-    .split-layout { height: calc(100vh - 135px); display: flex; gap: 20px; }
-    .left-panel  { flex: 7; display: flex; flex-direction: column; overflow: hidden; }
-    .right-panel { flex: 3; display: flex; flex-direction: column; }
-    .grid-container { overflow-y: auto; padding-right: 5px; flex: 1; }
-    .history-panel  { overflow-y: auto; flex: 1; }
-    .stock-badge-low  { background: #fee2e2; color: #dc2626; }
-    .stock-badge-ok   { background: #d1fae5; color: #059669; }
+    .history-panel { overflow-y: auto; flex: 1; }
 </style>
 
 <div class="content-wrapper">
@@ -45,55 +16,28 @@
 
     <section class="content">
         <div class="container-fluid">
-            <div class="split-layout">
+            <div class="split-layout split-layout--adjustment">
 
                 <!-- LEFT: PRODUCT GRID -->
                 <div class="left-panel">
-                    <div class="card shadow-sm border-0 mb-3 flex-shrink-0">
-                        <div class="card-body p-3">
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text bg-white border-right-0"><i class="fas fa-search text-muted"></i></span>
-                                </div>
-                                <input type="text" id="filter_search" class="form-control border-left-0 form-control-lg" placeholder="Buscar producto por código, nombre o marca..." autofocus>
-                            </div>
-                            <div class="category-filter">
-                                <button class="btn btn-warning rounded-pill px-4 mr-2 filter-btn active" data-filter="all">Todas</button>
-                                @foreach($categories as $cat)
-                                    <button class="btn btn-outline-secondary text-dark rounded-pill px-4 mr-2 filter-btn" data-filter="{{ $cat->id }}">{{ $cat->name }}</button>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
+                    @include('products::partials.product-grid-toolbar', [
+                        'categories' => $categories,
+                        'accent' => 'warning',
+                        'placeholder' => 'Buscar producto por código, nombre o marca...',
+                    ])
 
                     <div class="grid-container">
                         <div class="row" id="products_grid">
                             @foreach($products as $prod)
-                                <div class="col-xl-3 col-lg-4 col-md-6 col-6 mb-3 product-item"
-                                     data-category="{{ $prod->category_id }}"
-                                     data-search="{{ strtolower($prod->code.' '.$prod->description.' '.$prod->brand) }}">
-                                    <div class="card h-100 shadow-sm border adj-product-card"
-                                         onclick="openAdjustModal({{ $prod->id }}, '{{ addslashes($prod->description) }}', {{ $prod->stock }})">
-                                        <div class="product-img-placeholder">
-                                            <i class="fas fa-box-open"></i>
-                                        </div>
-                                        <div class="card-body p-2 d-flex flex-column">
-                                            <span class="badge badge-secondary align-self-start mb-1 text-xs">{{ $prod->code }}</span>
-                                            <h6 class="font-weight-bold mb-1 text-truncate" style="font-size:.82rem;" title="{{ $prod->description }}">{{ $prod->description }}</h6>
-                                            <small class="text-muted mb-2 d-block text-truncate">{{ $prod->brand }}</small>
-                                            <div class="mt-auto">
-                                                <span class="px-2 py-1 rounded font-weight-bold small {{ $prod->stock > 0 ? 'stock-badge-ok' : 'stock-badge-low' }}">
-                                                    <i class="fas fa-cubes mr-1"></i>{{ $prod->stock }} en stock
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                @include('products::partials.product-grid-item', [
+                                    'product' => $prod,
+                                    'variant' => 'adjustment',
+                                    'colClass' => 'col-xl-3 col-lg-4 col-md-6 col-6',
+                                    'onclick' => 'openAdjustModal('.$prod->id.', \''.addslashes($prod->description).'\', '.$prod->stock.')',
+                                ])
                             @endforeach
-                            <div id="no_results_msg" class="col-12 text-center text-muted py-5" style="display:none;">
-                                <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
-                                <h5>Sin resultados</h5>
-                            </div>
+
+                            @include('products::partials.product-grid-empty', ['message' => 'Sin resultados'])
                         </div>
                     </div>
                 </div>
@@ -217,27 +161,7 @@
 @push('script')
 <script>
 $(document).ready(function() {
-
-    // Grid filtering
-    $('.filter-btn').click(function() {
-        $('.filter-btn').removeClass('btn-warning active').addClass('btn-outline-secondary text-dark');
-        $(this).removeClass('btn-outline-secondary text-dark').addClass('btn-warning active');
-        filterProducts($(this).attr('data-filter'), $('#filter_search').val().toLowerCase());
-    });
-
-    $('#filter_search').on('keyup', function() {
-        filterProducts($('.filter-btn.active').attr('data-filter'), $(this).val().toLowerCase());
-    });
-
-    function filterProducts(category, search) {
-        let visible = 0;
-        $('.product-item').each(function() {
-            let mc = (category === 'all' || $(this).attr('data-category') == category);
-            let ms = (search === '' || $(this).attr('data-search').includes(search));
-            if (mc && ms) { $(this).show(); visible++; } else { $(this).hide(); }
-        });
-        if(visible === 0) $('#no_results_msg').show(); else $('#no_results_msg').hide();
-    }
+    initProductGridFilter({ accentClass: 'btn-warning' });
 
     // Type selection buttons
     $('.btn-type').click(function() {

@@ -18,7 +18,7 @@ class InventoryAdjustmentController extends Controller
 
     public function index()
     {
-        $products   = Product::where('status', 1)->get();
+        $products   = Product::with('brand')->where('status', 1)->get();
         $categories = Category::all();
         $history    = InventoryAdjustment::with('product', 'user')
                         ->latest()
