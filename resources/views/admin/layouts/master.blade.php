@@ -23,10 +23,28 @@
         <!-- DataTables -->
         <link rel="stylesheet" href="{{ asset('template/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
         <!-- Premium UI CSS -->
-        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260817e">
+        <script>
+            (function () {
+                var pref = 'system';
+                try {
+                    pref = localStorage.getItem('theme-preference') || localStorage.getItem('theme') || 'system';
+                } catch (e) {}
+                if (pref === 'dark-mode') pref = 'dark';
+                if (pref !== 'light' && pref !== 'dark' && pref !== 'system') pref = 'system';
+                var dark = pref === 'dark' || (pref === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.toggle('dark-mode', dark);
+                document.documentElement.setAttribute('data-theme-preference', pref);
+                document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+            })();
+        </script>
         @stack('style')
     </head>
-    <body class="hold-transition layout-top-nav">
+    <body class="hold-transition layout-top-nav layout-navbar-fixed">
+        <script>
+            document.body.classList.toggle('dark-mode', document.documentElement.classList.contains('dark-mode'));
+            document.body.classList.toggle('light', !document.documentElement.classList.contains('dark-mode'));
+        </script>
         @php
             if (!$errors->isEmpty()) {
                 alert()->error('Notificación', implode('<br>', $errors->all()))->toToast()->toHtml();
@@ -52,7 +70,9 @@
         </div>
         <!-- ./wrapper -->
         <!-- jQuery -->
+        <script src="{{ asset('js/theme.js') }}"></script>
         <script src="{{ asset('template/admin/plugins/jquery/jquery.min.js') }}"></script>
+        <script src="{{ asset('js/product-grid-filter.js') }}"></script>
         @yield('js')
         @include('admin.layouts.script')
         <!-- jQuery UI 1.11.4 -->

@@ -1,13 +1,22 @@
 <nav class="main-header navbar navbar-expand-md navbar-dark">
     <style>
-        /* Navbar compacto para que todos los items quepan en una sola fila */
+        .main-header .navbar-nav .dropdown-menu {
+            z-index: 1034;
+        }
+        @media (max-width: 991.98px) {
+            .layout-navbar-fixed .main-header .navbar-collapse.show {
+                max-height: calc(100vh - 3.5rem);
+                overflow-y: auto;
+            }
+        }
         .main-header .navbar-nav .nav-link {
-            font-size: 0.78rem !important;
-            padding: 0.4rem 0.6rem !important;
-            letter-spacing: 0.2px;
+            font-size: 0.95rem !important;
+            padding: 0.55rem 0.8rem !important;
+            letter-spacing: 0;
+            white-space: nowrap;
         }
         .main-header .navbar-nav .nav-link i {
-            font-size: 0.75rem;
+            font-size: 0.9rem;
         }
         @media (max-width: 991.98px) {
             .main-header .navbar-nav .nav-link {
@@ -227,10 +236,28 @@
 
         <!-- Right navbar links (Profile, Theme, etc) -->
         <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
-            <li class="nav-item">
-                <a class="nav-link" id="btntheme" role="button">
-                    <i id="icontheme" class="fas fa-sun"></i>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="btntheme" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Tema del sistema" aria-label="Elegir tema">
+                    <i id="icontheme" class="fas fa-desktop"></i>
                 </a>
+                <div class="dropdown-menu dropdown-menu-right shadow border-0 theme-menu" aria-labelledby="btntheme">
+                    <h6 class="dropdown-header text-uppercase">Apariencia</h6>
+                    <button type="button" class="dropdown-item theme-option d-flex align-items-center" data-theme-preference="system">
+                        <i class="fas fa-desktop fa-fw mr-2"></i>
+                        <span class="flex-grow-1">Sistema</span>
+                        <i class="fas fa-check theme-option-check ml-2" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="dropdown-item theme-option d-flex align-items-center" data-theme-preference="light">
+                        <i class="fas fa-sun fa-fw mr-2"></i>
+                        <span class="flex-grow-1">Claro</span>
+                        <i class="fas fa-check theme-option-check ml-2" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="dropdown-item theme-option d-flex align-items-center" data-theme-preference="dark">
+                        <i class="fas fa-moon fa-fw mr-2"></i>
+                        <span class="flex-grow-1">Oscuro</span>
+                        <i class="fas fa-check theme-option-check ml-2" aria-hidden="true"></i>
+                    </button>
+                </div>
             </li>
             <li class="nav-item dropdown user-menu">
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
@@ -246,7 +273,6 @@
                         </p>
                     </li>
                     <li class="user-footer">
-                        <a href="{{ route('index') }}" target="_blank" class="btn btn-default btn-flat">Ver Web</a>
                         <a href="#" data-toggle="modal" data-target="#modal-logout" data-backdrop="static" data-keyboard="false" class="btn btn-danger btn-flat float-right">Cerrar Sesión</a>
                     </li>
                 </ul>
