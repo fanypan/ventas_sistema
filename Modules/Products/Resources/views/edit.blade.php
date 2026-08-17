@@ -162,23 +162,10 @@
                             <h3 class="card-title text-center d-block w-100">Foto Producto</h3>
                         </div>
                         <div class="card-body text-center">
-                            <div id="image-preview-container" class="mb-3 border rounded p-2 bg-light" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                                @if($product->image)
-                                    <img id="image-preview" src="{{ asset('storage/' . $product->image) }}" class="img-fluid rounded" style="max-height: 200px; object-fit: contain;" alt="Foto actual">
-                                @else
-                                    <img id="image-preview" src="{{ asset('images/no-image.png') }}" class="img-fluid rounded" style="max-height: 200px; object-fit: contain;" alt="Sin foto">
-                                @endif
-                            </div>
-                            <div class="form-group">
-                                <div class="custom-file">
-                                    <input type="file" class="custom-file-input @error('image') is-invalid @enderror" id="image" name="image" accept="image/*">
-                                    <label class="custom-file-label" for="image">Cambiar foto</label>
-                                </div>
-                                @error('image')
-                                    <small class="text-danger mt-2 d-block">{{ $message }}</small>
-                                @enderror
-                            </div>
-                            <p class="text-muted small mt-2">Formatos sugeridos: JPG, PNG.<br>Peso máximo: 2MB.</p>
+                            @include('products::partials.image-upload', [
+                                'previewUrl' => $product->imageUrl(),
+                                'inputLabel' => 'Cambiar foto',
+                            ])
                         </div>
                     </div>
                 </div>
@@ -195,17 +182,22 @@ $(document).ready(function() {
     const $cost = $('#cost');
     const $margin = $('#profit_margin');
     const $price = $('#price');
+    let updatingFromMargin = false;
 
     function updatePrice() {
         let costVal = window.getCleanNumber($cost.val());
         let marginVal = parseFloat($margin.val()) || 0;
         if (costVal > 0) {
+            updatingFromMargin = true;
             let priceVal = costVal * (1 + (marginVal / 100));
             $price.val(Math.round(priceVal)).trigger('input');
+            updatingFromMargin = false;
         }
     }
 
     function updateMargin() {
+        if (updatingFromMargin) return;
+
         let costVal = window.getCleanNumber($cost.val());
         let priceVal = window.getCleanNumber($price.val());
         if (costVal > 0 && priceVal > 0) {
@@ -217,25 +209,6 @@ $(document).ready(function() {
     $cost.on('input', updatePrice);
     $margin.on('input', updatePrice);
     $price.on('input', updateMargin);
-
-    // Image preview
-    $('#image').on('change', function() {
-        const file = this.files[0];
-        if (file) {
-            let reader = new FileReader();
-            reader.onload = function(event) {
-                $('#image-preview').attr('src', event.target.result);
-            }
-            reader.readAsDataURL(file);
-            $(this).next('.custom-file-label').html(file.name);
-        }
-    });
-
-    // Custom file input label update
-    $(".custom-file-input").on("change", function() {
-      var fileName = $(this).val().split("\\").pop();
-      $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-    });
 });
 </script>
 @endpush

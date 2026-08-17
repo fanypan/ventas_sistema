@@ -65,11 +65,7 @@
                                 @foreach($products as $product)
                                 <tr>
                                     <td class="text-center">
-                                        @if($product->image)
-                                            <img src="{{ asset('storage/' . $product->image) }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: contain;">
-                                        @else
-                                            <img src="{{ asset('images/no-image.png') }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: contain;">
-                                        @endif
+                                        <img src="{{ $product->imageUrl() }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: contain;">
                                     </td>
                                     <td>{{ $product->code }}</td>
                                     <td>{{ $product->description }}</td>

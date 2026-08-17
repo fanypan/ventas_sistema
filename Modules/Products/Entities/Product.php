@@ -9,6 +9,8 @@ class Product extends Model
 {
     use HasFactory;
 
+    public const DEFAULT_IMAGE = 'products/default.png';
+
     protected $fillable = [
         'code',
         'description',
@@ -37,6 +39,18 @@ class Product extends Model
     public function creator()
     {
         return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
+
+    public function imageUrl(): string
+    {
+        $path = $this->image ?: self::DEFAULT_IMAGE;
+
+        return asset('storage/' . $path);
+    }
+
+    public function usesDefaultImage(): bool
+    {
+        return ! $this->image || $this->image === self::DEFAULT_IMAGE;
     }
     
     protected static function newFactory()

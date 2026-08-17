@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
+use Modules\Products\Entities\Product;
 
 class ProductController extends Controller
 {
@@ -87,6 +88,8 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        merge_currency_fields($request, ['price', 'cost']);
+
         $request->validate([
             'code' => 'nullable|string|unique:products,code',
             'description' => 'required|string|max:255',
@@ -100,12 +103,14 @@ class ProductController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $imagePath = null;
+        $this->ensureDefaultProductImage();
+
+        $imagePath = Product::DEFAULT_IMAGE;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
         }
 
-        \Modules\Products\Entities\Product::create([
+        Product::create([
             'code' => $request->code,
             'description' => $request->description,
             'price' => $request->price,
@@ -116,7 +121,7 @@ class ProductController extends Controller
             'user_id' => auth()->id(),
             'status' => 1,
             'model_name' => $request->model_name,
-            'warranty_months' => $request->warranty_months ?? 12,
+            'warranty_months' => $this->resolveWarrantyMonths($request),
             'image' => $imagePath,
         ]);
 
@@ -156,6 +161,8 @@ class ProductController extends Controller
     {
         $product = \Modules\Products\Entities\Product::findOrFail($id);
 
+        merge_currency_fields($request, ['price', 'cost']);
+
         $request->validate([
             'code' => 'nullable|string|unique:products,code,' . $product->id,
             'description' => 'required|string|max:255',
@@ -171,8 +178,7 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($product->image) {
+            if ($product->image && ! $product->usesDefaultImage()) {
                 Storage::disk('public')->delete($product->image);
             }
             $imagePath = $request->file('image')->store('products', 'public');
@@ -188,7 +194,7 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
             'model_name' => $request->model_name,
-            'warranty_months' => $request->warranty_months ?? 12,
+            'warranty_months' => $request->integer('warranty_months'),
             'status' => $request->status,
         ];
 
@@ -209,11 +215,39 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $product = \Modules\Products\Entities\Product::findOrFail($id);
-        if ($product->image) {
+        if ($product->image && ! $product->usesDefaultImage()) {
             Storage::disk('public')->delete($product->image);
         }
         $product->delete();
 
         return redirect()->route('products.index')->with('success', 'Producto eliminado exitosamente.');
+    }
+
+    private function resolveWarrantyMonths(Request $request): int
+    {
+        if ($request->has('warranty_months') && $request->input('warranty_months') !== '') {
+            return $request->integer('warranty_months');
+        }
+
+        return 12;
+    }
+
+    private function ensureDefaultProductImage(): void
+    {
+        $path = storage_path('app/public/' . Product::DEFAULT_IMAGE);
+
+        if (file_exists($path)) {
+            return;
+        }
+
+        $directory = dirname($path);
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $fallback = storage_path('app/public/logo.png');
+        if (file_exists($fallback)) {
+            copy($fallback, $path);
+        }
     }
 }
