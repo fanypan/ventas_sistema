@@ -29,6 +29,8 @@ class CashierController extends Controller
 
     public function store(Request $request)
     {
+        merge_currency_fields($request, ['monto_inicial']);
+
         $request->validate([
             'monto_inicial' => 'required|numeric|min:0',
         ]);
@@ -81,6 +83,12 @@ class CashierController extends Controller
 
     public function close(Request $request, $id)
     {
+        merge_currency_fields($request, ['monto_final']);
+
+        $request->validate([
+            'monto_final' => 'required|numeric|min:0',
+        ]);
+
         \Log::info("Intentando cerrar caja ID: " . $id . " con monto: " . $request->monto_final);
         $caja = Caja::findOrFail($id);
         $caja->update([

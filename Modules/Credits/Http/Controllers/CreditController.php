@@ -286,6 +286,8 @@ class CreditController extends Controller
     public function storeAbono(Request $request)
     {
         \Log::info("=== ABONO: Petición recibida ===", $request->all());
+
+        merge_currency_fields($request, ['amount', 'received_amount']);
         
         $request->validate([
             'abonable_id'   => 'required|integer',

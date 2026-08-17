@@ -33,6 +33,8 @@ class ExpenseController extends Controller
 
     public function store(Request $request)
     {
+        merge_currency_fields($request, ['amount']);
+
         $request->validate([
             'description' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
