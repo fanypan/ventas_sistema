@@ -10,15 +10,6 @@ use Modules\Sales\Entities\SaleDetail;
 
 class DashboardController extends Controller
 {
-    public function welcome()
-    {
-        if (auth()->check()) {
-            return redirect()->route('dashboard');
-        }
-
-        return view('welcome');
-    }
-
     public function index(Request $request)
     {
         $x['title'] = 'Dashboard';

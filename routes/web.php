@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\ModuleController;
@@ -23,7 +24,7 @@ use Spatie\Permission\Models\Role;
 |
 */
 
-Route::get('/', [DashboardController::class, 'welcome'])->name('index');
+Route::get('/', [LoginController::class, 'showLoginForm'])->name('index');
 
 Auth::routes([
     'register'  => false,
