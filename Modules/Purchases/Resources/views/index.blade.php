@@ -3,11 +3,17 @@
 @section('title', 'Compras')
 
 @section('content')
+<style>
+    .badge-activa   { background: #d1fae5; color: #065f46; }
+    .badge-anulada  { background: #fee2e2; color: #991b1b; }
+</style>
+
+<div class="content-wrapper">
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">Historial de Compras</h1>
+                <h1 class="m-0"><i class="fas fa-truck-loading mr-2 text-primary"></i>Historial de Compras</h1>
             </div>
             <div class="col-sm-6 text-right">
                 @can('create purchase')
@@ -39,35 +45,37 @@
                 </button>
             </div>
         @endif
+
         <div class="card card-outline card-primary">
             <div class="card-body p-0">
-                <table class="table table-striped table-hover m-0">
+                <div class="table-responsive">
+                <table class="table table-hover table-striped m-0">
                     <thead class="thead-light">
                         <tr>
-                            <th>#</th>
-                            <th>Fecha</th>
+                            <th>Nº</th>
+                            <th>Fecha/Hora</th>
                             <th>Proveedor</th>
-                            <th>Total</th>
                             <th>Usuario</th>
-                            <th>Estado</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-right">Total</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($purchases as $purchase)
+                        @forelse($purchases as $purchase)
                         <tr>
-                            <td>{{ $purchase->id }}</td>
+                            <td class="font-weight-bold text-primary">#{{ str_pad($purchase->id, 5, '0', STR_PAD_LEFT) }}</td>
                             <td>{{ $purchase->created_at->format('d/m/Y H:i') }}</td>
-                            <td>{{ $purchase->supplier->name }}</td>
-                            <td>{{ number_format($purchase->total, 2) }}</td>
-                            <td>{{ $purchase->creator->name }}</td>
+                            <td>{{ $purchase->supplier->name ?? '-' }}</td>
+                            <td>{{ $purchase->creator->name ?? '-' }}</td>
                             <td class="text-center">
                                 @if($purchase->status == 1)
-                                    <span class="badge badge-success">Activa</span>
+                                    <span class="badge badge-activa px-2 py-1 rounded-pill">Activa</span>
                                 @else
-                                    <span class="badge badge-danger">Anulada</span>
+                                    <span class="badge badge-anulada px-2 py-1 rounded-pill">Anulada</span>
                                 @endif
                             </td>
+                            <td class="text-right font-weight-bold">{{ money($purchase->total) }}</td>
                             <td class="text-center">
                                 <a href="{{ route('purchases.show', $purchase->id) }}" class="btn btn-info btn-sm" title="Ver Detalle">
                                     <i class="fas fa-eye"></i>
@@ -85,14 +93,23 @@
                                 @endif
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="fas fa-truck-loading fa-3x mb-2 opacity-25 d-block"></i>
+                                Sin compras registradas
+                            </td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
-            <div class="card-footer">
+            <div class="card-footer clearfix">
                 {{ $purchases->links() }}
             </div>
         </div>
     </div>
 </section>
+</div>
 @endsection
