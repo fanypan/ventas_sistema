@@ -44,7 +44,7 @@ class SaleController extends Controller
 
     public function pos()
     {
-        $products = \Modules\Products\Entities\Product::where('status', 1)->get();
+        $products = \Modules\Products\Entities\Product::with('brand')->where('status', 1)->get();
         $categories = \Modules\Products\Entities\Category::all();
         $cashOpen = \Modules\Financials\Entities\Caja::where('status', 1)->first();
         

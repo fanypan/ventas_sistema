@@ -4,59 +4,6 @@
 
 @section('content')
 <style>
-    .pos-product-card {
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    .pos-product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-        border-color: var(--primary) !important;
-    }
-    .product-img-placeholder {
-        height: 100px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        color: #fff;
-    }
-    .category-filter {
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-bottom: 10px;
-    }
-    .category-filter::-webkit-scrollbar {
-        height: 6px;
-    }
-    .category-filter::-webkit-scrollbar-thumb {
-        background-color: #cbd5e1;
-        border-radius: 10px;
-    }
-    .split-layout {
-        height: calc(100vh - 130px);
-        display: flex;
-        gap: 20px;
-    }
-    .left-panel {
-        flex: 6;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-    .right-panel {
-        flex: 4;
-        display: flex;
-        flex-direction: column;
-    }
-    .grid-container {
-        overflow-y: auto;
-        padding-right: 5px;
-        flex: 1;
-    }
     .cart-container {
         overflow-y: auto;
         flex: 1;
@@ -65,11 +12,14 @@
         table-layout: fixed;
     }
     .cart-product-name {
-        display: block;
-        font-weight: 700;
-        white-space: nowrap;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
         overflow: hidden;
-        text-overflow: ellipsis;
+        font-weight: 700;
+        font-size: .95rem;
+        line-height: 1.3;
         max-width: 100%;
     }
     .cart-product-meta {
@@ -77,54 +27,191 @@
         flex-wrap: wrap;
         gap: .35rem;
         align-items: center;
+        margin-top: .2rem;
+    }
+    .cart-table thead th {
+        font-size: .8rem;
+        letter-spacing: .02em;
+        padding: .7rem .75rem;
+    }
+    .cart-table td {
+        padding: .85rem .75rem;
+    }
+    .cart-qty {
+        font-size: .95rem;
+        min-width: 2.25rem;
+        padding: .35rem .55rem;
+    }
+    .cart-line-total {
+        font-size: 1rem;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+    .cart-checkout-bar {
+        display: flex;
+        flex-direction: column;
+        gap: .75rem;
+        padding: .85rem 1rem 1rem;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+    }
+    .cart-checkout-total {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: .75rem;
+    }
+    .cart-checkout-total span {
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+    .cart-checkout-total strong {
+        font-size: 1.65rem;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #059669;
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        word-break: break-word;
+    }
+    .cart-checkout-actions {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: .5rem;
+    }
+    .cart-checkout-actions .btn {
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .cart-checkout-actions kbd,
+    .checkout-confirm-kbd {
+        display: inline-block;
+        margin-left: .4rem;
+        padding: .05rem .35rem;
+        font-size: .68rem;
+        font-weight: 600;
+        color: rgba(255,255,255,.9);
+        background: rgba(0,0,0,.18);
+        border: 0;
+        border-radius: 4px;
+        box-shadow: none;
+    }
+    .checkout-hero {
+        text-align: center;
+        margin-bottom: 1.25rem;
+    }
+    .checkout-hero .checkout-total {
+        font-size: 2.35rem;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #059669;
+        font-variant-numeric: tabular-nums;
+        margin: 0;
+    }
+    .checkout-breakdown {
+        display: flex;
+        justify-content: center;
+        gap: 1.25rem;
+        margin-top: .5rem;
+        font-size: .85rem;
+        color: #64748b;
+        font-variant-numeric: tabular-nums;
+    }
+    .checkout-breakdown .is-discount {
+        color: #dc2626;
+    }
+    .cart-table td:first-child {
+        min-width: 0;
+    }
+    .customer-not-found-alert {
+        font-size: .82rem;
+        line-height: 1.35;
+        margin-bottom: 0;
+    }
+    .customer-not-found-alert .btn-link {
+        font-size: inherit;
+        vertical-align: baseline;
+    }
+    .customer-feedback-slot {
+        margin-top: .5rem;
+    }
+    .customer-feedback-slot.has-feedback {
+        min-height: 2.75rem;
+    }
+    .customer-selected-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .65rem;
+        padding: .5rem .75rem;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        border-radius: 8px;
+        font-size: .88rem;
+    }
+    .customer-selected-details {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+    }
+    .customer-selected-details strong {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .sale-success-icon {
+        font-size: 3.5rem;
+        line-height: 1;
+    }
+    .sale-success-change {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #059669;
+        font-variant-numeric: tabular-nums;
+        margin: 0;
     }
     .pay-methods {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 5px;
-    }
-    .pay-method-btn {
-        min-height: 60px;
-        line-height: 1.15;
-        white-space: normal;
-    }
-    .payment-actions .btn {
-        height: 100%;
-    }
-    .sale-total-row {
         gap: .5rem;
     }
-    .sale-total-label {
-        flex: 1 1 auto;
+    .pay-method-btn {
+        width: 100%;
+        min-height: 64px;
+        line-height: 1.15;
+        white-space: normal;
+        font-size: .8rem;
     }
-    .sale-total-amount {
-        flex: 0 1 auto;
-        text-align: right;
-        word-break: break-word;
+    .pay-method-btn:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
     }
-    .cash-input-group .input-group-text {
-        white-space: nowrap;
+    .checkout-cash-received {
+        font-size: 1.75rem;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
     }
-    @media (max-width: 1399.98px) {
-        .split-layout {
-            gap: 14px;
-        }
-        .left-panel {
-            flex: 5.5;
-        }
-        .right-panel {
-            flex: 4.5;
-        }
+    .checkout-change-box {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: .85rem 1rem;
+        text-align: center;
+    }
+    .checkout-change-box .checkout-change {
+        font-size: 1.5rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        margin: 0;
+        color: #059669;
     }
     @media (max-width: 1199.98px) {
-        .split-layout {
-            height: auto;
-            flex-direction: column;
-        }
-        .left-panel,
-        .right-panel {
-            flex: 1 1 auto;
-        }
         .grid-container,
         .cart-container {
             overflow: visible;
@@ -134,35 +221,21 @@
         .pay-methods {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
-        .payment-actions {
-            row-gap: .5rem;
+        .cart-checkout-actions {
+            grid-template-columns: 1fr;
         }
-        .sale-total-row {
-            align-items: flex-start !important;
-            flex-direction: column;
+        .cart-checkout-total strong {
+            font-size: 1.4rem;
         }
-        .sale-total-amount {
-            width: 100%;
-            text-align: left;
-        }
-        .cash-input-group {
-            flex-wrap: wrap;
-        }
-        .cash-input-group .input-group-prepend,
-        .cash-input-group .input-group-append,
-        .cash-input-group .form-control {
-            width: 100%;
-        }
-        .cash-input-group .input-group-text {
-            width: 100%;
-            justify-content: center;
+        .checkout-hero .checkout-total {
+            font-size: 1.85rem;
         }
         .cart-table thead th {
             font-size: .78rem;
             padding: .6rem .4rem;
         }
         .cart-table td {
-            padding: .65rem .4rem;
+            padding: .7rem .4rem;
         }
     }
 </style>
@@ -191,56 +264,23 @@
                 
                 <!-- LEFT PANEL: GRID -->
                 <div class="left-panel">
-                    <!-- Buscador y Categorías -->
-                    <div class="card shadow-sm border-0 mb-3 flex-shrink-0">
-                        <div class="card-body p-3">
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text bg-white border-right-0"><i class="fas fa-search text-muted"></i></span>
-                                </div>
-                                <input type="text" id="filter_search" class="form-control border-left-0 form-control-lg" placeholder="Buscar por código, código de barras o descripción..." autofocus>
-                            </div>
-                            
-                            <div class="category-filter" id="category_filters">
-                                <button class="btn btn-primary rounded-pill px-4 mr-2 filter-btn active" data-filter="all">Todas</button>
-                                @foreach($categories as $cat)
-                                    <button class="btn btn-outline-secondary text-dark rounded-pill px-4 mr-2 filter-btn" data-filter="{{ $cat->id }}">{{ $cat->name }}</button>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
+                    @include('products::partials.product-grid-toolbar', [
+                        'categories' => $categories,
+                        'accent' => 'primary',
+                        'placeholder' => 'Buscar por código, código de barras o descripción...',
+                    ])
 
-                    <!-- Cuadrilla de Productos -->
                     <div class="grid-container">
                         <div class="row" id="products_grid">
                             @foreach($products as $prod)
-                                <div class="col-xl-3 col-lg-4 col-md-4 col-6 mb-3 product-item" data-category="{{ $prod->category_id }}" data-search="{{ strtolower($prod->code.' '.$prod->description.' '.$prod->brand.' '.$prod->model_name) }}">
-                                    <div class="card h-100 shadow-sm border pos-product-card" onclick="addToCartFast({{ $prod->id }}, {{ $prod->stock }}, '{{ addslashes($prod->description) }}')">
-                                        <div class="product-img-placeholder">
-                                            @if($prod->image)
-                                                <img src="{{ asset('storage/' . $prod->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
-                                            @else
-                                                <i class="fas fa-box-open text-primary opacity-50"></i>
-                                            @endif
-                                        </div>
-                                        <div class="card-body p-2 d-flex flex-column">
-                                            <span class="badge badge-info align-self-start mb-1">{{ $prod->code }}</span>
-                                            <h6 class="font-weight-bold mb-1 text-truncate" title="{{ $prod->description }}">{{ $prod->description }}</h6>
-                                            <small class="text-muted text-truncate d-block mb-2">{{ $prod->brand }} {{ $prod->model_name }}</small>
-                                            
-                                            <div class="mt-auto d-flex justify-content-between align-items-center">
-                                                <h5 class="text-success font-weight-bold mb-0">Gs. {{ number_format($prod->price, 0, ',', '.') }}</h5>
-                                                <span class="badge {{ $prod->stock > 0 ? 'badge-primary' : 'badge-danger' }}">{{ $prod->stock }} en stock</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                @include('products::partials.product-grid-item', [
+                                    'product' => $prod,
+                                    'variant' => 'sale',
+                                    'onclick' => 'addToCartFast('.$prod->id.', '.$prod->stock.', \''.addslashes($prod->description).'\')',
+                                ])
                             @endforeach
-                            
-                            <div id="no_results_msg" class="col-12 text-center text-muted py-5" style="display:none;">
-                                <i class="fas fa-search fa-3x mb-3 text-lighter"></i>
-                                <h5>No se encontraron productos</h5>
-                            </div>
+
+                            @include('products::partials.product-grid-empty')
                         </div>
                     </div>
                 </div>
@@ -251,7 +291,7 @@
                         <div class="card-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
                             <h4 class="card-title font-weight-bold mb-0"><i class="fas fa-shopping-cart mr-2"></i>Carrito</h4>
                             <div>
-                                <button class="btn btn-xs btn-danger mr-1" id="btn_clear_cart" title="Vaciar Carrito">
+                                <button type="button" class="btn btn-xs btn-danger mr-1" id="btn_clear_cart" title="Vaciar Carrito">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                                 <span class="badge badge-light text-primary px-3 py-1 rounded-pill" id="item_count">0</span>
@@ -264,31 +304,45 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text bg-white border-right-0"><i class="fas fa-user-tag text-muted"></i></span>
                                 </div>
-                                <input type="text" id="customer_search" class="form-control border-left-0" placeholder="NIT o Nombre del cliente...">
+                                <input type="text" id="customer_search" class="form-control border-left-0" placeholder="NIT o Nombre del cliente..." autocomplete="off">
                                 <div class="input-group-append">
-                                    <button class="btn btn-outline-primary" type="button" id="btn_search_customer"><i class="fas fa-search"></i></button>
+                                    <button class="btn btn-outline-primary" type="button" id="btn_search_customer" title="Buscar cliente"><i class="fas fa-search"></i></button>
                                     <button class="btn btn-outline-info" type="button" id="btn_list_customers" title="Seleccionar de la lista"><i class="fas fa-list"></i></button>
                                     @can('create customer')
-                                    <button class="btn btn-success" type="button" data-toggle="modal" data-target="#modalNewCustomer"><i class="fas fa-plus"></i></button>
+                                    <button class="btn btn-success" type="button" id="btn_open_new_customer" title="Nuevo cliente"><i class="fas fa-plus"></i></button>
                                     @endcan
                                 </div>
                             </div>
-                            <div class="mt-2 text-sm d-flex justify-content-between" id="customer_info_panel" style="display:none;">
-                                <input type="hidden" id="customer_id" value="1">
-                                <strong><span id="lbl_customer_name" class="text-primary">Público General</span></strong>
-                                <span id="lbl_customer_nit" class="text-muted">0000000</span>
+                            <div class="customer-feedback-slot">
+                                <div id="customer_not_found_alert" class="alert alert-warning customer-not-found-alert py-2 px-3" style="display:none;" role="alert">
+                                    <i class="fas fa-user-slash mr-1"></i>
+                                    No se encontró cliente con ese NIT/RUC. Debe agregarlo para continuar.
+                                    @can('create customer')
+                                    <button type="button" class="btn btn-link p-0 ml-1 font-weight-bold" id="btn_add_customer_from_search">Agregar cliente</button>
+                                    @endcan
+                                </div>
+                                <div id="customer_info_panel" class="customer-selected-card" style="display:none;">
+                                    <input type="hidden" id="customer_id" value="1">
+                                    <div class="customer-selected-details">
+                                        <strong><span id="lbl_customer_name" class="text-primary">Público General</span></strong>
+                                        <span id="lbl_customer_nit" class="text-muted small">0000000</span>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0" id="btn_clear_customer" title="Quitar cliente">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Carrito Tabla -->
                         <div class="cart-container p-0">
-                            <table class="table table-hover table-striped table-sm m-0 cart-table">
+                            <table class="table table-hover table-striped m-0 cart-table">
                                 <thead class="bg-white sticky-top">
                                     <tr>
-                                        <th width="45%">Producto</th>
-                                        <th width="20%" class="text-center">Cant.</th>
-                                        <th width="20%" class="text-right">Total</th>
-                                        <th width="15%" class="text-center">X</th>
+                                        <th style="width:42%">Producto</th>
+                                        <th style="width:16%" class="text-center">Cant.</th>
+                                        <th style="width:24%" class="text-right">Total</th>
+                                        <th style="width:18%" class="text-center"><span class="sr-only">Acciones</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="cart_tbody">
@@ -297,88 +351,22 @@
                             </table>
                         </div>
 
-                        <!-- Totales y Cobro -->
-                        <div class="p-3 bg-light border-top mt-auto">
-
-                            <!-- Tipo de Comprobante + Descuento -->
-                            <div class="row mb-2">
-                                <div class="col-6">
-                                    <label class="text-muted mb-1" style="font-size:.68rem; font-weight:700; text-transform:uppercase;">Comprobante</label>
-                                    <select id="tipo_comprobante" class="form-control form-control-sm">
-                                        <option value="ticket">🧾 Ticket</option>
-                                        <option value="factura">📄 Factura</option>
-                                    </select>
-                                </div>
-                                <div class="col-6">
-                                    <label class="text-muted mb-1" style="font-size:.68rem; font-weight:700; text-transform:uppercase;">Descuento %</label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="number" id="txt_discount" class="form-control text-center font-weight-bold" value="0" min="0" max="100" step="1">
-                                        <div class="input-group-append"><span class="input-group-text">%</span></div>
-                                    </div>
-                                </div>
+                        <div class="cart-checkout-bar mt-auto">
+                            <div class="cart-checkout-total">
+                                <span>Total</span>
+                                <strong id="txt_total_sale_display">Gs. 0</strong>
                             </div>
-
-                            <!-- Subtotal y Total -->
-                            <div class="d-flex justify-content-between mb-1" style="font-size:.8rem;">
-                                <span class="text-muted">Subtotal</span>
-                                <span id="txt_subtotal_display" class="text-muted">Gs. 0</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2" style="font-size:.8rem;">
-                                <span class="text-danger">Descuento</span>
-                                <span id="txt_discount_display" class="text-danger">- Gs. 0</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-end mb-2 sale-total-row">
-                                <h5 class="text-muted text-uppercase font-weight-bold mb-0 sale-total-label" style="font-size:.75rem;">Total a Pagar</h5>
-                                <h2 class="text-success font-weight-bold mb-0 sale-total-amount" id="txt_total_sale_display" style="font-size:2rem;">Gs. 0</h2>
-                                <input type="hidden" id="txt_total_sale" value="0">
-                                <input type="hidden" id="txt_raw_subtotal" value="0">
-                            </div>
-
-                            <!-- Método de Pago -->
-                            <div class="mb-2">
-                                <p class="text-muted mb-1" style="font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px;">Método de Pago</p>
-                                <div class="pay-methods">
-                                    <button type="button" class="btn btn-sm flex-fill pay-method-btn active" data-method="efectivo" style="font-size:.72rem; padding:5px 2px;">
-                                        <i class="fas fa-money-bill-wave d-block mb-1" style="font-size:1rem;"></i>Efectivo
-                                    </button>
-                                    <button type="button" class="btn btn-sm flex-fill pay-method-btn" data-method="qr" style="font-size:.72rem; padding:5px 2px;">
-                                        <i class="fas fa-qrcode d-block mb-1" style="font-size:1rem;"></i>QR
-                                    </button>
-                                    <button type="button" class="btn btn-sm flex-fill pay-method-btn" data-method="tarjeta" style="font-size:.72rem; padding:5px 2px;">
-                                        <i class="fas fa-credit-card d-block mb-1" style="font-size:1rem;"></i>Tarjeta
-                                    </button>
-                                    <button type="button" class="btn btn-sm flex-fill pay-method-btn" data-method="transferencia" style="font-size:.72rem; padding:5px 2px;">
-                                        <i class="fas fa-university d-block mb-1" style="font-size:1rem;"></i>Transf.
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Campo Efectivo (solo para efectivo) -->
-                            <div id="cash_input_section" class="mb-2">
-                                <div class="input-group input-group-sm cash-input-group">
-                                    <div class="input-group-prepend"><span class="input-group-text bg-white">Paga Gs.</span></div>
-                                    <input type="text" id="txt_payment_with" class="form-control font-weight-bold currency-format" placeholder="0">
-                                    <div class="input-group-append"><span class="input-group-text bg-white">Vuelto: <strong id="txt_change" class="text-success ml-1">Gs. 0</strong></span></div>
-                                </div>
-                            </div>
-
+                            <input type="hidden" id="txt_total_sale" value="0">
+                            <input type="hidden" id="txt_raw_subtotal" value="0">
                             <input type="hidden" id="selected_payment_method" value="efectivo">
-
-                            <div class="row payment-actions">
-                                <div class="col-8">
-                                    <button class="btn btn-success btn-lg btn-block py-2 font-weight-bold shadow-sm text-uppercase" id="btn_process_sale" disabled style="letter-spacing: 1px; font-size:.85rem;">
-                                        <i class="fas fa-cash-register mr-2"></i> COBRAR
-                                    </button>
-                                </div>
-                                <div class="col-4">
-                                    <button class="btn btn-warning btn-lg btn-block py-2 font-weight-bold" id="btn_credit_sale" disabled title="Venta a Crédito" style="font-size:.80rem;">
-                                        <i class="fas fa-clock"></i> Crédito
-                                    </button>
-                                </div>
+                            <div class="cart-checkout-actions">
+                                <button type="button" class="btn btn-success font-weight-bold text-uppercase shadow-sm" id="btn_process_sale" disabled aria-keyshortcuts="Enter">
+                                    <i class="fas fa-cash-register mr-2"></i> Cobrar <kbd>Enter</kbd>
+                                </button>
+                                <button type="button" class="btn btn-warning font-weight-bold" id="btn_credit_sale" disabled title="Venta a crédito">
+                                    <i class="fas fa-clock mr-1"></i> Crédito
+                                </button>
                             </div>
-                            <button class="btn btn-outline-danger btn-block mt-1 font-weight-bold" id="btn_cancel_sale" style="font-size:.8rem;">
-                                <i class="fas fa-ban mr-1"></i> Cancelar Venta
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -646,51 +634,117 @@
     </div>
 </div>
 
-<!-- MODAL: CONFIRMAR PAGO -->
-<div class="modal fade" id="modalPayment" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- MODAL: COBRAR (etapa 2) -->
+<div class="modal fade" id="modalPayment" tabindex="-1" role="dialog" aria-labelledby="payment_modal_title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content shadow-lg border-0">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title font-weight-bold" id="payment_modal_title">
-                    <i class="fas fa-cash-register mr-2"></i> Confirmar Pago
+                    <i class="fas fa-cash-register mr-2"></i> Cobrar venta
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Volver al carrito">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body p-4">
-                <div class="text-center mb-4">
-                    <p class="text-muted text-uppercase small font-weight-bold mb-1">Total a Pagar</p>
-                    <h1 class="display-4 font-weight-bold text-success mb-0" id="pay_modal_total_display">Gs. 0</h1>
-                </div>
-
-                <!-- Sección Efectivo -->
-                <div id="section_pay_cash" style="display:none;">
-                    <div class="form-group mb-3">
-                        <label class="font-weight-bold text-muted small text-uppercase">Monto Recibido (Gs.)</label>
-                        <input type="text" id="pay_modal_received" class="form-control form-control-lg font-weight-bold text-primary text-center currency-format" style="font-size: 2rem;" placeholder="0">
-                    </div>
-                    <div class="bg-light p-3 rounded border text-center">
-                        <p class="text-muted small text-uppercase font-weight-bold mb-1">Vuelto</p>
-                        <h2 class="font-weight-bold text-dark mb-0" id="pay_modal_change">Gs. 0</h2>
+                <div class="checkout-hero">
+                    <p class="checkout-total" id="pay_modal_total_display">Gs. 0</p>
+                    <div class="checkout-breakdown">
+                        <span>Subtotal <span id="txt_subtotal_display">Gs. 0</span></span>
+                        <span class="is-discount" id="checkout_discount_row" hidden>Descuento <span id="txt_discount_display">- Gs. 0</span></span>
                     </div>
                 </div>
 
-                <!-- Sección Electrónica (QR/Tarjeta/Transf) -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="tipo_comprobante">Comprobante</label>
+                            <select id="tipo_comprobante" class="form-control">
+                                <option value="ticket">Ticket</option>
+                                <option value="factura">Factura</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="txt_discount">Descuento %</label>
+                            <div class="input-group">
+                                <input type="number" id="txt_discount" class="form-control text-center font-weight-bold" value="0" min="0" max="100" step="1">
+                                <div class="input-group-append"><span class="input-group-text">%</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label>Método de pago</label>
+                    <div class="pay-methods">
+                        <button type="button" class="btn btn-sm pay-method-btn active" data-method="efectivo">
+                            <i class="fas fa-money-bill-wave d-block mb-1"></i>Efectivo
+                        </button>
+                        <button type="button" class="btn btn-sm pay-method-btn" data-method="qr">
+                            <i class="fas fa-qrcode d-block mb-1"></i>QR
+                        </button>
+                        <button type="button" class="btn btn-sm pay-method-btn" data-method="tarjeta">
+                            <i class="fas fa-credit-card d-block mb-1"></i>Tarjeta
+                        </button>
+                        <button type="button" class="btn btn-sm pay-method-btn" data-method="transferencia">
+                            <i class="fas fa-university d-block mb-1"></i>Transf.
+                        </button>
+                    </div>
+                </div>
+
+                <div id="section_pay_cash">
+                    <div class="form-group mb-2">
+                        <label for="pay_modal_received">Monto recibido (Gs.)</label>
+                        <input type="text" id="pay_modal_received" class="form-control font-weight-bold text-primary checkout-cash-received currency-format" placeholder="0" autocomplete="off">
+                    </div>
+                    <div class="checkout-change-box mb-3">
+                        <p class="text-muted small font-weight-bold mb-1">Vuelto</p>
+                        <p class="checkout-change" id="pay_modal_change">Gs. 0</p>
+                    </div>
+                </div>
+
                 <div id="section_pay_electronic" style="display:none;">
                     <div class="form-group">
-                        <label class="font-weight-bold text-muted small text-uppercase" id="lbl_reference_title">Nro. Arqueo / Referencia</label>
-                        <input type="text" id="pay_modal_reference" class="form-control form-control-lg font-weight-bold text-center" placeholder="Ingrese el número o ID de transacción...">
+                        <label for="pay_modal_reference" id="lbl_reference_title">Nro. de referencia / ID operación</label>
+                        <input type="text" id="pay_modal_reference" class="form-control form-control-lg font-weight-bold text-center" placeholder="Número o ID de transacción" autocomplete="off">
                     </div>
                 </div>
 
-                <div class="form-group mt-3">
-                    <label class="font-weight-bold text-muted small text-uppercase">Nota / Observación (Opcional)</label>
-                    <textarea id="pay_modal_note" class="form-control" rows="2" placeholder="Alguna observación sobre este pago..."></textarea>
+                <div class="form-group mb-0">
+                    <label for="pay_modal_note">Nota (opcional)</label>
+                    <textarea id="pay_modal_note" class="form-control" rows="2" placeholder="Observación sobre este pago"></textarea>
                 </div>
             </div>
-            <div class="modal-footer bg-light p-3">
-                <button type="button" class="btn btn-secondary btn-lg px-4" data-dismiss="modal">Cancelar</button>
-                <button type="button" id="btn_confirm_final_payment" class="btn btn-success btn-lg px-5 font-weight-bold shadow">
-                    <i class="fas fa-check-circle mr-2"></i> REGISTRAR VENTA
+            <div class="modal-footer bg-light p-3 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary px-4" data-dismiss="modal">Volver al carrito</button>
+                <button type="button" id="btn_confirm_final_payment" class="btn btn-success btn-lg px-4 font-weight-bold shadow-sm" aria-keyshortcuts="Enter">
+                    <i class="fas fa-check-circle mr-2"></i> Registrar venta <kbd class="checkout-confirm-kbd">Enter</kbd>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: VENTA EXITOSA -->
+<div class="modal fade" id="modalSaleSuccess" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg text-center overflow-hidden">
+            <div class="modal-body p-4 pt-5">
+                <div class="sale-success-icon text-success mb-3">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h4 class="font-weight-bold mb-2" id="sale_success_title">Venta registrada</h4>
+                <p class="text-muted mb-0" id="sale_success_message">La venta se procesó correctamente.</p>
+                <div id="sale_success_change_box" class="checkout-change-box mt-3 mb-0" style="display:none;">
+                    <p class="text-muted small font-weight-bold mb-1">Vuelto</p>
+                    <p class="sale-success-change" id="sale_success_change">Gs. 0</p>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4 px-4 justify-content-center">
+                <button type="button" class="btn btn-success btn-lg px-5 font-weight-bold shadow-sm" id="btn_sale_success_continue">
+                    <i class="fas fa-plus-circle mr-2"></i> Nueva venta
                 </button>
             </div>
         </div>
@@ -703,69 +757,252 @@
 <script>
 // Validaciones y Lógica AJAX heredada de functions.js del sistema Venta original
 $(document).ready(function() {
+    let isProcessingSale = false;
+
+    initProductGridFilter({ accentClass: 'btn-primary' });
+
+    $('.modal').modal('hide');
+
     loadCart();
 
-    // 1. Filtrado Rápido por Botones de Categoría (Visual)
-    $('.filter-btn').click(function() {
-        $('.filter-btn').removeClass('btn-primary active').addClass('btn-outline-secondary text-dark');
-        $(this).removeClass('btn-outline-secondary text-dark').addClass('btn-primary active');
-        
-        let filter = $(this).attr('data-filter');
-        let searchTerm = $('#filter_search').val().toLowerCase();
-        
-        filterProducts(filter, searchTerm);
-    });
+    function searchAndAddProduct(term) {
+        term = (term || '').trim();
+        if (!term) return;
 
-    // 2. Filtrado Rápido por Texto (Visual)
-    $('#filter_search').on('keyup', function() {
-        let searchTerm = $(this).val().toLowerCase();
-        let activeFilter = $('.filter-btn.active').attr('data-filter');
-        
-        filterProducts(activeFilter, searchTerm);
-    });
-
-    function filterProducts(category, search) {
-        let totalVisible = 0;
-        
-        $('.product-item').each(function() {
-            let matchesCategory = (category === 'all' || $(this).attr('data-category') == category);
-            let matchesSearch = (search === '' || $(this).attr('data-search').includes(search));
-            
-            if (matchesCategory && matchesSearch) {
-                $(this).show();
-                totalVisible++;
-            } else {
-                $(this).hide();
-            }
+        $.post("{{ route('sales.ajax.search_product') }}", {
+            _token: "{{ csrf_token() }}",
+            term: term
+        }, function(product) {
+            addToCartFast(product.id, product.stock, product.description);
+            $('#filter_search').val('');
+            filterProducts($('.filter-btn.active').attr('data-filter') || 'all', '');
+        }).fail(function() {
+            alert('Producto no encontrado.');
         });
-
-        if(totalVisible === 0) {
-            $('#no_results_msg').show();
-        } else {
-            $('#no_results_msg').hide();
-        }
     }
 
-    // Customer Search (Misma lógica validada)
-    $('#btn_search_customer').click(function() {
-        let term = $('#customer_search').val();
-        if(term.length > 0) {
-            $.post("{{ route('sales.ajax.search_customer') }}", {
-                _token: "{{ csrf_token() }}",
-                term: term
-            }, function(res) {
-                $('#customer_id').val(res.id);
-                $('#lbl_customer_name').text(res.name);
-                $('#lbl_customer_nit').text(res.nit);
-                $('#customer_info_panel').slideDown();
-            }).fail(function() {
-                alert('Cliente no encontrado en la base de datos.');
-                $('#customer_id').val(1);
-                $('#lbl_customer_name').text('Público General');
-                $('#lbl_customer_nit').text('0000000');
-            });
+    $('#filter_search').on('keydown', function(e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        let term = $(this).val().trim();
+        if (term) {
+            searchAndAddProduct(term);
+            return;
+        }
+        if (!$('#btn_process_sale').prop('disabled')) {
+            $('#btn_process_sale').trigger('click');
         }
     });
+
+    $('#txt_discount, #pay_modal_received, #pay_modal_reference').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+        }
+    });
+
+    $('#customer_search').on('input', function() {
+        $('#customer_not_found_alert').hide();
+        const term = $(this).val().trim();
+
+        if (!term) {
+            resetCustomerToDefault();
+            return;
+        }
+
+        if ($('#customer_info_panel').is(':visible')) {
+            const currentNit = $('#lbl_customer_nit').text().trim();
+            if (term !== currentNit) {
+                resetCustomerToDefault();
+            }
+        }
+    });
+
+    $('#customer_search').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchCustomer();
+            return;
+        }
+
+        if (e.key === 'Tab' && !e.shiftKey) {
+            const term = $(this).val().trim();
+            if (!term) return;
+
+            e.preventDefault();
+            searchCustomer();
+        }
+    });
+
+    function syncCustomerFeedbackSlot() {
+        const hasFeedback = $('#customer_not_found_alert').is(':visible') || $('#customer_info_panel').is(':visible');
+        $('.customer-feedback-slot').toggleClass('has-feedback', hasFeedback);
+    }
+
+    function hideCustomerNotFound() {
+        $('#customer_not_found_alert').hide();
+        syncCustomerFeedbackSlot();
+    }
+
+    function showCustomerNotFound() {
+        $('#customer_info_panel').hide();
+        $('#customer_not_found_alert').show();
+        syncCustomerFeedbackSlot();
+    }
+
+    function setSelectedCustomer(customer) {
+        $('#customer_id').val(customer.id);
+        $('#lbl_customer_name').text(customer.name);
+        $('#lbl_customer_nit').text(customer.nit);
+        $('#customer_search').val(customer.nit);
+        hideCustomerNotFound();
+        $('#customer_info_panel').show();
+        syncCustomerFeedbackSlot();
+        $('#customer_search').blur();
+        $('#filter_search').trigger('focus');
+    }
+
+    function resetCustomerToDefault() {
+        $('#customer_id').val(1);
+        $('#lbl_customer_name').text('Público General');
+        $('#lbl_customer_nit').text('0000000');
+        $('#customer_info_panel').hide();
+        syncCustomerFeedbackSlot();
+    }
+
+    function clearSelectedCustomer() {
+        resetCustomerToDefault();
+        hideCustomerNotFound();
+        $('#customer_search').val('').trigger('focus');
+    }
+
+    function getCustomerIdForSale() {
+        if ($('#customer_info_panel').is(':visible')) {
+            return $('#customer_id').val() || 1;
+        }
+        return 1;
+    }
+
+    function finishSaleAndReset() {
+        clearSelectedCustomer();
+        location.reload();
+    }
+
+    function showSaleSuccess(options) {
+        options = options || {};
+        $('#sale_success_title').text(options.title || 'Venta registrada');
+        $('#sale_success_message').text(options.message || 'La venta se procesó correctamente.');
+
+        if (options.change > 0) {
+            $('#sale_success_change').text('Gs. ' + Math.round(options.change).toLocaleString('de-DE'));
+            $('#sale_success_change_box').show();
+        } else {
+            $('#sale_success_change_box').hide();
+        }
+
+        $('#modalSaleSuccess').modal('show');
+    }
+
+    $('#btn_clear_customer').click(function() {
+        clearSelectedCustomer();
+    });
+
+    $('#btn_sale_success_continue').click(function() {
+        finishSaleAndReset();
+    });
+
+    function searchCustomer() {
+        let term = $('#customer_search').val().trim();
+        if (!term) {
+            hideCustomerNotFound();
+            return $.Deferred().reject().promise();
+        }
+
+        return $.post("{{ route('sales.ajax.search_customer') }}", {
+            _token: "{{ csrf_token() }}",
+            term: term
+        }).done(function(res) {
+            setSelectedCustomer(res);
+        }).fail(function() {
+            resetCustomerToDefault();
+            showCustomerNotFound();
+        });
+    }
+
+    function openNewCustomerModal(prefillNit) {
+        if (!$('#modalNewCustomer').length) return;
+
+        $('#form_new_customer')[0].reset();
+        hideCustomerNotFound();
+
+        if (prefillNit) {
+            $('#form_new_customer input[name="nit"]').val(prefillNit);
+        }
+
+        $('#modalNewCustomer').modal('show');
+    }
+
+    $('#btn_search_customer').click(function() {
+        searchCustomer();
+    });
+
+    $(document).on('click', '#btn_open_new_customer, #btn_add_customer_from_search', function() {
+        openNewCustomerModal($('#customer_search').val().trim());
+    });
+
+    if ($('#modalNewCustomer').length) {
+        $('#modalNewCustomer').on('shown.bs.modal', function() {
+            const $nit = $('#form_new_customer input[name="nit"]');
+            const $name = $('#form_new_customer input[name="name"]');
+            if ($nit.val().trim()) {
+                $name.trigger('focus');
+            } else {
+                $nit.trigger('focus');
+            }
+        });
+    }
+
+    $(document).on('keydown', function(e) {
+        if ($('#modalSaleSuccess').hasClass('show') && e.key === 'Escape') {
+            e.preventDefault();
+            finishSaleAndReset();
+            return;
+        }
+
+        if (e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.altKey || e.repeat) return;
+
+        const $target = $(e.target);
+
+        if ($target.is('textarea') || $target.closest('#form_new_customer').length) {
+            return;
+        }
+
+        if ($('#modalSaleSuccess').hasClass('show')) {
+            e.preventDefault();
+            finishSaleAndReset();
+            return;
+        }
+
+        if ($('#modalPayment').hasClass('show')) {
+            e.preventDefault();
+            $('#btn_confirm_final_payment').trigger('click');
+            return;
+        }
+
+        if ($target.closest('#creditModal, #modalEditItem, #modalSelectCustomer, #modalNewCustomer, #modalCustomerList').length) {
+            return;
+        }
+
+        if ($target.is('#filter_search, #customer_search, #filter_customer_list, #search_customer_table')) {
+            return;
+        }
+
+        if (!$('#btn_process_sale').prop('disabled') && !$('.modal.show').length) {
+            e.preventDefault();
+            $('#btn_process_sale').trigger('click');
+        }
+    });
+
+    // Customer Search (Misma lógica validada)
 
     // 4. Métodos de Pago — Toggle Visual
 
@@ -785,12 +1022,9 @@ $(document).ready(function() {
         let method = $(this).attr('data-method');
         $('#selected_payment_method').val(method);
         updatePaymentButtons(method);
-        
-        if(method === 'efectivo') {
-            $('#cash_input_section').slideDown(150);
-        } else {
-            $('#cash_input_section').slideUp(150);
-            $('#txt_change').text('Gs. 0');
+        syncPaymentSections(method);
+        if ($('#modalPayment').hasClass('show')) {
+            focusCheckoutField(method);
         }
     });
 
@@ -806,22 +1040,36 @@ $(document).ready(function() {
         });
     }
 
-    // Calcular vuelto en tiempo real (Sincronizar ambos campos)
-    $('#txt_payment_with, #pay_modal_received').on('keyup input', function() {
-        let val = $(this).val();
-        $('#txt_payment_with, #pay_modal_received').val(val);
-        
-        let paga = window.getCleanNumber(val);
+    function syncPaymentSections(method) {
+        if(method === 'efectivo') {
+            $('#section_pay_cash').show();
+            $('#section_pay_electronic').hide();
+        } else {
+            $('#section_pay_cash').hide();
+            $('#section_pay_electronic').show();
+            $('#lbl_reference_title').text('Nro. de referencia / ID operación');
+        }
+    }
+
+    function focusCheckoutField(method) {
+        if(method === 'efectivo') {
+            $('#pay_modal_received').trigger('focus').trigger('select');
+        } else {
+            $('#pay_modal_reference').trigger('focus');
+        }
+    }
+
+    // Calcular vuelto en tiempo real
+    $('#pay_modal_received').on('keyup input', function() {
+        let paga = window.getCleanNumber($(this).val());
         let total = parseFloat($('#txt_total_sale').val()) || 0;
         let vuelto = paga - total;
 
-        let display = vuelto >= 0 
+        let display = vuelto >= 0
             ? 'Gs. ' + Math.round(vuelto).toLocaleString('de-DE')
             : '-Gs. ' + Math.round(Math.abs(vuelto)).toLocaleString('de-DE');
-        
-        let color = vuelto >= 0 ? '#059669' : '#dc2626';
 
-        $('#txt_change, #pay_modal_change').text(display).css('color', color);
+        $('#pay_modal_change').text(display).css('color', vuelto >= 0 ? '#059669' : '#dc2626');
     });
 
     // Descuento en tiempo real
@@ -892,6 +1140,8 @@ $(document).ready(function() {
     // Confirmar Crédito FINAL
     $(document).on('click', '#btn_confirm_credit', function(e) {
         e.preventDefault();
+
+        if (isProcessingSale || !$('#creditModal').hasClass('show')) return;
         
         let base = parseFloat($('#txt_total_sale').val()) || 0;
         let type = $('#credit_interest_type').val();
@@ -907,11 +1157,12 @@ $(document).ready(function() {
         
         let $btn = $(this);
         let originalHtml = $btn.html();
+        isProcessingSale = true;
         $btn.html('<i class="fas fa-spinner fa-spin mr-2"></i> Procesando...').prop('disabled', true);
 
         $.post("{{ route('sales.ajax.process_sale') }}", {
             _token: "{{ csrf_token() }}",
-            customer_id: $('#customer_id').val(),
+            customer_id: getCustomerIdForSale(),
             payment_type: 'credito',
             discount: parseFloat($('#txt_discount').val()) || 0,
             interest_type: type,
@@ -924,52 +1175,49 @@ $(document).ready(function() {
             if(res.success) {
                 let printUrl = "{{ route('sales.print_ticket', ':id') }}".replace(':id', res.sale_id);
                 window.open(printUrl, '_blank');
-                alert('✅ Venta a CRÉDITO registrada con éxito.');
-                location.reload();
+                $('#creditModal').modal('hide');
+                showSaleSuccess({
+                    title: 'Crédito registrado',
+                    message: 'La venta a crédito se guardó correctamente.'
+                });
             }
         }).fail(function(r) {
             alert(r.responseJSON ? r.responseJSON.error : 'Error al procesar el crédito');
+            isProcessingSale = false;
             $btn.html(originalHtml).prop('disabled', false);
         });
     });
 
-    // Abrir Modal de Cobro al hacer clic en COBRAR
-    $('#btn_process_sale').click(function() {
-        let payMethod = $('#selected_payment_method').val();
+    $('#btn_process_sale').on('click', function(e) {
+        e.preventDefault();
+        let payMethod = $('#selected_payment_method').val() || 'efectivo';
         let total = parseFloat($('#txt_total_sale').val()) || 0;
 
         if(total <= 0) return;
 
-        // Configurar modal
-        $('#pay_modal_total_display').text('Gs. ' + total.toLocaleString('de-DE'));
+        recalcTotals();
         $('#pay_modal_reference').val('');
         $('#pay_modal_note').val('');
-        
-        // Reset Cash inputs
-        if(payMethod === 'efectivo') {
-            $('#section_pay_cash').show();
-            $('#section_pay_electronic').hide();
-            $('#payment_modal_title').html('<i class="fas fa-money-bill-wave mr-2"></i> Cobro en Efectivo');
-            setTimeout(() => $('#pay_modal_received').focus().select(), 500);
-        } else {
-            $('#section_pay_cash').hide();
-            $('#section_pay_electronic').show();
-            let icon = 'fas fa-credit-card';
-            let title = 'Cobro con Tarjeta';
-
-            if(payMethod === 'qr') { icon = 'fas fa-qrcode'; title = 'Cobro con QR'; }
-            if(payMethod === 'transferencia') { icon = 'fas fa-university'; title = 'Cobro vía Transferencia'; }
-            
-            $('#lbl_reference_title').text('Nro. de Referencia / ID Operación');
-            $('#payment_modal_title').html(`<i class="${icon} mr-2"></i> ${title}`);
-            setTimeout(() => $('#pay_modal_reference').focus(), 500);
-        }
-
+        $('#pay_modal_received').val('');
+        $('#pay_modal_change').text('Gs. 0').css('color', '#059669');
+        updatePaymentButtons(payMethod);
+        syncPaymentSections(payMethod);
         $('#modalPayment').modal('show');
     });
 
+    $('#modalPayment').on('shown.bs.modal', function() {
+        focusCheckoutField($('#selected_payment_method').val() || 'efectivo');
+    });
+
+    $('#modalPayment').on('hidden.bs.modal', function() {
+        $('#filter_search').trigger('focus');
+    });
+
     // Procesar Cobro FINAL desde el MODAL
-    $('#btn_confirm_final_payment').click(function() {
+    $('#btn_confirm_final_payment').on('click', function(e) {
+        e.preventDefault();
+
+        if (isProcessingSale || !$('#modalPayment').hasClass('show')) return;
         let payMethod = $('#selected_payment_method').val();
         let paymentWith = window.getCleanNumber($('#pay_modal_received').val());
         let total = parseFloat($('#txt_total_sale').val()) || 0;
@@ -988,11 +1236,12 @@ $(document).ready(function() {
         } // If user confirmed or reference is provided, it proceeds naturally.
 
         let $btn = $(this);
+        isProcessingSale = true;
         $btn.html('<i class="fas fa-spinner fa-spin mr-2"></i> Procesando...').prop('disabled', true);
 
         $.post("{{ route('sales.ajax.process_sale') }}", {
             _token: "{{ csrf_token() }}",
-            customer_id: $('#customer_id').val(),
+            customer_id: getCustomerIdForSale(),
             payment_type: payMethod,
             payment_with: paymentWith,
             reference_number: reference,
@@ -1004,22 +1253,20 @@ $(document).ready(function() {
                 $('#modalPayment').modal('hide');
                 let printUrl = "{{ route('sales.print_ticket', ':id') }}".replace(':id', res.sale_id);
                 window.open(printUrl, '_blank');
-                
-                let msg = '✅ Venta procesada con éxito.';
-                if(payMethod === 'efectivo' && res.change > 0) {
-                    msg += '\n💵 Vuelto: Gs. ' + Math.round(res.change).toLocaleString('de-DE');
-                }
-                alert(msg);
-                location.reload();
+                showSaleSuccess({
+                    change: payMethod === 'efectivo' ? (res.change || 0) : 0
+                });
             }
         }).fail(function(r) {
             alert(r.responseJSON ? r.responseJSON.error : 'Error al procesar la venta');
-            $btn.html('<i class="fas fa-check-circle mr-2"></i> REGISTRAR VENTA').prop('disabled', false);
+            isProcessingSale = false;
+            $btn.html('<i class="fas fa-check-circle mr-2"></i> Registrar venta <kbd class="checkout-confirm-kbd">Enter</kbd>').prop('disabled', false);
         });
     });
 
     // Limpiar carrito (Vaciar y devolver stock)
-    $('#btn_clear_cart').click(function() {
+    $('#btn_clear_cart').on('click', function(e) {
+        e.preventDefault();
         if(confirm('¿Está seguro de vaciar el carrito? El stock de los productos será devuelto al inventario.')) {
             let $btn = $(this);
             $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
@@ -1028,9 +1275,20 @@ $(document).ready(function() {
             }, function(res) {
                 if(res.success) {
                     loadCart();
+                    clearSelectedCustomer();
                     $btn.prop('disabled', false).html('<i class="fas fa-trash-alt"></i>');
+                    $('#filter_search').trigger('focus');
                 }
             });
+        }
+    });
+
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            $('.modal').modal('hide');
+            isProcessingSale = false;
+            clearSelectedCustomer();
+            loadCart();
         }
     });
 
@@ -1049,11 +1307,7 @@ $(document).ready(function() {
         $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...');
         
         $.post("{{ route('sales.ajax.store_customer') }}", $(this).serialize() + "&_token={{ csrf_token() }}", function(res) {
-            $('#customer_id').val(res.id);
-            $('#lbl_customer_name').text(res.name);
-            $('#lbl_customer_nit').text(res.nit);
-            $('#customer_search').val(res.nit);
-            $('#customer_info_panel').slideDown();
+            setSelectedCustomer(res);
             
             $('#modalNewCustomer').modal('hide');
             $('#form_new_customer')[0].reset();
@@ -1066,10 +1320,11 @@ $(document).ready(function() {
 
     // Selector Cliente en Lista
     $(document).on('click', '.btn-select-customer', function() {
-        $('#customer_id').val($(this).data('id'));
-        $('#lbl_customer_name').text($(this).data('name'));
-        $('#lbl_customer_nit').text($(this).data('nit'));
-        $('#customer_info_panel').slideDown();
+        setSelectedCustomer({
+            id: $(this).data('id'),
+            name: $(this).data('name'),
+            nit: $(this).data('nit')
+        });
         $('#modalSelectCustomer').modal('hide');
     });
 
@@ -1199,12 +1454,16 @@ function recalcTotals() {
     if(discount > 100) discount = 100;
     let discountAmount = Math.round(subtotal * discount / 100);
     let total = subtotal - discountAmount;
+    let totalLabel = 'Gs. ' + Math.round(total).toLocaleString('de-DE');
 
     $('#txt_subtotal_display').text('Gs. ' + Math.round(subtotal).toLocaleString('de-DE'));
     $('#txt_discount_display').text('- Gs. ' + discountAmount.toLocaleString('de-DE'));
+    $('#checkout_discount_row').prop('hidden', discountAmount <= 0);
     $('#txt_total_sale').val(total);
-    $('#txt_total_sale_display').text('Gs. ' + Math.round(total).toLocaleString('de-DE'));
-    $('#credit_base_total').text('Gs. ' + Math.round(total).toLocaleString('de-DE'));
+    $('#txt_total_sale_display').text(totalLabel);
+    $('#pay_modal_total_display').text(totalLabel);
+    $('#credit_base_total').text(totalLabel);
+    $('#pay_modal_received').trigger('input');
 }
 
 function updateCartTable(res) {
@@ -1219,27 +1478,28 @@ function updateCartTable(res) {
         adjustedSubtotal += finalTotal;
 
         html += `<tr>
-            <td class="align-middle border-top-0">
+            <td class="align-middle">
                 <span class="cart-product-name" title="${d.product.description}">${d.product.description}</span>
                 <div class="cart-product-meta">
-                    <small class="text-primary mr-2">Gs. ${Math.round(d.price).toLocaleString('de-DE')}</small>
-                    ${discount > 0 ? `<small class="text-danger mr-1" title="Descuento">-${Math.round(discount).toLocaleString('de-DE')}</small>` : ''}
+                    <small class="text-primary">Gs. ${Math.round(d.price).toLocaleString('de-DE')}</small>
+                    ${discount > 0 ? `<small class="text-danger" title="Descuento">-${Math.round(discount).toLocaleString('de-DE')}</small>` : ''}
                     ${interest > 0 ? `<small class="text-success" title="Recargo">+${Math.round(interest).toLocaleString('de-DE')}</small>` : ''}
                 </div>
             </td>
-            <td class="align-middle text-center border-top-0">
-                <span class="badge badge-light border px-2 py-1 font-weight-bold">${d.quantity}</span>
+            <td class="align-middle text-center">
+                <span class="badge badge-light border cart-qty font-weight-bold">${d.quantity}</span>
             </td>
-            <td class="align-middle text-right font-weight-bold text-success border-top-0">Gs. ${Math.round(finalTotal).toLocaleString('de-DE')}</td>
-            <td class="align-middle text-center border-top-0">
+            <td class="align-middle text-right font-weight-bold text-success cart-line-total">Gs. ${Math.round(finalTotal).toLocaleString('de-DE')}</td>
+            <td class="align-middle text-center">
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-outline-info p-1 btn_edit_item" 
-                            data-id="${d.id}" data-name="${d.product.description}" 
-                            data-qty="${d.quantity}" data-discount="${discount}" data-interest="${interest}">
+                    <button type="button" class="btn btn-sm btn-outline-info btn_edit_item"
+                            data-id="${d.id}" data-name="${d.product.description}"
+                            data-qty="${d.quantity}" data-discount="${discount}" data-interest="${interest}"
+                            title="Ajustar">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-link text-danger p-1 btn_remove_item" data-id="${d.id}">
-                        <i class="fas fa-times-circle"></i>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn_remove_item" data-id="${d.id}" title="Quitar">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
             </td>
@@ -1247,7 +1507,7 @@ function updateCartTable(res) {
     });
     
     if(res.details.length === 0) {
-        html = '<tr><td colspan="4" class="text-center text-muted py-4"><i class="fas fa-shopping-basket fa-3x mb-2 opacity-50"></i><br>Agregue productos</td></tr>';
+        html = '<tr><td colspan="4" class="text-center text-muted py-5"><i class="fas fa-shopping-basket fa-3x mb-2 opacity-50"></i><br>Agregue productos al carrito</td></tr>';
     }
 
     $('#cart_tbody').html(html);

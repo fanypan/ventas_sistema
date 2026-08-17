@@ -101,6 +101,28 @@
             <td>TOTAL:</td>
             <td class="text-right">{{ number_format($sale->total, 0, ',', '.') }} Gs.</td>
         </tr>
+        @php
+            $paymentLabels = [
+                'efectivo' => 'Efectivo',
+                'tarjeta'  => 'Tarjeta',
+                'transferencia' => 'Transferencia',
+                'credito'  => 'Crédito',
+            ];
+        @endphp
+        <tr>
+            <td>FORMA DE PAGO:</td>
+            <td class="text-right">{{ $paymentLabels[$sale->payment_type] ?? ucfirst($sale->payment_type ?? 'N/A') }}</td>
+        </tr>
+        @if($sale->payment_type === 'efectivo' && $sale->payment_with > 0)
+        <tr>
+            <td>PAGA CON:</td>
+            <td class="text-right">{{ number_format($sale->payment_with, 0, ',', '.') }} Gs.</td>
+        </tr>
+        <tr style="font-weight: bold;">
+            <td>VUELTO:</td>
+            <td class="text-right">{{ number_format($sale->change, 0, ',', '.') }} Gs.</td>
+        </tr>
+        @endif
     </table>
 
     <div class="footer">

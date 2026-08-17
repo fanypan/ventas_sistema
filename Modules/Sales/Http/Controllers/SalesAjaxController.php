@@ -169,8 +169,8 @@ class SalesAjaxController extends Controller
     {
         $id = $request->id;
         $quantity = (int)$request->quantity;
-        $discount = (float)($request->discount ?? 0);
-        $interest = (float)($request->interest ?? 0);
+        $discount = parse_currency($request->discount ?? 0);
+        $interest = parse_currency($request->interest ?? 0);
 
         $tempDetail = TemporaryDetail::find($id);
         if ($tempDetail) {
@@ -212,8 +212,8 @@ class SalesAjaxController extends Controller
         }
 
         $payment_type = $request->payment_type ?? 'efectivo';
-        $payment_with = (float) $request->payment_with;
-        $discountPercent = (float) ($request->discount ?? 0);
+        $payment_with = parse_currency($request->payment_with);
+        $discountPercent = parse_currency($request->discount);
 
         DB::beginTransaction();
         try {
@@ -243,7 +243,7 @@ class SalesAjaxController extends Controller
             }
 
             $interestType = $request->interest_type ?? 'amount'; // percent or amount
-            $interestVal  = (float) ($request->interest_value ?? 0);
+            $interestVal  = parse_currency($request->interest_value);
             
             if ($interestType === 'percent') {
                 $interestAmount = round($total * $interestVal / 100);
@@ -271,7 +271,7 @@ class SalesAjaxController extends Controller
 
             // Generate Installments if Credit
             if ($payment_type === 'credito') {
-                $customInstallmentAmount = (float) $request->installment_amount;
+                $customInstallmentAmount = parse_currency($request->installment_amount);
                 $frequency = $request->frequency ?? 'mensual';
                 
                 $totalToDistribute = $total + $interestAmount;
