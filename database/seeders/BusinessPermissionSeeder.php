@@ -36,7 +36,7 @@ class BusinessPermissionSeeder extends Seeder
 
         $admin = Role::findByName('admin');
         $operator = Role::findByName('operator');
-        $superadmin = Role::findByName('superadmin');
+        $superadmin = Role::where('name', 'superadmin')->first();
 
         $admin->givePermissionTo(array_merge(
             $this->crudMany($crudResources),
@@ -60,7 +60,7 @@ class BusinessPermissionSeeder extends Seeder
             'read credit', 'create credit',
         ]);
 
-        $superadmin->givePermissionTo(Permission::all());
+        $superadmin?->givePermissionTo(Permission::all());
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }

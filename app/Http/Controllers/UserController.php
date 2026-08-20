@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Billing\PlanLimitService;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -23,6 +24,10 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        if (! app(PlanLimitService::class)->canCreateUser()) {
+            Alert::error('Plan', app(PlanLimitService::class)->userLimitMessage())->toToast();
+            return back()->withInput();
+        }
         $validator = Validator::make($request->all(), [
             'name'      => ['required', 'string', 'max:255'],
             'email'     => ['required', 'string', 'email', 'max:255', 'unique:users'],

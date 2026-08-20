@@ -58,6 +58,12 @@
 
             <!-- Navbar -->
             @include('admin.layouts.navbar')
+            @if (!empty($subscriptionBanner))
+                <div class="alert alert-{{ $subscriptionBanner['level'] }} mb-0 rounded-0 text-center">
+                    {{ $subscriptionBanner['text'] }}
+                    <a href="{{ route('tenant.plan') }}">Ver mi plan</a>
+                </div>
+            @endif
             <!-- /.navbar -->
 
             <!-- Content Wrapper. Contains page content -->

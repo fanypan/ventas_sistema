@@ -1,4 +1,5 @@
  ## Features
+- SaaS multi-tenant (una DB por cliente, subdominio, panel de onboarding): ver [docs/SAAS.md](docs/SAAS.md)
 - Login Page
     [![login.png](https://i.postimg.cc/vmCY7mwC/login.png)](https://postimg.cc/67Lxtt3h)
 - User Management
@@ -32,7 +33,7 @@
 
 **Con Docker (recomendado):** [Docker Engine](https://docs.docker.com/engine/install/) + plugin Compose v2, o [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows / Linux).
 
-**Sin Docker:** PHP 8.2, Composer, MySQL 8, extensiones `pdo_mysql`, `gd`, `zip`, `bcmath`, `intl`, `exif`. Redis es opcional.
+**Sin Docker:** PHP 8.2, Composer, MySQL 8, extensiones `pdo_mysql`, `gd`, `zip`, `bcmath`, `intl`, `exif`. Redis es **requerido** para colas del SaaS (`QUEUE_CONNECTION=redis`).
 
 ## Instalación
 

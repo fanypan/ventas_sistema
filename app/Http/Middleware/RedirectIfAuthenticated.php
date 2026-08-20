@@ -22,6 +22,10 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                if ($guard === 'platform') {
+                    return redirect()->route('platform.dashboard');
+                }
+
                 return redirect()->route('dashboard');
             }
         }

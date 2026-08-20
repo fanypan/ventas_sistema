@@ -319,6 +319,13 @@ class SalesAjaxController extends Controller
             TemporaryDetail::where('user_token', $token)->delete();
 
             DB::commit();
+
+            try {
+                app(\App\Services\Sifen\SifenIssuer::class)->issueForSale($sale->fresh());
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
             return response()->json([
                 'success' => true,
                 'sale_id' => $sale->id,

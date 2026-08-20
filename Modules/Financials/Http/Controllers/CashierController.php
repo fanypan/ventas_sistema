@@ -2,6 +2,7 @@
 
 namespace Modules\Financials\Http\Controllers;
 
+use App\Services\Billing\PlanLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Financials\Entities\Caja;
@@ -29,6 +30,9 @@ class CashierController extends Controller
 
     public function store(Request $request)
     {
+        if (! app(PlanLimitService::class)->canOpenCaja()) {
+            return back()->with('error', app(PlanLimitService::class)->cajaLimitMessage());
+        }
         merge_currency_fields($request, ['monto_inicial']);
 
         $request->validate([

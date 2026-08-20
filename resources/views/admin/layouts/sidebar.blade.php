@@ -272,6 +272,13 @@
                     </a>
                 </li>
                 @endcan
+                <li class="nav-header ml-2">SUSCRIPCIÓN</li>
+                <li class="nav-item">
+                    <a href="{{ route('tenant.plan') }}" class="nav-link {{ request()->routeIs('tenant.plan') ? 'active':'' }}">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <p>Mi plan</p>
+                    </a>
+                </li>
                 <li class="nav-header ml-2">ACCESS</li>
                 @can('read user')
                     <li class="nav-item">

@@ -21,7 +21,8 @@
         "nesbot/carbon": "^2.66",
         "nwidart/laravel-modules": "^9.0",
         "realrashid/sweet-alert": "^5.0",
-        "spatie/laravel-permission": "^5.10"
+        "spatie/laravel-permission": "^5.10",
+        "stancl/tenancy": "^3.8"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

@@ -12,7 +12,7 @@ class FinancialsServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerViews();
-        $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/Migrations'));
+        // Tenant migrations run via stancl/tenancy.
     }
 
     public function register()

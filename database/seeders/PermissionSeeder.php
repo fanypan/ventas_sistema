@@ -15,27 +15,27 @@ class PermissionSeeder extends Seeder
      */
     public function run()
     {
-        Permission::create(['name' => 'filemanager']);
-        Permission::create(['name' => 'read module']);
+        Permission::firstOrCreate(['name' => 'filemanager']);
+        Permission::firstOrCreate(['name' => 'read module']);
 
-        Permission::create(['name' => 'delete setting']);
-        Permission::create(['name' => 'update setting']);
-        Permission::create(['name' => 'read setting']);
-        Permission::create(['name' => 'create setting']);
+        Permission::firstOrCreate(['name' => 'delete setting']);
+        Permission::firstOrCreate(['name' => 'update setting']);
+        Permission::firstOrCreate(['name' => 'read setting']);
+        Permission::firstOrCreate(['name' => 'create setting']);
 
-        Permission::create(['name' => 'delete user']);
-        Permission::create(['name' => 'update user']);
-        Permission::create(['name' => 'read user']);
-        Permission::create(['name' => 'create user']);
+        Permission::firstOrCreate(['name' => 'delete user']);
+        Permission::firstOrCreate(['name' => 'update user']);
+        Permission::firstOrCreate(['name' => 'read user']);
+        Permission::firstOrCreate(['name' => 'create user']);
 
-        Permission::create(['name' => 'delete role']);
-        Permission::create(['name' => 'update role']);
-        Permission::create(['name' => 'read role']);
-        Permission::create(['name' => 'create role']);
+        Permission::firstOrCreate(['name' => 'delete role']);
+        Permission::firstOrCreate(['name' => 'update role']);
+        Permission::firstOrCreate(['name' => 'read role']);
+        Permission::firstOrCreate(['name' => 'create role']);
 
-        Permission::create(['name' => 'delete permission']);
-        Permission::create(['name' => 'update permission']);
-        Permission::create(['name' => 'read permission']);
-        Permission::create(['name' => 'create permission']);
+        Permission::firstOrCreate(['name' => 'delete permission']);
+        Permission::firstOrCreate(['name' => 'update permission']);
+        Permission::firstOrCreate(['name' => 'read permission']);
+        Permission::firstOrCreate(['name' => 'create permission']);
     }
 }

@@ -1,96 +1,46 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\FileManagerController;
-use App\Http\Controllers\ModuleController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\SettingController;
-use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Platform\AuthController;
+use App\Http\Controllers\Platform\DashboardController;
+use App\Http\Controllers\Platform\PaymentController;
+use App\Http\Controllers\Platform\PlanController;
+use App\Http\Controllers\Platform\TenantController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Spatie\Permission\Models\Role;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+Route::get('/', function (Request $request) {
+    if (in_array($request->getHost(), config('tenancy.central_domains', []), true)) {
+        return app(\App\Http\Controllers\LandingController::class)->index();
+    }
 
-Route::get('/', [LoginController::class, 'showLoginForm'])->name('index');
+    return redirect('/login');
+})->name('landing');
 
-Auth::routes([
-    'register'  => false,
-    'reset'     => false,
-    'confirm'   => false
-]);
+Route::middleware('central')->group(function () {
 
-Route::middleware(['auth'])->get('/home', [DashboardController::class, 'index'])->name('home');
+    Route::prefix('plataforma')->name('platform.')->group(function () {
+        Route::middleware('guest:platform')->group(function () {
+            Route::get('login', [AuthController::class, 'showLogin'])->name('login');
+            Route::post('login', [AuthController::class, 'login'])->name('login.attempt');
+        });
 
-Route::prefix('admin')->middleware(['auth'])->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('admin');
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:platform');
 
-    Route::controller(UserController::class)->group(function () {
-        Route::get('user', 'index')->middleware(['permission:read user'])->name('user.index');
-        Route::post('user', 'store')->middleware(['permission:create user'])->name('user.store');
-        Route::post('user/show', 'show')->middleware(['permission:read user'])->name('user.show');
-        Route::put('user', 'update')->middleware(['permission:update user'])->name('user.update');
-        Route::delete('user', 'destroy')->middleware(['permission:delete user'])->name('user.destroy');
+        Route::middleware('auth:platform')->group(function () {
+            Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+            Route::get('clientes', [TenantController::class, 'index'])->name('tenants.index');
+            Route::get('clientes/nuevo', [TenantController::class, 'create'])->name('tenants.create');
+            Route::post('clientes', [TenantController::class, 'store'])->name('tenants.store');
+            Route::get('clientes/{tenant}', [TenantController::class, 'show'])->name('tenants.show');
+            Route::post('clientes/{tenant}/suspender', [TenantController::class, 'suspend'])->name('tenants.suspend');
+            Route::post('clientes/{tenant}/reactivar', [TenantController::class, 'reactivate'])->name('tenants.reactivate');
+            Route::post('clientes/{tenant}/baja', [TenantController::class, 'cancel'])->name('tenants.cancel');
+            Route::delete('clientes/{tenant}', [TenantController::class, 'destroy'])->name('tenants.destroy');
+            Route::get('clientes/{tenant}/pago', [PaymentController::class, 'create'])->name('payments.create');
+            Route::post('clientes/{tenant}/pago', [PaymentController::class, 'store'])->name('payments.store');
+            Route::get('planes', [PlanController::class, 'index'])->name('plans.index');
+            Route::get('planes/{plan}/editar', [PlanController::class, 'edit'])->name('plans.edit');
+            Route::put('planes/{plan}', [PlanController::class, 'update'])->name('plans.update');
+        });
     });
-
-    Route::controller(RoleController::class)->group(function () {
-        Route::get('role', 'index')->middleware(['permission:read role'])->name('role.index');
-        Route::post('role', 'store')->middleware(['permission:create role'])->name('role.store');
-        Route::post('role/show', 'show')->middleware(['permission:read role'])->name('role.show');
-        Route::put('role', 'update')->middleware(['permission:update role'])->name('role.update');
-        Route::delete('role', 'destroy')->middleware(['permission:delete role'])->name('role.destroy');
-    });
-
-    Route::controller(PermissionController::class)->group(function () {
-        Route::get('permission', 'index')->middleware(['permission:read permission'])->name('permission.index');
-        Route::post('permission', 'store')->middleware(['permission:create permission'])->name('permission.store');
-        Route::post('permission/show', 'show')->middleware(['permission:read permission'])->name('permission.show');
-        Route::put('permission', 'update')->middleware(['permission:update permission'])->name('permission.update');
-        Route::delete('permission', 'destroy')->middleware(['permission:delete permission'])->name('permission.destroy');
-        Route::get('permission/reload', 'reloadPermission')->middleware(['permission:create permission'])->name('permission.reload');
-    });
-
-    Route::get('module', [ModuleController::class, 'index'])->middleware(['permission:read module'])->name('module.index');
-
-    Route::get('filemanager', [FileManagerController::class, 'index'])->middleware(['permission:filemanager'])->name('filemanager');
-
-    Route::controller(SettingController::class)->group(function () {
-        Route::get('setting', 'index')->middleware(['permission:read setting'])->name('setting.index');
-        Route::post('setting', 'store')->middleware(['permission:create setting'])->name('setting.store');
-        Route::post('setting/show', 'show')->middleware(['permission:read setting'])->name('setting.show');
-        Route::put('setting', 'update')->middleware(['permission:update setting'])->name('setting.update');
-        Route::delete('setting', 'destroy')->middleware(['permission:delete setting'])->name('setting.destroy');
-    });
-
-    Route::prefix('reports')->middleware(['permission:read report'])->group(function () {
-        Route::get('/', [ReportController::class, 'index'])->name('reports.index');
-        Route::get('products/pdf', [ReportController::class, 'productsPdf'])->name('reports.products.pdf');
-        Route::get('products/excel', [ReportController::class, 'productsExcel'])->name('reports.products.excel');
-        
-        Route::get('sales', [ReportController::class, 'salesPdf'])->name('reports.sales.pdf');
-        Route::get('purchases', [ReportController::class, 'purchasesPdf'])->name('reports.purchases.pdf');
-        Route::get('cash', [ReportController::class, 'cashPdf'])->name('reports.cash.pdf');
-        Route::get('financial_status', [ReportController::class, 'financialStatusPdf'])->name('reports.financial_status.pdf');
-        Route::get('expenses', [ReportController::class, 'expensesPdf'])->name('reports.expenses.pdf');
-
-        // Nuevos reportes
-        Route::get('low-stock', [ReportController::class, 'lowStockPdf'])->name('reports.low_stock.pdf');
-        Route::get('sales-by-payment', [ReportController::class, 'salesByPaymentPdf'])->name('reports.sales_by_payment.pdf');
-        Route::get('sales-by-product', [ReportController::class, 'salesByProductPdf'])->name('reports.sales_by_product.pdf');
-    });
-
 });
-
