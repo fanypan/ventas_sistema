@@ -5,6 +5,7 @@ graphify-out
 node_modules
 vendor
 Sistemaventas
+_archive
 storage/logs
 storage/framework/cache/data
 storage/framework/sessions
