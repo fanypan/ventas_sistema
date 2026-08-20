@@ -1,0 +1,29 @@
+---
+description: Identidad del SaaS de ventas Paraguay y límites que no se cruzan
+alwaysApply: true
+---
+
+# AranduTech Ventas (SaaS)
+
+POS/ERP Laravel 9 + AdminLTE para comercios en Paraguay. **Sales-assisted**, **una MySQL por cliente**, acceso por subdominio. UI en español rioplatense. La caja no espera.
+
+## No hacer
+
+- Signup público, Stripe o Mercado Pago
+- `organization_id` / shared-schema (el aislamiento es DB-per-tenant)
+- Upgrade de Laravel 9 en el mismo PR que features de negocio
+- Revivir código de `_archive/Sistemaventas`
+- Hablar con SIFEN/SET/DNIT, firmar XML o guardar certificados F1 (eso es `api_facturacion_electronica`)
+- Guardar API keys de FE o `.env` en git
+- Meter tablas de ventas/productos en migraciones **centrales**
+- Cambiar la arquitectura de menús del POS (se puede pulir look, no rearmar IA)
+
+## Dónde va cada cosa
+
+- Central (staff): `routes/web.php`, `app/Http/Controllers/Platform/`, `database/migrations/` (sin `tenant/`)
+- Comercio: `routes/tenant.php`, `Modules/*/`, `database/migrations/tenant/`
+- Operación: [docs/SAAS.md](docs/SAAS.md)
+- Upgrade L10: [docs/LARAVEL_UPGRADE.md](docs/LARAVEL_UPGRADE.md)
+- FE: panel del comercio configura URL + API key; HTTP a `/api/v1`, nunca a SIFEN
+
+Staff y comercio son guards distintos (`platform` vs `web`). El `Gate` de `superadmin` es del tenant, no de la plataforma.

@@ -1,0 +1,22 @@
+---
+description: FE vía API AranduTech — este POS nunca habla con SIFEN/SET/DNIT
+globs: "{app/Services/Sifen/**/*.php,app/Models/SifenDocument.php,Modules/Sales/**/*.php,config/saas.php,database/migrations/tenant/**/*sifen*}"
+alwaysApply: false
+---
+
+# Facturación electrónica
+
+Este repo es el **POS**. La SET la atiende el servicio `api_facturacion_electronica` (Laravel `/api/v1` + adapter Deno). Acá **no** hay SOAP, XML, firma, CSC, TIPS ni certificados F1.
+
+## Qué sí
+
+- Apartado de **configuración en el panel admin del comercio**: URL del servicio + API key (`sk_test_` / `sk_live_`). Opcional: establecimiento/punto.
+- Tras `DB::commit` de la venta, HTTP `POST {url}/api/v1/documents` con `Authorization: Bearer`. Receptor e ítems **inline** (contrato TIPS `data`). No mandar `numero` del DE.
+- Guardar en este POS solo rastro: id remoto, estado, CDC cuando llegue. La venta **no se revierte** si la API falla o responde 202.
+
+## Qué no
+
+- Conectar a SIFEN, SET, DNIT o al `sifen-adapter` (Deno es red interna de la API).
+- Portar xmlgen, ekuatia, certificados o KuDE a este repo.
+- Sincronizar catálogo de clientes/productos a la API (no existen `/clients` ni `/products`).
+- Bloquear la caja esperando CDC.

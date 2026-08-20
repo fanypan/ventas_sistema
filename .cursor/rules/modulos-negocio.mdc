@@ -1,0 +1,20 @@
+---
+description: Módulos nwidart del POS — rutas tenant y convenciones AdminLTE
+globs: Modules/**
+alwaysApply: false
+---
+
+# Módulos de negocio
+
+Cada módulo vive en `Modules/{Name}` (nwidart v9). El comercio los usa en su DB.
+
+Al crear o tocar un módulo:
+
+1. Rutas con `TenantMiddleware::web()`, no `web` suelto.
+2. No llamar `loadMigrationsFrom` en el ServiceProvider.
+3. Permisos CRUD `read/create/update/delete {recurso}` + seed en `BusinessPermissionSeeder`.
+4. Conservar menús/rutas actuales; pulir UI sin rearmar navegación.
+5. Voz rioplatense en textos nuevos (“Ingresá”, “Guardá”).
+6. La caja es crítica: acciones de venta en un paso, sin wizards.
+
+POS: las ventas se cierran en `SalesAjaxController@processSale`, no en `SaleController@store` (está vacío). Factura electrónica: HTTP a la API **después** del `DB::commit`; no a SIFEN.

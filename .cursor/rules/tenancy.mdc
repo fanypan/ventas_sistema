@@ -1,0 +1,25 @@
+---
+description: Multi-tenant stancl — migraciones, rutas y storage por comercio
+globs: "{routes/**/*.php,config/tenancy.php,database/migrations/**/*.php,Modules/**/Providers/*.php,app/Models/Tenant.php,app/Providers/TenancyServiceProvider.php,app/Support/TenantMiddleware.php}"
+alwaysApply: false
+---
+
+# Tenancy
+
+Identificación por Host (`InitializeTenancyByDomain`). Central: `CENTRAL_DOMAINS`. Tenant: `{slug}.{TENANT_BASE_DOMAIN}`.
+
+```php
+// Módulos: siempre TenantMiddleware::web(), nunca solo 'web'
+Route::middleware(TenantMiddleware::web())
+    ->namespace($this->moduleNamespace)
+    ->group(module_path('Sales', '/Routes/web.php'));
+```
+
+- **No** `loadMigrationsFrom` en providers de módulos (rompe la DB central).
+- Paths tenant: `config/tenancy.php` → `database/migrations/tenant` + `Modules/*/Database/Migrations`.
+- Alta de cliente: `Tenant::create` dispara CreateDatabase + MigrateDatabase + `SetupTenantJob`.
+- Tras `TenancyInitialized`, olvidar cache de Spatie Permission.
+- Jobs de negocio: inicializar tenancy (`$tenant->run(...)`) o el Queue bootstrapper.
+- Tests HTTP al comercio: URL absoluta `http://demo.localhost/...`, no `localhost`.
+
+Prohibido crear tablas de POS en `database/migrations/` (raíz = solo plataforma: tenants, plans, payments).

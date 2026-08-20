@@ -1,0 +1,18 @@
+---
+description: Planes, pagos manuales, gracia y límites de cupo
+globs: "{app/Services/Billing/**/*.php,app/Http/Controllers/Platform/**/*.php,app/Http/Middleware/EnsureTenantSubscription.php,app/Console/Commands/TickSubscriptionsCommand.php,database/seeders/PlanSeeder.php}"
+alwaysApply: false
+---
+
+# Billing
+
+Cobro **manual** (transferencia/efectivo). El staff registra el pago; no hay checkout.
+
+Estados: `active` → `grace` (7d) → `readonly` (3d, POS POST bloqueado) → `suspended`. Job `subscriptions:tick` (Redis, no `sync`).
+
+- `SubscriptionService` cambia fechas y estado; no pise `pending` mientras se aprovisiona.
+- Límites: `PlanLimitService` en alta de usuarios y apertura de caja.
+- Features del plan van en JSON `plans.features` (`sifen`, `credits`, …); no reescribir módulos para ocultar menús si alcanza un flag.
+- Precios en Gs. enteros (sin decimales). IVA no incluido en el seed.
+
+Al registrar un pago se **renueva** el período (mensual/anual) desde `ends_at` si aún no venció.
