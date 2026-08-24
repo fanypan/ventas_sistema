@@ -1,7 +1,7 @@
 ---
 name: saas-tenancy
 description: >-
-  Guides multi-tenant work on this Laravel SaaS (stancl/tenancy v3, one MySQL per
+  Guides multi-tenant work on this Laravel SaaS (stancl/tenancy v3, one PostgreSQL per
   comercio, subdomain identification). Use when creating tenants, touching
   domains, central vs tenant migrations, routes/tenant.php, TenancyServiceProvider,
   TenantMiddleware, storage per tenant, or debugging "wrong database" / 404 on
@@ -20,9 +20,11 @@ description: >-
 
 ## Alta de tenant
 
-`Tenant::create([...])` ya dispara CreateDatabase + MigrateDatabase. `setup_password` va en la columna virtual `data`. `SetupTenantJob` siembra roles `admin`/`operator`, crea el usuario y manda el mail.
+`Tenant::create([...])` ya dispara CreateDatabase + MigrateDatabase. El **slug** es `[a-z0-9]+` (sin `-` ni `_`): la base queda `tenant_{slug}` y el host `{slug}.{TENANT_BASE_DOMAIN}`. La clave de alta **no** va en `data`: `TenantSetupPassword` la guarda cifrada en cache hasta `SetupTenantJob`. El panel la muestra una vez en el flash `plain_password`. El job siembra roles `admin`/`operator`, crea el usuario y manda el mail.
 
-El usuario MySQL necesita `CREATE DATABASE`. Ver [docs/SAAS.md](../../docs/SAAS.md).
+Si falla create/migrate/setup, `TenantProvisioningRollback` borra la base y el registro central. Bases huérfanas: `php artisan tenants:cleanup-orphans`.
+
+El usuario Postgres necesita `CREATEDB`. Ver [docs/SAAS.md](../../docs/SAAS.md).
 
 ## Debug rápido
 
@@ -30,8 +32,8 @@ El usuario MySQL necesita `CREATE DATABASE`. Ver [docs/SAAS.md](../../docs/SAAS.
 |---|---|
 | 404 en `demo.localhost/login` | Host no está en `domains` o test pegó a `localhost` |
 | Landing 404 | Otra ruta `GET /` de tenant pisa la central |
-| Tablas de ventas en DB `admin_lte3` | Migración central o `loadMigrationsFrom` |
-| Permisos cruzados entre clientes | Cache Spatie sin forget al inicializar tenancy |
+| Tablas de ventas en DB `ventas_central` | Migración central o `loadMigrationsFrom` |
+| Permisos cruzados entre clientes | Cache Spatie con la misma clave; tiene que ir namespaced por tenant id |
 | Job ve datos del tenant anterior | Falta `$tenant->run()` / Queue bootstrapper |
 
 Tests: extender `Tests\TenantTestCase`, HTTP a `http://demo.localhost/...`.

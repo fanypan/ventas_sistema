@@ -13,7 +13,7 @@ DENY_PATTERNS = [
     (r"git\s+push\s+[^\n]*(-f|--force)", "No force-push."),
     (r"git\s+reset\s+--hard", "reset --hard no, salvo que el usuario lo pida."),
     (r"rm\s+-rf\s+[^\n]*(_archive|Sistemaventas|storage|vendor|database)", "Borrado destructivo de dirs sensibles."),
-    (r"down\s+-v", "docker compose down -v borra MySQL/Redis/storage de producción."),
+    (r"down\s+-v", "docker compose down -v borra Postgres/Redis/storage de producción."),
 ]
 
 ASK_PATTERNS = [

@@ -15,13 +15,15 @@ php artisan module:build
 # nombre en plural: e.g. warranties
 ```
 
-Luego, obligatorio:
+El stub (`stubs/module-generator`) ya sale con `TenantMiddleware::web()` y **sin** `loadMigrationsFrom`. Verificá:
 
-1. En `Modules/{Name}/Providers/RouteServiceProvider.php` usar `TenantMiddleware::web()`.
-2. En el ServiceProvider del módulo: **borrar** `loadMigrationsFrom(...)`.
-3. Migraciones quedan en `Modules/{Name}/Database/Migrations` (stancl las corre por tenant).
-4. `module.json`: `menus` + `permissions`. Recargar permisos o incluirlos en `BusinessPermissionSeeder`.
+1. `Modules/{Name}/Providers/RouteServiceProvider.php` usa `TenantMiddleware::web()`.
+2. El ServiceProvider del módulo **no** llama `loadMigrationsFrom(...)`.
+3. Migraciones en `Modules/{Name}/Database/Migrations` (stancl las corre por tenant).
+4. `module.json`: `menus` + `permissions` en **singular**. Recargar permisos o incluirlos en `BusinessPermissionSeeder`.
 5. Roles: `admin` ve el CRUD; `operator` solo lo que va a caja. No crear `superadmin` de tenant.
+
+Si usás `module:make` (nwidart), los stubs están en `stubs/nwidart-stubs` (`config/modules.php`).
 
 ## POS
 
@@ -29,4 +31,4 @@ Cerrar venta = `SalesAjaxController@processSale`. Stock se descuenta al carrito.
 
 ## UI
 
-No rearmar menús. Textos nuevos en rioplatense. Acciones de caja en un paso.
+Leé [DESIGN.md](../../../DESIGN.md) antes de tocar vistas. No rearmar menús. Textos nuevos en rioplatense. Acciones de caja en un paso (índigo, Outfit, `white-space: nowrap`). No usar el teal de la landing en el POS.

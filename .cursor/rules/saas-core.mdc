@@ -5,7 +5,7 @@ alwaysApply: true
 
 # AranduTech Ventas (SaaS)
 
-POS/ERP Laravel 9 + AdminLTE para comercios en Paraguay. **Sales-assisted**, **una MySQL por cliente**, acceso por subdominio. UI en español rioplatense. La caja no espera.
+POS/ERP Laravel 9 + AdminLTE para comercios en Paraguay. **Sales-assisted**, **una PostgreSQL por cliente**, acceso por subdominio. UI en español rioplatense. La caja no espera.
 
 ## No hacer
 
@@ -23,6 +23,7 @@ POS/ERP Laravel 9 + AdminLTE para comercios en Paraguay. **Sales-assisted**, **u
 - Central (staff): `routes/web.php`, `app/Http/Controllers/Platform/`, `database/migrations/` (sin `tenant/`)
 - Comercio: `routes/tenant.php`, `Modules/*/`, `database/migrations/tenant/`
 - Operación: [docs/SAAS.md](docs/SAAS.md)
+- Visual: [DESIGN.md](DESIGN.md) — Outfit + índigo en POS y plataforma; teal solo en landing
 - Upgrade L10: [docs/LARAVEL_UPGRADE.md](docs/LARAVEL_UPGRADE.md)
 - FE: panel del comercio configura URL + API key; HTTP a `/api/v1`, nunca a SIFEN
 

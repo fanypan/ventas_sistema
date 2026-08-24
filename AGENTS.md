@@ -1,14 +1,15 @@
 # Agente — AranduTech Ventas
 
-SaaS sales-assisted de POS para Paraguay (Laravel 9, una MySQL por cliente, subdominio).
+SaaS sales-assisted de POS para Paraguay (Laravel 9, una PostgreSQL por cliente, subdominio).
 
 ## Antes de codear
 
-1. ¿Plataforma (`/plataforma`) o comercio (`{slug}.dominio`)?
+1. ¿Plataforma (`PLATFORM_PATH` / subdominio `PLATFORM_DOMAIN`) o comercio (`{slug}.dominio`)?
 2. Si es comercio: rutas tenant + migraciones tenant. Nunca tablas de ventas en la DB central.
 3. Skills del repo (leelas si el trabajo calza): `saas-tenancy`, `onboard-cliente`, `modulo-negocio`, `facturacion-electronica`.
-4. Operación: `docs/SAAS.md`. Producto: `PRODUCT.md`.
-5. Este POS **no se conecta a SIFEN**. FE = HTTP a `api_facturacion_electronica` (`/api/v1`), configurada en el panel admin del comercio.
+4. Operación: `docs/SAAS.md`. Producto: `PRODUCT.md`. Visual: `DESIGN.md` (tokens en el frontmatter; sidecar `.impeccable/design.json`).
+5. UI: no rearmar menús del POS. Índigo en producto (POS + plataforma); teal solo en landing/WhatsApp. Outfit, densidad de escritorio, voz rioplatense.
+6. Este POS **no se conecta a SIFEN**. FE = HTTP a `api_facturacion_electronica` (`/api/v1`), configurada en el panel admin del comercio.
 
 ## Guardarraíles
 

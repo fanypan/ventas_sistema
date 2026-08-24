@@ -25,6 +25,8 @@ Flujo humano + panel (no hay self-serve):
 - `suspended`: vista “cuenta en pausa”.
 - Reactivar: registrar pago o botón Reactivar.
 
-Código: `TenantController`, `PaymentController`, `SubscriptionService`, `EnsureTenantSubscription`.
+Código: `TenantController`, `PaymentController`, `SubscriptionService`, `EnsureTenantSubscription`. UI del panel: [DESIGN.md](../../../DESIGN.md) + `resources/views/platform/`.
+
+Roles de plataforma (`platform_users.role`): **staff** da de alta, cobra y suspende; **admin** además da de baja, borra el tenant y edita planes.
 
 No agregar pasarelas de cobro. Precios en Gs. enteros. Factura electrónica: el comercio pega URL + API key de `api_facturacion_electronica` en su panel; el certificado F1 vive en esa API, no acá.

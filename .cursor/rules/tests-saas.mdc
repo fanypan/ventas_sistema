@@ -11,5 +11,5 @@ alwaysApply: false
 - `QUEUE_CONNECTION=sync` en phpunit para que el alta de tenant sea inline.
 - CSRF: `withoutMiddleware(VerifyCsrfToken::class)` en POST.
 - `actingAs($user, 'platform')` para staff; `actingAs($tenantUser)` para comercio.
-- No asumir MySQL: phpunit usa sqlite `:memory:` + archivos `database/tenant*`.
-- Si agregás migraciones tenant con SQL solo-MySQL (`after()`, enums), el test sqlite revienta: preferí DDL portable o salteá esa aserción.
+- No asumir MySQL/Postgres en tests: phpunit usa sqlite `:memory:` + archivos `database/tenant*`. Dev y prod usan **pgsql**.
+- Si agregás migraciones tenant con SQL no portable (`after()` es ignorado; `enum()` puede fallar), preferí DDL portable o salteá esa aserción.
