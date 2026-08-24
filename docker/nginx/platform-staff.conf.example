@@ -1,0 +1,15 @@
+# Restricción opcional por IP para el panel staff (producción).
+#
+# 1. Copiá este archivo a platform-staff.conf (no commitear IPs reales).
+# 2. Ajustá PLATFORM_PATH si no es "plataforma".
+# 3. Descomentá el include en docker/nginx/default.conf.
+#
+# Ajustá las IPs de oficina/VPN del equipo AranduTech.
+
+# location ~ ^/(plataforma|a7k9m2p4)(/|$) {
+#     allow 203.0.113.10;
+#     allow 198.51.100.0/24;
+#     deny all;
+#
+#     try_files $uri $uri/ /index.php?$query_string;
+# }

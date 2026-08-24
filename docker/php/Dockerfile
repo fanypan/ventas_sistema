@@ -1,12 +1,17 @@
 FROM php:8.2-cli-bookworm
 
+# pg_dump debe coincidir con el major de postgres:16 (el cliente de Bookworm es 15).
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git unzip curl gosu \
+    git unzip curl gosu gnupg ca-certificates \
     libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libwebp-dev \
-    libonig-dev libicu-dev \
+    libonig-dev libicu-dev libpq-dev \
     nodejs npm \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/pgdg.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client-16 \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install pdo_mysql mysqli zip gd bcmath pcntl exif intl \
+    && docker-php-ext-install pdo_pgsql zip gd bcmath pcntl exif intl \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && rm -rf /var/lib/apt/lists/*

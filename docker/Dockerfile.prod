@@ -4,11 +4,15 @@
 FROM php:8.2-fpm-bookworm AS app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git unzip curl \
+    git unzip curl gnupg ca-certificates \
     libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libwebp-dev \
-    libonig-dev libicu-dev libfcgi-bin \
+    libonig-dev libicu-dev libfcgi-bin libpq-dev \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/pgdg.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client-16 \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install pdo_mysql mysqli zip gd bcmath pcntl exif intl opcache \
+    && docker-php-ext-install pdo_pgsql zip gd bcmath pcntl exif intl opcache \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && rm -rf /var/lib/apt/lists/*
@@ -36,7 +40,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-di
     && rm -f /usr/bin/composer
 
 COPY docker/php/entrypoint.prod.sh /usr/local/bin/entrypoint.prod.sh
-RUN chmod +x /usr/local/bin/entrypoint.prod.sh
+COPY docker/php/queue-start.sh /usr/local/bin/queue-start.sh
+RUN chmod +x /usr/local/bin/entrypoint.prod.sh /usr/local/bin/queue-start.sh
 
 EXPOSE 9000
 
@@ -53,4 +58,4 @@ COPY --from=app /var/www/html/public /var/www/html/public
 EXPOSE 80
 
 HEALTHCHECK --interval=15s --timeout=5s --retries=10 \
-    CMD wget -qO- http://127.0.0.1/ >/dev/null || exit 1
+    CMD wget -qO- http://127.0.0.1/up >/dev/null || exit 1

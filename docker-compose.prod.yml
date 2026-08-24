@@ -3,8 +3,8 @@
 #
 # Uso:
 #   docker compose -f docker-compose.prod.yml up -d --build
-# Requiere APP_KEY y credenciales de DB en `.env`.
-# No publicar MySQL/Redis al host. Cambiar DB_PASSWORD antes de internet.
+# Requiere APP_KEY, DB_PASSWORD y REDIS_PASSWORD en `.env` (sin fallback).
+# No publicar Postgres/Redis al host.
 
 name: ventas_sistema_prod
 
@@ -37,12 +37,15 @@ services:
       APP_DEBUG: "false"
       LOG_CHANNEL: stderr
       LOG_LEVEL: error
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-admin_lte3}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-ventas_central}
       DB_USERNAME: ${DB_USERNAME:-ventas}
-      DB_PASSWORD: ${DB_PASSWORD:-ventas}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      SESSION_SECURE_COOKIE: "true"
+      TRUSTED_PROXIES: private
       REDIS_CLIENT: phpredis
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -55,7 +58,7 @@ services:
     volumes:
       - storage_data:/var/www/html/storage
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -74,12 +77,15 @@ services:
       APP_ENV: production
       APP_DEBUG: "false"
       LOG_CHANNEL: stderr
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-admin_lte3}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-ventas_central}
       DB_USERNAME: ${DB_USERNAME:-ventas}
-      DB_PASSWORD: ${DB_PASSWORD:-ventas}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      SESSION_SECURE_COOKIE: "true"
+      TRUSTED_PROXIES: private
       REDIS_CLIENT: phpredis
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -88,17 +94,18 @@ services:
       QUEUE_CONNECTION: redis
       RUN_MIGRATIONS: "false"
       RUN_SEED: "false"
+      HORIZON_ENABLED: ${HORIZON_ENABLED:-false}
     volumes:
       - storage_data:/var/www/html/storage
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     networks:
       - ventas
     restart: unless-stopped
-    entrypoint: ["php", "artisan", "queue:work", "redis", "--sleep=1", "--tries=3"]
+    entrypoint: ["/usr/local/bin/queue-start.sh"]
 
   scheduler:
     build:
@@ -111,12 +118,15 @@ services:
       APP_ENV: production
       APP_DEBUG: "false"
       LOG_CHANNEL: stderr
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-admin_lte3}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-ventas_central}
       DB_USERNAME: ${DB_USERNAME:-ventas}
-      DB_PASSWORD: ${DB_PASSWORD:-ventas}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      SESSION_SECURE_COOKIE: "true"
+      TRUSTED_PROXIES: private
       REDIS_CLIENT: phpredis
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -127,7 +137,7 @@ services:
     volumes:
       - storage_data:/var/www/html/storage
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -136,40 +146,34 @@ services:
     restart: unless-stopped
     entrypoint: ["php", "artisan", "schedule:work"]
 
-  mysql:
-    image: mysql:8.0
+  postgres:
+    image: postgres:16-alpine
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-admin_lte3}
-      MYSQL_USER: ${DB_USERNAME:-ventas}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-ventas}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      POSTGRES_DB: ${DB_DATABASE:-ventas_central}
+      POSTGRES_USER: ${DB_USERNAME:-ventas}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 20
-      start_period: 15s
+      start_period: 10s
     networks:
       - ventas
     restart: unless-stopped
 
   redis:
     image: redis:7-alpine
-    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    command: ["sh", "-c", "exec redis-server --save 60 1 --loglevel warning --requirepass \"$$REDIS_PASSWORD\""]
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -182,6 +186,6 @@ networks:
     driver: bridge
 
 volumes:
-  mysql_data:
+  postgres_data:
   storage_data:
   redis_data:

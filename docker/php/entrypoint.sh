@@ -42,11 +42,10 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   gosu "${WWWUSER}:${WWWGROUP}" php artisan migrate --force --no-interaction
 fi
 
-if [ "${RUN_SEED:-true}" = "true" ] && [ ! -f storage/app/.docker_seeded ]; then
+if [ "${RUN_SEED:-true}" = "true" ]; then
+  # Idempotente (updateOrCreate): seguro en cada arranque aunque Postgres se recree
+  # y storage/app/.docker_seeded siga en disco.
   gosu "${WWWUSER}:${WWWGROUP}" php artisan db:seed --force --no-interaction
-  mkdir -p storage/app
-  touch storage/app/.docker_seeded
-  chown "${WWWUSER}:${WWWGROUP}" storage/app/.docker_seeded
 fi
 
 exec gosu "${WWWUSER}:${WWWGROUP}" "$@"
