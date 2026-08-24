@@ -1,0 +1,11 @@
+{
+    "preset": "laravel",
+    "exclude": [
+        "vendor",
+        "Modules",
+        "storage",
+        "bootstrap/cache",
+        "public",
+        "node_modules"
+    ]
+}

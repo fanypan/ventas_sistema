@@ -17,6 +17,10 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('subscriptions:tick')->dailyAt('07:00');
         $schedule->command('tenants:backup')->dailyAt('02:30');
+
+        if (config('observability.horizon_enabled')) {
+            $schedule->command('horizon:snapshot')->everyFiveMinutes();
+        }
     }
 
     /**

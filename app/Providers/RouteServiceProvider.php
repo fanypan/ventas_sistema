@@ -33,6 +33,10 @@ class RouteServiceProvider extends ServiceProvider
                 ->middleware('api')
                 ->group(base_path('routes/api.php'));
 
+            Route::get(config('observability.health_path', 'up'), \App\Http\Controllers\HealthController::class)
+                ->middleware('throttle:60,1')
+                ->name('health');
+
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
@@ -47,6 +51,24 @@ class RouteServiceProvider extends ServiceProvider
     {
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('platform-login', function (Request $request) {
+            if (app()->environment('testing')) {
+                return Limit::none();
+            }
+
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('tenant-login', function (Request $request) {
+            if (app()->environment('testing')) {
+                return Limit::none();
+            }
+
+            return Limit::perMinute(5)->by(
+                mb_strtolower((string) $request->input('email')).'|'.$request->ip()
+            );
         });
     }
 }
