@@ -31,9 +31,10 @@ class SettingController extends Controller
         }
         try {
             Setting::create($request->all());
-            Alert::success('Notificación', 'Ajuste creado exitosamente.')->toToast()->toHtml();
+            Alert::success('Listo', 'Ajuste creado.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Error', 'No se pudo crear el ajuste: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo crear el ajuste', 'Revisá los datos e intentá de nuevo.')->toToast();
         }
         return back();
     }
@@ -63,9 +64,10 @@ class SettingController extends Controller
             for ($i = 0; $i < count($request->key); $i++) { 
                 Setting::where(['key' => $request->key[$i]])->update(['value' => $request->value[$i]]);
             }
-            Alert::success('Notificación', 'Configuración guardada correctamente.')->toToast()->toHtml();
+            Alert::success('Listo', 'Configuración guardada.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Error', 'No se pudieron guardar los ajustes: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudieron guardar los ajustes', 'Intentá de nuevo.')->toToast();
         }
         return back();
     }
@@ -76,9 +78,10 @@ class SettingController extends Controller
             $setting = Setting::find($request->id);
             $name = $setting->name;
             $setting->delete();
-            Alert::success('Notificación', 'El ajuste ' . $name . ' fue eliminado.')->toToast()->toHtml();
+            Alert::success('Listo', 'El ajuste '.$name.' fue eliminado.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Error', 'No se pudo eliminar el ajuste: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo eliminar el ajuste', 'Intentá de nuevo.')->toToast();
         }
         return back();
     }

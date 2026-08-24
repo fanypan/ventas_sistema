@@ -112,7 +112,7 @@
             $(document).on("click", '{{ implode(',', $setid) }}', function(event) {
                 event.preventDefault();
                 inputId = '#'+event.target.id;
-                window.open('/file-manager/fm-button', 'fm', 'width=800,height=600');
+                window.open('{{ route('fm.fm-button') }}', 'fm', 'width=800,height=600');
             });
         });
     </script>

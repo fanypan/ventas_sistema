@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleController extends Controller
 {
+    private const PROTECTED_ROLE = 'superadmin';
+
     public function index()
     {
         $x['title']         = 'Role';
@@ -31,6 +33,9 @@ class RoleController extends Controller
             return back()->withErrors($validator)
                 ->withInput();
         }
+        if ($this->isProtectedRoleName($request->name)) {
+            abort(403, 'No se puede crear el rol superadmin.');
+        }
         DB::beginTransaction();
         try {
             $role = Role::create([
@@ -39,10 +44,11 @@ class RoleController extends Controller
             ]);
             $role->givePermissionTo($request->permissions);
             DB::commit();
-            Alert::success('Notificación', 'Rol <b>' . $role->name . '</b> creado correctamente')->toToast()->toHtml();
+            Alert::success('Listo', 'Rol '.$role->name.' creado.')->toToast();
         } catch (\Throwable $th) {
             DB::rollback();
-            Alert::error('Notificación', 'Error al crear rol <b>' . $role->name . '</b>: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo crear el rol', 'Revisá los datos e intentá de nuevo.')->toToast();
         }
         return back();
     }
@@ -67,32 +73,56 @@ class RoleController extends Controller
             return back()->withErrors($validator)
                 ->withInput();
         }
+        $role = Role::find($request->id);
+        $this->denyProtectedRole($role);
+        if ($this->isProtectedRoleName($request->name)) {
+            abort(403, 'No se puede renombrar un rol a superadmin.');
+        }
         DB::beginTransaction();
         try {
-            $role = Role::find($request->id);
             $role->update([
                 'name'          => $request->name,
                 'guard_name'    => $request->guard_name,
             ]);
             $role->syncPermissions($request->permissions);
             DB::commit();
-            Alert::success('Notificación', 'Rol <b>' . $role->name . '</b> guardado correctamente')->toToast()->toHtml();
+            Alert::success('Listo', 'Rol '.$role->name.' guardado.')->toToast();
         } catch (\Throwable $th) {
             DB::rollback();
-            Alert::error('Notificación', 'Error al guardar rol <b>' . $role->name . '</b>: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo guardar el rol', 'Revisá los datos e intentá de nuevo.')->toToast();
         }
         return back();
     }
 
     public function destroy(Request $request)
     {
+        $role = Role::find($request->id);
+        $this->denyProtectedRole($role);
+
         try {
-            $role = Role::find($request->id);
             $role->delete();
-            Alert::success('Notificación', 'Rol <b>' . $role->name . '</b> eliminado')->toToast()->toHtml();
+            Alert::success('Listo', 'Rol '.$role->name.' eliminado.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Notificación', 'Error al eliminar rol <b>' . $role->name . '</b>: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo eliminar el rol', 'Intentá de nuevo.')->toToast();
         }
         return back();
+    }
+
+    private function isProtectedRoleName(?string $name): bool
+    {
+        return strtolower(trim((string) $name)) === self::PROTECTED_ROLE;
+    }
+
+    private function denyProtectedRole(?Role $role): void
+    {
+        if (! $role) {
+            abort(404);
+        }
+
+        if ($this->isProtectedRoleName($role->name)) {
+            abort(403, 'No se puede modificar el rol superadmin.');
+        }
     }
 }

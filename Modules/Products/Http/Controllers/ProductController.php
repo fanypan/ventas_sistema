@@ -13,6 +13,8 @@ class ProductController extends Controller
 {
     use AuthorizesCrud;
 
+    private const IMAGE_RULES = 'nullable|file|mimes:jpeg,png,jpg,gif,webp|max:2048';
+
     public function __construct()
     {
         $this->authorizeCrud('product', [
@@ -100,7 +102,7 @@ class ProductController extends Controller
             'stock' => 'integer|min:0',
             'model_name' => 'nullable|string|max:100',
             'warranty_months' => 'nullable|integer|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => self::IMAGE_RULES,
         ]);
 
         $this->ensureDefaultProductImage();
@@ -174,7 +176,7 @@ class ProductController extends Controller
             'model_name' => 'nullable|string|max:100',
             'warranty_months' => 'nullable|integer|min:0',
             'status' => 'required|integer|in:0,1',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => self::IMAGE_RULES,
         ]);
 
         if ($request->hasFile('image')) {

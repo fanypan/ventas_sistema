@@ -6,6 +6,8 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
+use App\Rules\RucParaguay;
+use App\Support\RucParaguay as RucParaguaySupport;
 
 class CustomerController extends Controller
 {
@@ -34,14 +36,14 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nit' => 'nullable|string|unique:customers,nit',
+            'nit' => ['nullable', new RucParaguay(), 'unique:customers,nit'],
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
         ]);
 
         \Modules\Customers\Entities\Customer::create([
-            'nit' => $request->nit,
+            'nit' => RucParaguaySupport::format($request->nit),
             'name' => $request->name,
             'phone' => $request->phone,
             'address' => $request->address,

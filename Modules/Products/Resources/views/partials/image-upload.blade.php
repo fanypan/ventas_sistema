@@ -38,14 +38,14 @@
     </div>
 </div>
 
-<input type="file" class="d-none @error('image') is-invalid @enderror" id="image" name="image" accept="image/*">
+<input type="file" class="d-none @error('image') is-invalid @enderror" id="image" name="image" accept="image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp">
 <label for="image" class="btn btn-outline-secondary btn-sm btn-block mb-0">{{ $inputLabel }}</label>
 
 @error('image')
     <small class="text-danger mt-2 d-block">{{ $message }}</small>
 @enderror
 
-<p class="text-muted small mt-2 mb-0">Formatos sugeridos: JPG, PNG.<br>Peso máximo: 2MB.</p>
+<p class="text-muted small mt-2 mb-0">Formatos: JPG, PNG, GIF o WebP.<br>Peso máximo: 2 MB. No se aceptan SVG.</p>
 
 @once
 @push('script')
@@ -60,8 +60,14 @@ $(document).ready(function() {
         $hint.hide();
     }
 
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+    function isAllowedImage(file) {
+        return file && allowedTypes.indexOf(file.type) !== -1;
+    }
+
     function previewImage(file) {
-        if (!file || !file.type.startsWith('image/')) {
+        if (!isAllowedImage(file)) {
             return;
         }
 
@@ -74,6 +80,10 @@ $(document).ready(function() {
     }
 
     function assignFile(file) {
+        if (!isAllowedImage(file)) {
+            return;
+        }
+
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
         $input[0].files = dataTransfer.files;

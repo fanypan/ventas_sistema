@@ -58,6 +58,7 @@
                                                 <td>{{ $i->updated_at }}</td>
                                             @canany(['update user', 'delete user'])
                                                     <td>
+                                                        @unless ($i->hasRole('superadmin'))
                                                         <div class="btn-group">
                                                             @can('update user')
                                                                 <button class="btn btn-sm btn-primary btn-edit" data-id="{{ $i->id }}"><i class="fas fa-pencil-alt"></i></button>
@@ -66,6 +67,7 @@
                                                                 <button class="btn btn-sm btn-danger btn-delete" data-id="{{ $i->id }}" data-name="{{ $i->name }}"><i class="fas fa-trash"></i></button>
                                                             @endcan
                                                         </div>
+                                                        @endunless
                                                     </td>
                                                 @endcanany
                                             </tr>
@@ -157,20 +159,20 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <label>Password</label>
+                            <label>Contraseña</label>
                             <div class="input-group">
-                                <input type="password" class="form-control @error('password') is-invalid @enderror" placeholder="Contraseña" name="password" value="{{ old('password') }}">
+                                <input type="password" class="form-control @error('password') is-invalid @enderror" placeholder="Mínimo 8 caracteres" name="password" value="{{ old('password') }}" minlength="8" autocomplete="new-password">
                                 @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="input-group">
-                            <label>Role</label>
+                            <label>Rol</label>
                             <div class="input-group">
-                                <select class="form-control" name="role">
+                                <select class="form-control" name="role" required>
                                     @foreach ($role as $i)
-                                        <option value="{{ $i->name }}">{{ $i->name }}</option>
+                                        <option value="{{ $i->name }}" @selected(old('role') === $i->name)>{{ $i->name === 'admin' ? 'Administrador' : ($i->name === 'operator' ? 'Operador' : $i->name) }}</option>
                                     @endforeach
                                 </select>
                                 @error('role')
@@ -222,20 +224,20 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <label>Password</label>
+                            <label>Contraseña</label>
                             <div class="input-group">
-                                <input type="password" class="form-control @error('password') is-invalid @enderror" placeholder="Password" name="password" value="{{ old('password') }}">
+                                <input type="password" class="form-control @error('password') is-invalid @enderror" placeholder="Dejá vacío para no cambiar" name="password" value="{{ old('password') }}" minlength="8" autocomplete="new-password">
                                 @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="input-group">
-                            <label>Role</label>
+                            <label>Rol</label>
                             <div class="input-group">
-                                <select class="form-control" name="role" id="role">
+                                <select class="form-control" name="role" id="role" required>
                                     @foreach ($role as $i)
-                                        <option value="{{ $i->name }}">{{ $i->name }}</option>
+                                        <option value="{{ $i->name }}">{{ $i->name === 'admin' ? 'Administrador' : ($i->name === 'operator' ? 'Operador' : $i->name) }}</option>
                                     @endforeach
                                 </select>
                                 @error('role')

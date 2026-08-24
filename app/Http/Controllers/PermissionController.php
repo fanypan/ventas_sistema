@@ -33,9 +33,10 @@ class PermissionController extends Controller
                 'name'          => $request->name,
                 'guard_name'    => $request->guard_name,
             ]);
-            Alert::success('Notificación', 'Data <b>' . $permission->name . '</b> creado correctamente')->toToast()->toHtml();
+            Alert::success('Listo', 'Permiso '.$permission->name.' creado.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Notificación', 'Data <b>' . $permission->name . '</b> falló al crear: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo crear el permiso', 'Revisá los datos e intentá de nuevo.')->toToast();
         }
         return back();
     }
@@ -65,9 +66,10 @@ class PermissionController extends Controller
                 'name'          => $request->name,
                 'guard_name'    => $request->guard_name,
             ]);
-            Alert::success('Notificación', 'Data <b>' . $permission->name . '</b> guardado correctamente')->toToast()->toHtml();
+            Alert::success('Listo', 'Permiso '.$permission->name.' guardado.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Notificación', 'Data <b>' . $permission->name . '</b> falló al guardar: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo guardar el permiso', 'Revisá los datos e intentá de nuevo.')->toToast();
         }
         return back();
     }
@@ -77,9 +79,10 @@ class PermissionController extends Controller
         try {
             $permission = Permission::find($request->id);
             $permission->delete();
-            Alert::success('Notificación', 'Data <b>' . $permission->name . '</b> eliminado')->toToast()->toHtml();
+            Alert::success('Listo', 'Permiso '.$permission->name.' eliminado.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Notificación', 'Data <b>' . $permission->name . '</b> falló al eliminar: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo eliminar el permiso', 'Intentá de nuevo.')->toToast();
         }
         return back();
     }
@@ -87,9 +90,10 @@ class PermissionController extends Controller
     {
         try {
             $this->initModules();
-            Alert::success('Notificación', 'Permiso actualizado correctamente')->toToast()->toHtml();
+            Alert::success('Listo', 'Permisos actualizados.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Notificación', 'Error al actualizar permiso: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudieron actualizar los permisos', 'Intentá de nuevo.')->toToast();
         }
         return back();
     }

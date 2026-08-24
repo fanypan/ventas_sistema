@@ -101,8 +101,10 @@ class PurchaseController extends Controller
                 'purchase_id' => $purchase->id,
                 'total' => (int) $purchase->total,
             ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json(['error' => 'No se pudo guardar la compra. Intentá de nuevo.'], 500);
         }
     }
 
@@ -138,8 +140,10 @@ class PurchaseController extends Controller
             });
 
             return back()->with('success', 'Compra anulada correctamente. Stock descontado.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Error al anular compra: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', 'No se pudo anular la compra. Intentá de nuevo.');
         }
     }
 

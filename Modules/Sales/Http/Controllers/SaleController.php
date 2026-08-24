@@ -187,9 +187,11 @@ class SaleController extends Controller
 
             \Illuminate\Support\Facades\DB::commit();
             return back()->with('success', 'Venta anulada correctamente. Stock restablecido.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Illuminate\Support\Facades\DB::rollBack();
-            return back()->with('error', 'Error al anular venta: ' . $e->getMessage());
+            report($e);
+
+            return back()->with('error', 'No se pudo anular la venta. Intentá de nuevo.');
         }
     }
 }

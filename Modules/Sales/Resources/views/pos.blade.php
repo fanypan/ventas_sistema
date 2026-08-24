@@ -755,6 +755,10 @@
 
 @push('script')
 <script>
+function escapeHtml(str) {
+    return $('<div>').text(str == null ? '' : String(str)).html().replace(/"/g, '&quot;');
+}
+
 // Validaciones y Lógica AJAX heredada de functions.js del sistema Venta original
 $(document).ready(function() {
     let isProcessingSale = false;
@@ -1338,10 +1342,10 @@ $(document).ready(function() {
             if(res.length > 0) {
                 res.forEach(c => {
                     html += `<tr>
-                        <td class="align-middle">${c.nit || '-'}</td>
-                        <td class="align-middle font-weight-bold text-dark">${c.name}</td>
+                        <td class="align-middle">${escapeHtml(c.nit || '-')}</td>
+                        <td class="align-middle font-weight-bold text-dark">${escapeHtml(c.name)}</td>
                         <td class="text-right">
-                            <button type="button" class="btn btn-sm btn-success btn-select-customer rounded-pill px-3 shadow-sm" data-id="${c.id}" data-name="${c.name}" data-nit="${c.nit}">
+                            <button type="button" class="btn btn-sm btn-success btn-select-customer rounded-pill px-3 shadow-sm" data-id="${c.id}" data-name="${escapeHtml(c.name)}" data-nit="${escapeHtml(c.nit)}">
                                 <i class="fas fa-check mr-1"></i> Seleccionar
                             </button>
                         </td>
@@ -1477,9 +1481,10 @@ function updateCartTable(res) {
         let finalTotal = baseTotal - discount + interest;
         adjustedSubtotal += finalTotal;
 
+        const productName = escapeHtml(d.product ? d.product.description : '');
         html += `<tr>
             <td class="align-middle">
-                <span class="cart-product-name" title="${d.product.description}">${d.product.description}</span>
+                <span class="cart-product-name" title="${productName}">${productName}</span>
                 <div class="cart-product-meta">
                     <small class="text-primary">Gs. ${Math.round(d.price).toLocaleString('de-DE')}</small>
                     ${discount > 0 ? `<small class="text-danger" title="Descuento">-${Math.round(discount).toLocaleString('de-DE')}</small>` : ''}
@@ -1493,7 +1498,7 @@ function updateCartTable(res) {
             <td class="align-middle text-center">
                 <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-outline-info btn_edit_item"
-                            data-id="${d.id}" data-name="${d.product.description}"
+                            data-id="${d.id}" data-name="${productName}"
                             data-qty="${d.quantity}" data-discount="${discount}" data-interest="${interest}"
                             title="Ajustar">
                         <i class="fas fa-edit"></i>
@@ -1524,11 +1529,11 @@ function loadCustomerListTable() {
         let html = '';
         data.forEach(c => {
             html += `<tr>
-                <td class="align-middle font-weight-bold">${c.nit}</td>
-                <td class="align-middle">${c.name}</td>
+                <td class="align-middle font-weight-bold">${escapeHtml(c.nit)}</td>
+                <td class="align-middle">${escapeHtml(c.name)}</td>
                 <td class="text-right">
                     <button class="btn btn-sm btn-primary btn_select_customer_from_list" 
-                        data-id="${c.id}" data-nit="${c.nit}" data-name="${c.name}">
+                        data-id="${c.id}" data-nit="${escapeHtml(c.nit)}" data-name="${escapeHtml(c.name)}">
                         <i class="fas fa-check mr-1"></i> Seleccionar
                     </button>
                 </td>

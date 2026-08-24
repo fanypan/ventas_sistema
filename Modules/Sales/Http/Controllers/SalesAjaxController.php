@@ -4,6 +4,8 @@ namespace Modules\Sales\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use App\Rules\RucParaguay;
+use App\Support\RucParaguay as RucParaguaySupport;
 use Modules\Products\Entities\Product;
 use Modules\Customers\Entities\Customer;
 use Modules\Sales\Entities\TemporaryDetail;
@@ -38,9 +40,8 @@ class SalesAjaxController extends Controller
 
     public function getCart()
     {
-        $token = md5(auth()->id());
         $details = TemporaryDetail::with('product')
-            ->where('user_token', $token)
+            ->where('user_token', $this->cartToken())
             ->get();
 
         $sub_total = $details->sum(function($d) {
@@ -55,7 +56,7 @@ class SalesAjaxController extends Controller
 
     public function addToCart(Request $request)
     {
-        $token = md5(auth()->id());
+        $token = $this->cartToken();
         $product_id = $request->product_id;
         $quantity = $request->quantity;
 
@@ -99,8 +100,7 @@ class SalesAjaxController extends Controller
 
     public function removeFromCart(Request $request)
     {
-        $id = $request->id;
-        $detail = TemporaryDetail::find($id);
+        $detail = $this->cartLine($request->id);
         if ($detail) {
             $product = Product::find($detail->product_id);
             if ($product) {
@@ -108,13 +108,13 @@ class SalesAjaxController extends Controller
             }
             $detail->delete();
         }
+
         return $this->getCart();
     }
 
     public function clearCart()
     {
-        $token = md5(auth()->id());
-        $details = TemporaryDetail::where('user_token', $token)->get();
+        $details = TemporaryDetail::where('user_token', $this->cartToken())->get();
         foreach ($details as $detail) {
             $product = Product::find($detail->product_id);
             if ($product) {
@@ -150,12 +150,12 @@ class SalesAjaxController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'nit'  => 'required|unique:customers,nit',
+            'nit'  => ['required', new RucParaguay(), 'unique:customers,nit'],
         ]);
 
         $customer = Customer::create([
             'name'    => $request->name,
-            'nit'     => $request->nit,
+            'nit'     => RucParaguaySupport::format($request->nit),
             'phone'   => $request->phone,
             'address' => $request->address,
             'user_id' => auth()->id(),
@@ -172,7 +172,7 @@ class SalesAjaxController extends Controller
         $discount = parse_currency($request->discount ?? 0);
         $interest = parse_currency($request->interest ?? 0);
 
-        $tempDetail = TemporaryDetail::find($id);
+        $tempDetail = $this->cartLine($id);
         if ($tempDetail) {
             $product = Product::find($tempDetail->product_id);
             if ($product) {
@@ -198,7 +198,7 @@ class SalesAjaxController extends Controller
 
     public function processSale(Request $request)
     {
-        $token = md5(auth()->id());
+        $token = $this->cartToken();
         $details = TemporaryDetail::where('user_token', $token)->get();
 
         if ($details->isEmpty()) {
@@ -333,7 +333,25 @@ class SalesAjaxController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
+            report($e);
+
+            return response()->json(['error' => 'No se pudo cerrar la venta. Intentá de nuevo.'], 500);
         }
+    }
+
+    private function cartToken(): string
+    {
+        return md5((string) auth()->id());
+    }
+
+    private function cartLine(mixed $id): ?TemporaryDetail
+    {
+        if ($id === null || $id === '') {
+            return null;
+        }
+
+        return TemporaryDetail::where('user_token', $this->cartToken())
+            ->where('id', $id)
+            ->first();
     }
 }

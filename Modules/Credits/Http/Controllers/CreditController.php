@@ -380,17 +380,19 @@ class CreditController extends Controller
             }
             return back()->with('success', '¡Pago registrado con éxito!');
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Illuminate\Support\Facades\DB::rollBack();
-            \Log::error("ABONO: Error - " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            
+            report($e);
+            \Log::error('ABONO: Error - '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error al registrar pago: ' . $e->getMessage(),
+                    'message' => 'No se pudo registrar el pago. Intentá de nuevo.',
                 ], 422);
             }
-            return back()->with('error', 'Error al registrar pago: ' . $e->getMessage());
+
+            return back()->with('error', 'No se pudo registrar el pago. Intentá de nuevo.');
         }
     }
 

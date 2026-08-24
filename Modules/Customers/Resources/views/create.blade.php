@@ -32,7 +32,8 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label for="nit">NIT / CI / RUC</label>
-                                <input type="text" class="form-control @error('nit') is-invalid @enderror" id="nit" name="nit" placeholder="Opcional" value="{{ old('nit') }}">
+                                <input type="text" class="form-control @error('nit') is-invalid @enderror" id="nit" name="nit" placeholder="1234567-8 o 0" value="{{ old('nit') }}">
+                                <small class="text-muted">CI/RUC con dígito verificador. Usá <code>0</code> para consumidor final.</small>
                                 @error('nit')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
