@@ -4,7 +4,7 @@ import json
 import sys
 
 CONTEXT = """
-Arnés AranduTech Ventas: Laravel 9 SaaS, DB por tenant (stancl), staff en /plataforma, comercio en {slug}.localhost.
+Arnés AranduTech Ventas: Laravel 13 SaaS, DB por tenant (stancl), staff en /plataforma, comercio en {slug}.localhost.
 Leé docs/SAAS.md si tocás onboarding, colas o DNS. Producto: PRODUCT.md. Visual: DESIGN.md (índigo en POS y plataforma; teal solo en landing).
 Skills del repo: saas-tenancy, onboard-cliente, modulo-negocio, facturacion-electronica.
 No mezcles migraciones centrales con tablas de POS. No hagas migrate:fresh ni revivas _archive/Sistemaventas. No rearmar menús del POS.

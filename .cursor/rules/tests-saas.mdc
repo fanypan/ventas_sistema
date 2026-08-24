@@ -9,7 +9,7 @@ alwaysApply: false
 - Central: `LandingAndPlatformTest` pega a `http://localhost/`.
 - Comercio: extender `Tests\TenantTestCase`; HTTP a `http://demo.localhost/...`.
 - `QUEUE_CONNECTION=sync` en phpunit para que el alta de tenant sea inline.
-- CSRF: `withoutMiddleware(VerifyCsrfToken::class)` en POST.
+- CSRF: `withoutMiddleware(PreventRequestForgery::class)` en POST.
 - `actingAs($user, 'platform')` para staff; `actingAs($tenantUser)` para comercio.
 - No asumir MySQL/Postgres en tests: phpunit usa sqlite `:memory:` + archivos `database/tenant*`. Dev y prod usan **pgsql**.
 - Si agregás migraciones tenant con SQL no portable (`after()` es ignorado; `enum()` puede fallar), preferí DDL portable o salteá esa aserción.

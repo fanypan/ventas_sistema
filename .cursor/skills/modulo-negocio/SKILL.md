@@ -18,7 +18,7 @@ php artisan module:build
 El stub (`stubs/module-generator`) ya sale con `TenantMiddleware::web()` y **sin** `loadMigrationsFrom`. Verificá:
 
 1. `Modules/{Name}/Providers/RouteServiceProvider.php` usa `TenantMiddleware::web()`.
-2. El ServiceProvider del módulo **no** llama `loadMigrationsFrom(...)`.
+2. El ServiceProvider del módulo **no** llama `loadMigrationsFrom(...)`. `config/modules.php` tiene `auto-discover.migrations` en `false`.
 3. Migraciones en `Modules/{Name}/Database/Migrations` (stancl las corre por tenant).
 4. `module.json`: `menus` + `permissions` en **singular**. Recargar permisos o incluirlos en `BusinessPermissionSeeder`.
 5. Roles: `admin` ve el CRUD; `operator` solo lo que va a caja. No crear `superadmin` de tenant.

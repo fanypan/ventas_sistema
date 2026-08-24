@@ -6,12 +6,12 @@ alwaysApply: false
 
 # Módulos de negocio
 
-Cada módulo vive en `Modules/{Name}` (nwidart v9). El comercio los usa en su DB.
+Cada módulo vive en `Modules/{Name}` (nwidart v13). El comercio los usa en su DB.
 
 Al crear o tocar un módulo:
 
 1. Rutas con `TenantMiddleware::web()`, no `web` suelto.
-2. No llamar `loadMigrationsFrom` en el ServiceProvider.
+2. No llamar `loadMigrationsFrom` en el ServiceProvider. `config/modules.php` tiene `auto-discover.migrations` en `false` para que `php artisan migrate` no toque la DB central.
 3. Permisos CRUD `read/create/update/delete {recurso}` + seed en `BusinessPermissionSeeder`.
 4. Conservar menús/rutas actuales; pulir UI sin rearmar navegación. Tokens y reglas: [DESIGN.md](../../DESIGN.md).
 5. Voz rioplatense en textos nuevos (“Ingresá”, “Guardá”).

@@ -1,6 +1,6 @@
 # AranduTech Ventas
 
-POS/ERP SaaS para comercios en Paraguay (Laravel 9, AdminLTE). **Una PostgreSQL por cliente**, acceso por subdominio, onboarding sales-assisted (sin signup público).
+POS/ERP SaaS para comercios en Paraguay (Laravel 13, AdminLTE). **Una PostgreSQL por cliente**, acceso por subdominio, onboarding sales-assisted (sin signup público).
 
 - Operación y dominios: [docs/SAAS.md](docs/SAAS.md)
 - Producto: [PRODUCT.md](PRODUCT.md)
@@ -10,7 +10,7 @@ POS/ERP SaaS para comercios en Paraguay (Laravel 9, AdminLTE). **Una PostgreSQL 
 
 **Con Docker (recomendado):** [Docker Engine](https://docs.docker.com/engine/install/) + plugin Compose v2, o [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows / Linux).
 
-**Sin Docker:** PHP 8.2, Composer, PostgreSQL 16, Redis, extensiones `pdo_pgsql`, `gd`, `zip`, `bcmath`, `intl`, `exif`. Redis es **requerido** para colas (`QUEUE_CONNECTION=redis`): el alta de un comercio corre en background.
+**Sin Docker:** PHP 8.3, Composer, PostgreSQL 16, Redis, extensiones `pdo_pgsql`, `gd`, `zip`, `bcmath`, `intl`, `exif`. Redis es **requerido** para colas (`QUEUE_CONNECTION=redis`): el alta de un comercio corre en background.
 
 ## Instalación
 
@@ -87,7 +87,7 @@ Si `docker compose` no existe, usá `docker-compose` (guión) o actualizá Docke
 
 ```bash
 sudo apt update
-sudo apt install php8.2 php8.2-cli php8.2-pgsql php8.2-gd php8.2-zip php8.2-bcmath php8.2-intl php8.2-xml php8.2-mbstring php8.2-curl php8.2-redis unzip postgresql postgresql-client redis-server
+sudo apt install php8.3 php8.3-cli php8.3-pgsql php8.3-gd php8.3-zip php8.3-bcmath php8.3-intl php8.3-xml php8.3-mbstring php8.3-curl php8.3-redis unzip postgresql postgresql-client redis-server
 # Composer: https://getcomposer.org/download/
 ```
 
@@ -158,7 +158,7 @@ En otra ventana: `php artisan queue:work redis`.
 Si `php` no se reconoce, usá la ruta de Laragon/XAMPP, por ejemplo:
 
 ```powershell
-C:\laragon\bin\php\php-8.2.0-Win32-vs16-x64\php.exe artisan serve
+C:\laragon\bin\php\php-8.3.0-Win32-vs16-x64\php.exe artisan serve
 ```
 
 ---
@@ -203,7 +203,7 @@ Healthcheck de la app: `GET /up`.
 
 ## Puesta en producción
 
-`docker-compose.yml` es **solo desarrollo** (`php artisan serve`). En producción usá **`docker-compose.prod.yml`**: Nginx + PHP-FPM 8.2 + PostgreSQL 16 + Redis + **worker de cola** + **scheduler**. El código va **dentro de la imagen** (no se monta el disco). Postgres y Redis **no** se publican al host.
+`docker-compose.yml` es **solo desarrollo** (`php artisan serve`). En producción usá **`docker-compose.prod.yml`**: Nginx + PHP-FPM 8.3 + PostgreSQL 16 + Redis + **worker de cola** + **scheduler**. El código va **dentro de la imagen** (no se monta el disco). Postgres y Redis **no** se publican al host.
 
 Proyecto Compose aparte (`name: ventas_sistema_prod`): no pisa volúmenes ni red del stack local.
 
@@ -236,7 +236,7 @@ php artisan key:generate --show
 Si todavía no hay `vendor`, desde Docker:
 
 ```bash
-docker run --rm php:8.2-cli php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"
+docker run --rm php:8.3-cli php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"
 ```
 
 Pegá el resultado en `APP_KEY`. Variables importantes:

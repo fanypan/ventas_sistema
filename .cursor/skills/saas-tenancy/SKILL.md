@@ -16,7 +16,7 @@ description: >-
 2. Plataforma → `routes/web.php` + migraciones en `database/migrations/` (sin `tenant/`).
 3. Comercio → `routes/tenant.php` o módulo con `TenantMiddleware::web()`.
 4. DDL del POS → `database/migrations/tenant/` o `Modules/*/Database/Migrations`.
-5. Nunca `loadMigrationsFrom` en el ServiceProvider del módulo.
+5. Nunca `loadMigrationsFrom` en el ServiceProvider del módulo. `auto-discover.migrations` en `config/modules.php` tiene que quedar en `false`.
 
 ## Alta de tenant
 

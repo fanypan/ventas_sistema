@@ -1,6 +1,6 @@
 # Agente — AranduTech Ventas
 
-SaaS sales-assisted de POS para Paraguay (Laravel 9, una PostgreSQL por cliente, subdominio).
+SaaS sales-assisted de POS para Paraguay (Laravel 13, una PostgreSQL por cliente, subdominio).
 
 ## Antes de codear
 
