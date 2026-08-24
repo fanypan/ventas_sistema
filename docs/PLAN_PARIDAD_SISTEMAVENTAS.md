@@ -29,6 +29,6 @@ No migrar `debug_*.php`, `test_*.php`, `diag_*.php` ni copias (`- copia.php`).
 - Ajuste de stock movido al módulo `StockAdjustments`
 - `docker-compose.yml` documentado como solo local (`php artisan serve`)
 - Botones de alta/edición/baja en listados con `@can` (create/update/delete)
-- Compose de producción: `docker-compose.prod.yml` (nginx + php-fpm + MySQL + Redis)
+- Compose de producción: `docker-compose.prod.yml` (nginx + php-fpm + PostgreSQL + Redis)
 
 ---

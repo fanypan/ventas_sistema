@@ -1,39 +1,16 @@
- ## Features
-- SaaS multi-tenant (una DB por cliente, subdominio, panel de onboarding): ver [docs/SAAS.md](docs/SAAS.md)
-- Login Page
-    [![login.png](https://i.postimg.cc/vmCY7mwC/login.png)](https://postimg.cc/67Lxtt3h)
-- User Management
-    [![user-management.png](https://i.postimg.cc/sDfrhWZv/user-management.png)](https://postimg.cc/LhWwdnDp)
-- Role Management
-    [![role-management.png](https://i.postimg.cc/tCvLnMjM/role-management.png)](https://postimg.cc/w7JWSF3X)
-- Permission Management
-    [![permission-management.png](https://i.postimg.cc/gJK7zMs4/permission-management.png)](https://postimg.cc/YGhR8zJm)
-- Dynamic website settings
-    [![website-setting.png](https://i.postimg.cc/MTzsF7wB/website-setting.png)](https://postimg.cc/zLPSLRVD)
-- View installed module
-    [![module-view.png](https://i.postimg.cc/JzJP764J/module-view.png)](https://postimg.cc/ZWbrVLNK)
-- File manager
-    [![file-manager.png](https://i.postimg.cc/mDdSpK8x/file-manager.png)](https://postimg.cc/FdLc7WMG)
-- File picker
-    [![file-picker.png](https://i.postimg.cc/Fz7VMGBY/file-picker.png)](https://postimg.cc/n9fm7KZx)
+# AranduTech Ventas
 
-## Packages
-- [Admin LTE 3 Template](https://github.com/ColorlibHQ/AdminLTE)
-- Laravel UI (Bootstrap)
-- Laravel Auth
-- [Google recaptcha](https://laravel-recaptcha-docs.biscolab.com/docs/intro)
-- [Laravel Debugbar](https://github.com/barryvdh/laravel-debugbar)
-- [Spatie](https://spatie.be/docs/laravel-permission/v5/introduction)
-- [Sweet Alert](https://github.com/realrashid/sweet-alert)
-- [File Manager](https://github.com/alexusmai/laravel-file-manager)
-- [Laravel Module](https://nwidart.com/laravel-modules/v6/introduction)
-- [Laravel Module Generator](https://github.com/dcblogdev/laravel-module-generator)
+POS/ERP SaaS para comercios en Paraguay (Laravel 9, AdminLTE). **Una PostgreSQL por cliente**, acceso por subdominio, onboarding sales-assisted (sin signup público).
+
+- Operación y dominios: [docs/SAAS.md](docs/SAAS.md)
+- Producto: [PRODUCT.md](PRODUCT.md)
+- Visual: [DESIGN.md](DESIGN.md) (índigo en POS y plataforma; teal solo en landing)
 
 ## Requisitos
 
 **Con Docker (recomendado):** [Docker Engine](https://docs.docker.com/engine/install/) + plugin Compose v2, o [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows / Linux).
 
-**Sin Docker:** PHP 8.2, Composer, MySQL 8, extensiones `pdo_mysql`, `gd`, `zip`, `bcmath`, `intl`, `exif`. Redis es **requerido** para colas del SaaS (`QUEUE_CONNECTION=redis`).
+**Sin Docker:** PHP 8.2, Composer, PostgreSQL 16, Redis, extensiones `pdo_pgsql`, `gd`, `zip`, `bcmath`, `intl`, `exif`. Redis es **requerido** para colas (`QUEUE_CONNECTION=redis`): el alta de un comercio corre en background.
 
 ## Instalación
 
@@ -54,7 +31,7 @@ En Windows (PowerShell o Git Bash) el `cd` es el mismo. Si clonás con Git GUI, 
 cp .env.example .env
 ```
 
-En `.env` dejá `DB_HOST=mysql` y el uid del host:
+En `.env` dejá `DB_HOST=postgres` y el uid del host:
 
 ```bash
 # en .env
@@ -72,15 +49,11 @@ docker compose up -d --build
 
 3. La app queda en **http://localhost:8090**  
    Mailpit (mails de prueba): **http://localhost:8025**  
-   MySQL desde el host: `127.0.0.1:3307` (usuario/clave `ventas` / `ventas`, base `admin_lte3`).
+   Postgres desde el host: `127.0.0.1:5433` (usuario/clave `ventas` / `ventas`, base `ventas_central`).
 
 La primera vez el entrypoint corre `composer install`, migraciones y seed.
 
-Si ya existía la base y no se sembraron permisos de negocio:
-
-```bash
-docker compose exec app php artisan db:seed --class=BusinessPermissionSeeder --force
-```
+El servicio `queue` tiene que estar `Up`: sin él no se termina de aprovisionar un comercio.
 
 ---
 
@@ -103,7 +76,7 @@ docker compose up -d --build
 
 3. Abrí **http://localhost:8090**
 
-Dejá `DB_HOST=mysql` en `.env` (es el nombre del servicio, no `127.0.0.1`).  
+Dejá `DB_HOST=postgres` en `.env` (es el nombre del servicio, no `127.0.0.1`).  
 `WWWUSER` / `WWWGROUP` en `1000` está bien con Docker Desktop + WSL 2.
 
 Si `docker compose` no existe, usá `docker-compose` (guión) o actualizá Docker Desktop.
@@ -114,11 +87,11 @@ Si `docker compose` no existe, usá `docker-compose` (guión) o actualizá Docke
 
 ```bash
 sudo apt update
-sudo apt install php8.2 php8.2-cli php8.2-mysql php8.2-gd php8.2-zip php8.2-bcmath php8.2-intl php8.2-xml php8.2-mbstring php8.2-curl unzip
+sudo apt install php8.2 php8.2-cli php8.2-pgsql php8.2-gd php8.2-zip php8.2-bcmath php8.2-intl php8.2-xml php8.2-mbstring php8.2-curl php8.2-redis unzip postgresql postgresql-client redis-server
 # Composer: https://getcomposer.org/download/
 ```
 
-Creá la base `admin_lte3` en MySQL. Luego:
+Creá la base `ventas_central` en PostgreSQL (el usuario necesita `CREATEDB` para el alta de comercios). Luego:
 
 ```bash
 cp .env.example .env
@@ -128,13 +101,18 @@ En `.env` (valores típicos en el host):
 
 ```env
 APP_URL=http://127.0.0.1:8000
+DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=admin_lte3
-DB_USERNAME=root
+DB_PORT=5432
+DB_DATABASE=ventas_central
+DB_USERNAME=ventas
 DB_PASSWORD=
 REDIS_HOST=127.0.0.1
+QUEUE_CONNECTION=redis
 MAIL_MAILER=log
+CENTRAL_DOMAINS=localhost,127.0.0.1
+TENANT_BASE_DOMAIN=localhost
+PLATFORM_PATH=plataforma
 ```
 
 ```bash
@@ -145,13 +123,19 @@ php artisan migrate --seed
 php artisan serve
 ```
 
+En otra terminal, el worker de cola:
+
+```bash
+php artisan queue:work redis --sleep=1 --tries=3
+```
+
 App: **http://127.0.0.1:8000**
 
 ---
 
 ### Windows — sin Docker
 
-Opciones habituales: [Laragon](https://laragon.org/) (PHP + MySQL + Composer) o XAMPP + [Composer](https://getcomposer.org/Composer-Setup.exe).
+Opciones habituales: [Laragon](https://laragon.org/) (PHP + PostgreSQL + Composer) o XAMPP + PostgreSQL + [Composer](https://getcomposer.org/Composer-Setup.exe). Instalá Redis (o usá Docker solo para Redis).
 
 En PowerShell, con PHP y Composer en el `PATH`:
 
@@ -159,7 +143,7 @@ En PowerShell, con PHP y Composer en el `PATH`:
 copy .env.example .env
 ```
 
-Editá `.env` igual que en Linux sin Docker (`DB_HOST=127.0.0.1`, `DB_PORT=3306`, usuario/clave de tu MySQL local).
+Editá `.env` igual que en Linux sin Docker (`DB_CONNECTION=pgsql`, `DB_HOST=127.0.0.1`, `REDIS_HOST=127.0.0.1`).
 
 ```powershell
 composer install
@@ -169,6 +153,8 @@ php artisan migrate --seed
 php artisan serve
 ```
 
+En otra ventana: `php artisan queue:work redis`.
+
 Si `php` no se reconoce, usá la ruta de Laragon/XAMPP, por ejemplo:
 
 ```powershell
@@ -177,30 +163,57 @@ C:\laragon\bin\php\php-8.2.0-Win32-vs16-x64\php.exe artisan serve
 
 ---
 
-### Usuarios de prueba (después del seed)
+### Cómo entrar (después del seed)
 
-| Rol         | Email                         | Contraseña   |
-|-------------|-------------------------------|--------------|
-| Superadmin  | superadmin@superadmin.com     | superadmin   |
-| Admin       | admin@admin.com               | admin        |
-| Operator    | operator@operator.com         | operator     |
+| Superficie | URL (Docker local) | Usuario | Contraseña |
+|---|---|---|---|
+| Landing | http://localhost:8090 | — | — |
+| **Staff** (plataforma) | http://localhost:8090/plataforma/login | `plataforma@arandutech.com` | `plataforma` |
+| POS de un comercio | http://{slug}.localhost:8090 | el mail del alta | se muestra una vez y va por mail |
+
+Los usuarios `superadmin@` / `admin@` / `operator@` **ya no se siembran** en la base central. Cada comercio nace con un `admin` (el mail del alta) y el rol `operator` listo para asignar.
 
 reCAPTCHA es opcional en local. Si lo usás: [consola reCAPTCHA v2](https://www.google.com/recaptcha/admin) y las claves `RECAPTCHA_SITE_KEY` / `RECAPTCHA_SECRET_KEY` en `.env`.
+
+`*.localhost` resuelve solo. El tenant de prueba aparece después de dar de alta un cliente en el panel staff.
+
+### Observabilidad y calidad
+
+Apagado por default. Variables en `.env` (detalle: [docs/SAAS.md](docs/SAAS.md)):
+
+```bash
+# Errores (vacío = off)
+SENTRY_LARAVEL_DSN=
+# Colas con dashboard staff
+HORIZON_ENABLED=false
+# Debug local (solo APP_ENV=local)
+TELESCOPE_ENABLED=false
+```
+
+```bash
+docker compose exec app php artisan test
+docker compose exec app vendor/bin/pint --test
+docker compose exec app vendor/bin/phpstan analyse
+docker compose --profile obs up -d   # Dozzle + Uptime Kuma
+```
+
+Healthcheck de la app: `GET /up`.
 
 ---
 
 ## Puesta en producción
 
-El archivo `docker-compose.yml` es **solo desarrollo** (`php artisan serve`). En producción usá **`docker-compose.prod.yml`**: Nginx + PHP-FPM 8.2 + MySQL 8 + Redis. El código va **dentro de la imagen** (no se monta el disco). MySQL y Redis **no** se publican al host.
+`docker-compose.yml` es **solo desarrollo** (`php artisan serve`). En producción usá **`docker-compose.prod.yml`**: Nginx + PHP-FPM 8.2 + PostgreSQL 16 + Redis + **worker de cola** + **scheduler**. El código va **dentro de la imagen** (no se monta el disco). Postgres y Redis **no** se publican al host.
 
-Proyecto Compose aparte (`ventas_sistema_prod`): no pisa volúmenes ni red del stack local.
+Proyecto Compose aparte (`name: ventas_sistema_prod`): no pisa volúmenes ni red del stack local.
 
 ### Qué tenés que tener
 
-- Un VPS **Linux** (Ubuntu 22.04/24.04) con Docker Engine + plugin Compose v2. Es el camino recomendado.
-- En **Windows** se puede con Docker Desktop, pero para un local de ventas conviene Linux (o WSL 2 en el servidor no aplica: el servidor debería ser Linux).
-- Dominio apuntando a la IP del servidor (si vas a usar HTTPS).
+- Un VPS **Linux** (Ubuntu 22.04/24.04) con Docker Engine + plugin Compose v2.
+- Dominio + DNS wildcard `*.tudominio.com` apuntando a la IP del servidor (el POS es `{slug}.tudominio.com`).
 - Un `.env` **de producción** en el servidor: no copies el `.env` de tu notebook con `APP_DEBUG=true` y claves `ventas/ventas`.
+
+Este compose sirve **HTTP en el puerto 80**. En internet poné un reverse proxy con certificado (Caddy, Nginx, Traefik o el panel del VPS) delante. Laravel ya confía en el proxy (`TrustProxies` con `*`).
 
 ### 1. Clonar en el servidor (Linux)
 
@@ -216,8 +229,6 @@ cp .env.example .env
 
 Generá `APP_KEY` **antes** de levantar. El entrypoint de producción **no arranca** si la key está vacía.
 
-En una máquina con PHP/Composer (o en el servidor si ya tenés PHP):
-
 ```bash
 php artisan key:generate --show
 ```
@@ -231,76 +242,101 @@ docker run --rm php:8.2-cli php -r "echo 'base64:'.base64_encode(random_bytes(32
 Pegá el resultado en `APP_KEY`. Variables importantes:
 
 ```env
-APP_NAME="Sistema de Ventas"
-APP_URL=https://ventas.tudominio.com
-APP_KEY=base64:...          # obligatorio
-APP_PUBLISH_PORT=80         # puerto publicado de Nginx (443 lo maneja el proxy, ver más abajo)
+APP_NAME="AranduTech Ventas"
+APP_URL=https://tudominio.com
+APP_KEY=base64:...
+APP_PUBLISH_PORT=80
 
-DB_HOST=mysql               # nombre del servicio, no 127.0.0.1
-DB_DATABASE=admin_lte3
+DB_CONNECTION=pgsql
+DB_HOST=postgres
+DB_PORT=5432
+DB_DATABASE=ventas_central
 DB_USERNAME=ventas
 DB_PASSWORD=una-clave-larga
-MYSQL_ROOT_PASSWORD=otra-clave-larga
+REDIS_PASSWORD=otra-clave-larga
+SESSION_SECURE_COOKIE=true
+
+QUEUE_CONNECTION=redis
+
+# Dominios SaaS (sin esto el POS por subdominio no arranca)
+CENTRAL_DOMAINS=tudominio.com,www.tudominio.com,admin.tudominio.com
+TENANT_BASE_DOMAIN=tudominio.com
+PLATFORM_PATH=a7k9m2p4
+PLATFORM_DOMAIN=admin.tudominio.com
 
 RUN_MIGRATIONS=true
-RUN_SEED=true               # solo el primer arranque, después false
+RUN_SEED=true
 
-MAIL_MAILER=log             # o smtp real (MAIL_HOST, MAIL_USERNAME, MAIL_PASSWORD)
+# El alta de cliente manda la clave por mail
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.tudominio.com
+MAIL_PORT=587
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@tudominio.com
 ```
 
-`docker-compose.prod.yml` **fuerza** `APP_ENV=production`, `APP_DEBUG=false`, cache/sesión en Redis y `DB_HOST=mysql`. Las claves de MySQL se leen de este `.env`.
+`docker-compose.prod.yml` **fuerza** `APP_ENV=production`, `APP_DEBUG=false`, cache/sesión/cola en Redis, `SESSION_SECURE_COOKIE=true`, `TRUSTED_PROXIES=private` y `DB_HOST=postgres`. No hay fallback `ventas` para `DB_PASSWORD`; Redis exige `REDIS_PASSWORD` (`requirepass`).
 
-**Importante:** las variables `MYSQL_*` solo se aplican la **primera** vez que se crea el volumen `mysql_data`. Si levantaste con `ventas/ventas` y después cambiás la clave en `.env`, MySQL sigue con la clave vieja. En un servidor nuevo, poné las claves definitivas **antes** del primer `up`.
+**Importante:** `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` solo se aplican la **primera** vez que se crea el volumen de Postgres. En un servidor nuevo, poné las claves definitivas **antes** del primer `up`.
+
+`PLATFORM_PATH=plataforma` es solo para local. En internet usá un prefijo opaco: el staff entra por `https://admin.tudominio.com/{PLATFORM_PATH}/login` (bookmark interno; no hay link en la landing).
 
 ### 3. Primer arranque
-
-**Linux:**
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d --build
 docker compose -f docker-compose.prod.yml ps
-docker compose -f docker-compose.prod.yml logs -f php nginx
+docker compose -f docker-compose.prod.yml logs -f php nginx queue scheduler
 ```
 
-**Windows (PowerShell, Docker Desktop):**
+Cuando `php` esté healthy, Nginx responde en `http://SERVIDOR/` (puerto `APP_PUBLISH_PORT`, por defecto 80). Confirmá que `queue` y `scheduler` estén `Up`:
 
-```powershell
-copy .env.example .env
-# editá .env (APP_KEY, APP_URL, DB_PASSWORD, MYSQL_ROOT_PASSWORD)
-docker compose -f docker-compose.prod.yml up -d --build
-```
+- `queue` — alta de cliente y jobs de tenancy
+- `scheduler` — `subscriptions:tick` (07:00) y `tenants:backup` (02:30)
 
-Cuando `php` esté healthy, Nginx responde en `http://SERVIDOR/` (puerto `APP_PUBLISH_PORT`, por defecto 80).
+Si `RUN_SEED=true` en ese primer arranque, definí `PLATFORM_ADMIN_PASSWORD` (en production el seeder no arranca sin eso). En local, si está vacío, queda `plataforma@arandutech.com` / `plataforma`. En el próximo reciclo poné `RUN_SEED=false`.
 
-Si `RUN_SEED=true` en ese primer arranque, existen los usuarios de la tabla de arriba. **Cambiá esas contraseñas** (o desactivá esas cuentas) y en el próximo reciclo poné `RUN_SEED=false` para no volver a sembrar.
-
-Si no sembraste (`RUN_SEED=false`), no hay usuarios: entrá al contenedor y creá uno, o corré el seeder una sola vez:
+Si no sembraste, creá el usuario staff a mano o corré el seeder una sola vez:
 
 ```bash
 docker compose -f docker-compose.prod.yml exec php php artisan db:seed --force
 ```
 
-Firewall: abrí **80** y **443**. No abras 3306 ni 6379.
+Firewall: abrí **80** y **443**. No abras 5432 ni 6379.
 
-### 4. HTTPS (dominio)
+El usuario de Postgres tiene que poder `CREATE DATABASE` (en este compose ya es superuser). Si el volumen era viejo:
 
-Este compose sirve **HTTP en el puerto 80**. En internet poné un reverse proxy con certificado (Caddy, Nginx, Traefik o el panel del VPS) delante, o Cloudflare.
+```sql
+ALTER ROLE ventas CREATEDB;
+```
 
-Ejemplo mínimo con Caddy en el host, proxy a Nginx del compose en el puerto 80:
+### 4. HTTPS y DNS
+
+Ejemplo mínimo con Caddy en el host (TLS wildcard; el compose sigue en el puerto 80):
 
 ```caddy
-ventas.tudominio.com {
+tudominio.com, www.tudominio.com, admin.tudominio.com, *.tudominio.com {
     reverse_proxy 127.0.0.1:80
 }
 ```
 
-`APP_URL` tiene que ser exactamente la URL pública (`https://ventas.tudominio.com`). Laravel ya confía en el proxy (`TrustProxies`).
+`APP_URL` tiene que ser exactamente la URL pública (`https://tudominio.com`).
 
-Si el proxy usa otro puerto publicado, por ejemplo `APP_PUBLISH_PORT=8080`, el `reverse_proxy` apunta a `127.0.0.1:8080`.
+| Host | Qué es |
+|---|---|
+| `tudominio.com` | landing y planes |
+| `admin.tudominio.com/{PLATFORM_PATH}` | panel staff |
+| `{slug}.tudominio.com` | POS del comercio |
+
+Opcional: restringir el panel staff por IP (`docker/nginx/platform-staff.conf.example`).
+
+Si el proxy usa otro puerto publicado (`APP_PUBLISH_PORT=8080`), el `reverse_proxy` apunta a `127.0.0.1:8080`.
 
 ### 5. Actualizar la app
 
-Los datos (MySQL, Redis, `storage` con logos y uploads) viven en volúmenes Docker y **no se borran** al rebuild.
+Los datos (Postgres, Redis, `storage` con logos y uploads) viven en volúmenes Docker y **no se borran** al rebuild.
 
 ```bash
 cd ventas_sistema
@@ -313,22 +349,27 @@ El entrypoint vuelve a correr migraciones (`RUN_MIGRATIONS=true`) y regenera `co
 ### 6. Operación diaria
 
 ```bash
-# estado
 docker compose -f docker-compose.prod.yml ps
 
-# logs (PHP escribe a stderr)
-docker compose -f docker-compose.prod.yml logs -f php nginx mysql
+docker compose -f docker-compose.prod.yml logs -f php nginx queue scheduler postgres
 
-# Artisan
 docker compose -f docker-compose.prod.yml exec php php artisan about
 docker compose -f docker-compose.prod.yml exec php php artisan permission:cache-reset
 
-# backup de la base (archivo en el directorio actual del host)
-docker compose -f docker-compose.prod.yml exec -T mysql \
-  sh -c 'mysqldump -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > backup-$(date +%F).sql
+# central.sql + un dump por tenant → storage/app/backups/{fecha}/
+docker compose -f docker-compose.prod.yml exec php php artisan tenants:backup
 ```
 
-Backup de archivos subidos: el volumen `ventas_sistema_prod_storage_data` (nombre aproximado; listalo con `docker volume ls`).
+Un `pg_dump` solo de `ventas_central` **no** alcanza: cada comercio es otra base (`tenant_demo`, etc.).
+
+Bases huérfanas (sin cliente en plataforma):
+
+```bash
+docker compose -f docker-compose.prod.yml exec php php artisan tenants:cleanup-orphans --dry-run
+docker compose -f docker-compose.prod.yml exec php php artisan tenants:cleanup-orphans
+```
+
+Backup de archivos subidos: volumen `ventas_sistema_prod_storage_data` (`docker volume ls`).
 
 Para bajar el stack **sin** borrar datos:
 
@@ -336,139 +377,41 @@ Para bajar el stack **sin** borrar datos:
 docker compose -f docker-compose.prod.yml down
 ```
 
-`down -v` **borra** MySQL, Redis y storage. No lo uses en producción salvo que quieras resetear todo.
+`down -v` **borra** Postgres, Redis y storage. No lo uses en producción salvo que quieras resetear todo.
 
 ### 7. Checklist
 
-- [ ] `APP_KEY` definido y **nunca** regenerado después de tener datos (invalida sesiones y cifrado)
+- [ ] `APP_KEY` definido y **nunca** regenerado después de tener datos
 - [ ] `APP_DEBUG=false` (el compose ya lo fuerza)
-- [ ] Contraseñas de DB distintas a las de ejemplo
+- [ ] Contraseña de DB distinta a `ventas`
+- [ ] `CENTRAL_DOMAINS`, `TENANT_BASE_DOMAIN`, `PLATFORM_PATH` (opaco) y `PLATFORM_DOMAIN`
+- [ ] DNS wildcard `*.tudominio.com` + TLS wildcard
+- [ ] `queue` y `scheduler` en `Up`
+- [ ] SMTP real (`MAIL_MAILER=smtp`) si vas a dar de alta clientes
 - [ ] `RUN_SEED=false` después del primer deploy
-- [ ] Contraseñas de `superadmin` / `admin` / `operator` cambiadas
-- [ ] `APP_URL` con `https://` si hay TLS
-- [ ] Puerto 3306/6379 no publicados
-- [ ] Copias de `mysqldump` y de `storage` en otro disco/nube
+- [ ] `PLATFORM_ADMIN_PASSWORD` si sembrás staff en prod (no dejes `plataforma`)
+- [ ] `APP_URL` con `https://`
+- [ ] Puerto 5432/6379 no publicados
+- [ ] Copias de `tenants:backup` y de `storage` en otro disco/nube
 
+## Módulos de negocio
 
-| Rol         | Email                         | Contraseña   |
-|-------------|-------------------------------|--------------|
-| Superadmin  | superadmin@superadmin.com     | superadmin   |
-| Admin       | admin@admin.com               | admin        |
-| Operator    | operator@operator.com         | operator     |
+Los CRUDs del POS viven en `Modules/` y corren **en la DB del comercio**, no en `ventas_central`.
 
-reCAPTCHA es opcional en local. Si lo usás: [consola reCAPTCHA v2](https://www.google.com/recaptcha/admin) y las claves `RECAPTCHA_SITE_KEY` / `RECAPTCHA_SECRET_KEY` en `.env`.
-
-## Modules
-### build a new module
-``` bash
+```bash
 php artisan module:build
-type the module name (plural). example : posts, categories, sliders etc.
+# nombre en plural: warranties, categories, etc.
 ```
-### Enable module
-``` bash
-php artisan module:enable {module name}
+
+El stub ya sale tenant-safe (`TenantMiddleware`, sin `loadMigrationsFrom`). Después del generate:
+
+1. `module.json`: `menus` + `permissions` en **singular** (`warranty`, no `warranties`).
+2. Recargar permisos en el panel del comercio, o incluir el recurso en `BusinessPermissionSeeder`.
+3. `admin` ve el CRUD; `operator` solo lo que va a caja. No crear `superadmin` de tenant.
+
+Detalle: [`.cursor/skills/modulo-negocio/SKILL.md`](.cursor/skills/modulo-negocio/SKILL.md). No rearmar menús del POS.
+
+```bash
+php artisan module:enable {Nombre}
+php artisan module:disable {Nombre}
 ```
-### Disable module
-``` bash
-php artisan module:disable {module name}
-```
-### All module files will be generated in root/Modules/{Modulename}
-### To automatically update permission, go to permission page and click the reload button
-### Change module config
-``` bash
-Update the module config in root/Modules/{module name}/module.json
-"menus": [
-    {
-        "icon": "fas fa-image",
-        "name": "{ModuleName}",
-        "route": "route.name",
-        "permission": "read {modulename}"
-    }
-],
-"permissions": ["{module name}"]
-```
-### If you need add menu in created module
-``` bash
-Update the module config in root/Modules/{Modulename}/module.json
-"menus": [
-    {
-        "icon": "fas fa-image",
-        "name": "{Module Name}",
-        "route": "route.name",
-        "permission": "read {modulename}"
-    },
-    {
-        "icon": "fas fa-images",
-        "name": "{Module Name}",
-        "route": "route.name",
-        "permission": "read {modulename}"
-    }
-],
-"permissions": ["{modulename}", "{modulename}"]
-```
-### Then reload the permission in Permission > Reload Permission
-
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
-
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
