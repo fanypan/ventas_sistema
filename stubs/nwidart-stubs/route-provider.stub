@@ -2,6 +2,7 @@
 
 namespace $NAMESPACE$;
 
+use App\Support\TenantMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -33,8 +34,6 @@ class $CLASS$ extends ServiceProvider
      */
     public function map()
     {
-        $this->mapApiRoutes();
-
         $this->mapWebRoutes();
     }
 
@@ -47,23 +46,8 @@ class $CLASS$ extends ServiceProvider
      */
     protected function mapWebRoutes()
     {
-        Route::middleware('web')
+        Route::middleware(TenantMiddleware::web())
             ->namespace($this->moduleNamespace)
             ->group(module_path('$MODULE$', '$WEB_ROUTES_PATH$'));
-    }
-
-    /**
-     * Define the "api" routes for the application.
-     *
-     * These routes are typically stateless.
-     *
-     * @return void
-     */
-    protected function mapApiRoutes()
-    {
-        Route::prefix('api')
-            ->middleware('api')
-            ->namespace($this->moduleNamespace)
-            ->group(module_path('$MODULE$', '$API_ROUTES_PATH$'));
     }
 }

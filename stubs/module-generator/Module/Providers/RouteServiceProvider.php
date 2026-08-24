@@ -2,6 +2,7 @@
 
 namespace Modules\{Module}\Providers;
 
+use App\Support\TenantMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -16,22 +17,13 @@ class RouteServiceProvider extends ServiceProvider
 
     public function map()
     {
-        $this->mapApiRoutes();
         $this->mapWebRoutes();
     }
 
     protected function mapWebRoutes()
     {
-        Route::middleware('web')
+        Route::middleware(TenantMiddleware::web())
             ->namespace($this->moduleNamespace)
             ->group(module_path('{Module}', '/Routes/web.php'));
-    }
-
-    protected function mapApiRoutes()
-    {
-        Route::prefix('api')
-            ->middleware('api')
-            ->namespace($this->moduleNamespace)
-            ->group(module_path('{Module}', '/Routes/api.php'));
     }
 }

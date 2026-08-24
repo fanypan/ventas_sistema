@@ -2,7 +2,7 @@
     "name": "{Module}",
     "label": "{Module}",
     "alias": "{module}",
-    "description": "manage all {module}",
+    "description": "CRUD de {module} del comercio",
     "keywords": ["{module}"],
     "priority": 0,
     "providers": [
@@ -16,8 +16,8 @@
             "icon": "fas fa-circle",
             "name": "{Module}",
             "route": "{module}.index",
-            "permission": "read {module}"
+            "permission": "read {model}"
         }
     ],
-    "permissions": ["{module}"]
+    "permissions": ["{model}"]
 }

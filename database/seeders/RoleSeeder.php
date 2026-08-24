@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleSeeder extends Seeder
 {
@@ -21,7 +21,9 @@ class RoleSeeder extends Seeder
         ]);
         Role::firstOrCreate([
             'name'          => 'operator',
-            'guard_name'    => 'web'
+            'guard_name'    => 'web',
         ]);
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }

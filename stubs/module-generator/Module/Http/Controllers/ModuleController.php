@@ -2,6 +2,7 @@
 
 namespace Modules\{Module}\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Routing\Controller;
@@ -11,6 +12,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class {Module}Controller extends Controller
 {
+    use AuthorizesCrud;
+
+    public function __construct()
+    {
+        $this->authorizeCrud('{model}');
+    }
+
     public function index()
     {
         $x['title']     = "{Model}";
@@ -32,9 +40,10 @@ class {Module}Controller extends Controller
             ${model} = {Model}::create([
                 'name'      => $request->name
             ]);
-            Alert::success('Notificación', 'Datos de <b>' . ${model}->name . '</b> creados correctamente')->toToast()->toHtml();
+            Alert::success('Listo', 'Datos de ' . ${model}->name . ' creados.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Notificación', 'Error al crear <b>' . ${model}->name . '</b>: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo crear', 'Revisá los datos e intentá de nuevo.')->toToast();
         }
         return back();
     }
@@ -63,9 +72,10 @@ class {Module}Controller extends Controller
             ${model}->update([
                 'name'  => $request->name
             ]);
-            Alert::success('Notificación', 'Datos de <b>' . ${model}->name . '</b> guardados correctamente')->toToast()->toHtml();
+            Alert::success('Listo', 'Datos de ' . ${model}->name . ' guardados.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Notificación', 'Error al guardar <b>' . ${model}->name . '</b>: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo guardar', 'Revisá los datos e intentá de nuevo.')->toToast();
         }
         return back();
     }
@@ -75,9 +85,10 @@ class {Module}Controller extends Controller
         try {
             ${model} = {Model}::find($request->id);
             ${model}->delete();
-            Alert::success('Notificación', 'Datos de <b>' . ${model}->name . '</b> eliminados')->toToast()->toHtml();
+            Alert::success('Listo', 'Datos de ' . ${model}->name . ' eliminados.')->toToast();
         } catch (\Throwable $th) {
-            Alert::error('Notificación', 'Error al eliminar <b>' . ${model}->name . '</b>: ' . $th->getMessage())->toToast()->toHtml();
+            report($th);
+            Alert::error('No se pudo eliminar', 'Intentá de nuevo.')->toToast();
         }
         return back();
     }

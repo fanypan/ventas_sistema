@@ -34,33 +34,47 @@ class BusinessPermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
         }
 
-        $admin = Role::findByName('admin');
-        $operator = Role::findByName('operator');
-        $superadmin = Role::where('name', 'superadmin')->first();
-
-        $admin->givePermissionTo(array_merge(
+        $adminPermissions = array_merge(
             $this->crudMany($crudResources),
             [
+                'filemanager',
+                'read module',
                 'void sale',
                 'consume insumo',
                 'read report',
                 'delete user', 'update user', 'read user', 'create user',
-                'read role',
-                'read permission',
+                'delete role', 'update role', 'read role', 'create role',
+                'delete permission', 'update permission', 'read permission', 'create permission',
                 'delete setting', 'update setting', 'read setting', 'create setting',
             ]
-        ));
+        );
 
-        $operator->givePermissionTo([
+        foreach ($adminPermissions as $name) {
+            Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
+        }
+
+        $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $operator = Role::firstOrCreate(['name' => 'operator', 'guard_name' => 'web']);
+        $superadmin = Role::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
+
+        $admin->syncPermissions($adminPermissions);
+
+        $operatorPermissions = [
             'read customer', 'create customer', 'update customer',
             'read product', 'read category', 'read brand',
             'read sale', 'create sale',
             'read cash', 'create cash', 'update cash',
             'read expense', 'create expense',
             'read credit', 'create credit',
-        ]);
+        ];
 
-        $superadmin?->givePermissionTo(Permission::all());
+        foreach ($operatorPermissions as $name) {
+            Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
+        }
+
+        $operator->syncPermissions($operatorPermissions);
+
+        $superadmin->syncPermissions(Permission::where('guard_name', 'web')->pluck('name')->all());
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
