@@ -1,24 +1,30 @@
 @extends('platform.layout')
 @section('title', 'Ingresar')
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-header">Staff AranduTech</div>
-            <div class="card-body">
-                <form method="POST" action="{{ route('platform.login.attempt') }}">
-                    @csrf
-                    <div class="form-group">
-                        <label>Correo</label>
-                        <input class="form-control" type="email" name="email" value="{{ old('email') }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Contraseña</label>
-                        <input class="form-control" type="password" name="password" required>
-                    </div>
-                    <button class="btn btn-primary btn-block">Entrar</button>
-                </form>
-            </div>
+<div class="platform-login">
+    <div class="card">
+        <div class="card-body p-4">
+            <h1>Ingresá a la plataforma</h1>
+            <p class="platform-lead mb-4">Usá tu correo de staff.</p>
+            @if ($errors->any())
+                <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
+            @endif
+            <form method="POST" action="{{ route('platform.login.attempt') }}">
+                @csrf
+                <div class="form-group">
+                    <label for="email">Correo</label>
+                    <input class="form-control @error('email') is-invalid @enderror" id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="username" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input class="form-control @error('password') is-invalid @enderror" id="password" type="password" name="password" autocomplete="current-password" required>
+                </div>
+                <div class="form-group form-check">
+                    <input class="form-check-input" type="checkbox" name="remember" id="remember" value="1" @checked(old('remember'))>
+                    <label class="form-check-label font-weight-normal" for="remember">Recordarme</label>
+                </div>
+                <button class="btn btn-primary btn-block" type="submit">Ingresá</button>
+            </form>
         </div>
     </div>
 </div>

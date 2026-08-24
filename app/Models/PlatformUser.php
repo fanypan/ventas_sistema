@@ -9,6 +9,10 @@ class PlatformUser extends Authenticatable
 {
     use Notifiable;
 
+    public const ROLE_ADMIN = 'admin';
+
+    public const ROLE_STAFF = 'staff';
+
     protected $fillable = [
         'name',
         'email',
@@ -23,6 +27,6 @@ class PlatformUser extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === self::ROLE_ADMIN;
     }
 }

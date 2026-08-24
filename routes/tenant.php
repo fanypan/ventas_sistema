@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\ModuleController;
@@ -18,8 +19,18 @@ Route::middleware(TenantMiddleware::web())->group(function () {
         'register'  => false,
         'reset'     => false,
         'confirm'   => false,
+        'login'     => false,
     ]);
-    Route::redirect('/inicio', '/login')->name('index');
+
+    Route::middleware('guest')->group(function () {
+        Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
+        Route::middleware('throttle:tenant-login')->group(function () {
+            Route::post('/', [LoginController::class, 'login']);
+            Route::post('/login', [LoginController::class, 'login']);
+        });
+    });
+    Route::redirect('/login', '/');
+    Route::redirect('/inicio', '/')->name('index');
 
     Route::middleware(['auth'])->get('/home', [DashboardController::class, 'index'])->name('home');
 

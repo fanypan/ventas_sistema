@@ -2,48 +2,103 @@
 @section('title', $tenant->name)
 @section('content')
 @if (session('plain_password'))
-    <div class="alert alert-success">
-        Contraseña inicial del admin: <strong>{{ session('plain_password') }}</strong> (también se envía por mail).
+    <div class="alert alert-success" role="status">
+        Contraseña inicial del admin: <strong class="platform-password">{{ session('plain_password') }}</strong>
+        (también se envía por mail).
     </div>
 @endif
-<div class="d-flex justify-content-between align-items-center mb-3">
+
+<div class="platform-page-head">
     <div>
-        <h1 class="mb-0">{{ $tenant->name }}</h1>
-        <p class="text-muted mb-0">{{ $tenant->url() }} · {{ $tenant->status }} · {{ $tenant->plan?->name }}</p>
+        <h1>{{ $tenant->name }}</h1>
+        <p class="platform-lead mb-2">
+            <a href="{{ $tenant->url() }}" target="_blank" rel="noopener noreferrer">{{ $tenant->primaryDomain() }}</a>
+            · {{ $tenant->plan?->name ?: 'Sin plan' }}
+        </p>
+        @include('platform.partials.status-badge', ['tenant' => $tenant])
     </div>
-    <div>
+    <div class="platform-actions">
         <a class="btn btn-success" href="{{ route('platform.payments.create', $tenant) }}">Registrar pago</a>
         @if ($tenant->status !== 'suspended')
-            <form class="d-inline" method="POST" action="{{ route('platform.tenants.suspend', $tenant) }}">@csrf<button class="btn btn-warning">Suspender</button></form>
+            <form method="POST" action="{{ route('platform.tenants.suspend', $tenant) }}" onsubmit="return confirm(@json('¿Pausar el POS de '.$tenant->name.'? El comercio no va a poder cobrar.'))">
+                @csrf
+                <button class="btn btn-warning" type="submit">Suspender</button>
+            </form>
         @else
-            <form class="d-inline" method="POST" action="{{ route('platform.tenants.reactivate', $tenant) }}">@csrf<button class="btn btn-info">Reactivar</button></form>
+            <form method="POST" action="{{ route('platform.tenants.reactivate', $tenant) }}">
+                @csrf
+                <button class="btn btn-info" type="submit">Reactivar</button>
+            </form>
         @endif
-        <form class="d-inline" method="POST" action="{{ route('platform.tenants.cancel', $tenant) }}">@csrf<button class="btn btn-secondary">Baja</button></form>
-        <form class="d-inline" method="POST" action="{{ route('platform.tenants.destroy', $tenant) }}" onsubmit="return confirm('¿Borrar tenant y su base?')">@csrf @method('DELETE')<button class="btn btn-danger">Eliminar</button></form>
+        @if (auth('platform')->user()->isAdmin())
+            <form method="POST" action="{{ route('platform.tenants.cancel', $tenant) }}" onsubmit="return confirm(@json('¿Dar de baja a '.$tenant->name.'? No se borra la base.'))">
+                @csrf
+                <button class="btn btn-secondary" type="submit">Baja</button>
+            </form>
+            <form method="POST" action="{{ route('platform.tenants.destroy', $tenant) }}" onsubmit="return confirm(@json('¿Borrar '.$tenant->name.' y su base? Esto no se puede deshacer.'))">
+                @csrf
+                @method('DELETE')
+                <button class="btn btn-danger" type="submit">Eliminar</button>
+            </form>
+        @endif
     </div>
 </div>
+
 <div class="card mb-3">
     <div class="card-body">
-        <p>RUC: {{ $tenant->ruc ?: '—' }}</p>
-        <p>Admin: {{ $tenant->admin_name }} &lt;{{ $tenant->admin_email }}&gt;</p>
-        <p>Vence: {{ optional($tenant->subscription?->ends_at)->format('d/m/Y H:i') ?: '—' }}</p>
-        <p>Aprovisionado: {{ optional($tenant->provisioned_at)->format('d/m/Y H:i') ?: 'pendiente' }}</p>
+        <dl class="platform-meta">
+            <div>
+                <dt>RUC</dt>
+                <dd>{{ $tenant->ruc ?: '—' }}</dd>
+            </div>
+            <div>
+                <dt>Admin</dt>
+                <dd>{{ $tenant->admin_name }} &lt;{{ $tenant->admin_email }}&gt;</dd>
+            </div>
+            <div>
+                <dt>Vence</dt>
+                <dd>{{ optional($tenant->subscription?->ends_at)->format('d/m/Y H:i') ?: '—' }}</dd>
+            </div>
+            <div>
+                <dt>Aprovisionado</dt>
+                <dd>{{ optional($tenant->provisioned_at)->format('d/m/Y H:i') ?: 'Pendiente' }}</dd>
+            </div>
+        </dl>
     </div>
 </div>
-<h4>Pagos</h4>
-<table class="table">
-    <thead><tr><th>Fecha</th><th>Monto</th><th>Medio</th><th>Ref</th></tr></thead>
-    <tbody>
-    @forelse ($tenant->payments as $payment)
-        <tr>
-            <td>{{ $payment->paid_at?->format('d/m/Y') }}</td>
-            <td>Gs. {{ number_format($payment->amount, 0, ',', '.') }}</td>
-            <td>{{ $payment->method }}</td>
-            <td>{{ $payment->reference }}</td>
-        </tr>
-    @empty
-        <tr><td colspan="4">Sin pagos.</td></tr>
-    @endforelse
-    </tbody>
-</table>
+
+<div class="card">
+    <div class="card-header">Pagos</div>
+    @if ($tenant->payments->isEmpty())
+        @include('platform.partials.empty', [
+            'title' => 'Sin pagos',
+            'body' => 'Registrá el cobro para renovar el período.',
+            'actionUrl' => route('platform.payments.create', $tenant),
+            'actionLabel' => 'Registrar pago',
+        ])
+    @else
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Monto</th>
+                        <th>Medio</th>
+                        <th>Ref</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach ($tenant->payments as $payment)
+                    <tr>
+                        <td>{{ $payment->paid_at?->format('d/m/Y') }}</td>
+                        <td>{{ money($payment->amount) }}</td>
+                        <td>{{ $payment->methodLabel() }}</td>
+                        <td>{{ $payment->reference ?: '—' }}</td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
+</div>
 @endsection

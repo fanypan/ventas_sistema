@@ -41,4 +41,12 @@ class ManualPayment extends Model
     {
         return $this->belongsTo(PlatformUser::class, 'platform_user_id');
     }
+
+    public function methodLabel(): string
+    {
+        return [
+            self::METHOD_TRANSFER => 'Transferencia',
+            self::METHOD_CASH => 'Efectivo',
+        ][$this->method] ?? $this->method;
+    }
 }
