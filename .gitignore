@@ -26,6 +26,7 @@ list_tables.php
 *.sql
 storage/app/.docker_seeded
 /database/tenant*
+/storage/tenant*
 
 # Graphify (salida regenerable)
 graphify-out/
