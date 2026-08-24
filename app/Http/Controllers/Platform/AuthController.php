@@ -22,11 +22,15 @@ class AuthController extends Controller
 
         if (Auth::guard('platform')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+            $request->session()->put(
+                'password_hash_platform',
+                Auth::guard('platform')->user()->getAuthPassword()
+            );
 
             return redirect()->intended(route('platform.dashboard'));
         }
 
-        return back()->withErrors(['email' => 'Credenciales inválidas.'])->onlyInput('email');
+        return back()->withErrors(['email' => 'Ese correo o contraseña no coinciden.'])->onlyInput('email');
     }
 
     public function logout(Request $request)

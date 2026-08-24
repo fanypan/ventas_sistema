@@ -2,7 +2,10 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
+use Stancl\Tenancy\Contracts\TenantCouldNotBeIdentifiedException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -13,7 +16,7 @@ class Handler extends ExceptionHandler
      * @var array<int, class-string<Throwable>>
      */
     protected $dontReport = [
-        //
+        TenantCouldNotBeIdentifiedException::class,
     ];
 
     /**
@@ -37,5 +40,29 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        $this->renderable(function (TenantCouldNotBeIdentifiedException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Not Found.'], 404);
+            }
+
+            return response()->view('errors.404', ['exception' => $e], 404);
+        });
+    }
+
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $exception->getMessage()], 401);
+        }
+
+        $guards = $exception->guards();
+        $platformPath = config('saas.platform_path');
+
+        if (in_array('platform', $guards, true) || $request->is($platformPath.'*')) {
+            return redirect()->guest(route('platform.login'));
+        }
+
+        return redirect()->guest(route('login'));
     }
 }

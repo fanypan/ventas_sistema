@@ -18,17 +18,24 @@
         </include>
     </coverage>
     <php>
-        <env name="APP_KEY" value="base64:2fl+KTVYFkzUzEgoBW4Ia8EDbsND2KSKCKwIUkPuMcQ="/>
-        <env name="APP_URL" value="http://localhost"/>
+        <env name="APP_ENV" value="testing" force="true"/>
+        <env name="APP_KEY" value="base64:2fl+KTVYFkzUzEgoBW4Ia8EDbsND2KSKCKwIUkPuMcQ=" force="true"/>
+        <env name="APP_URL" value="http://localhost" force="true"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="CACHE_DRIVER" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="array"/>
-        <env name="TELESCOPE_ENABLED" value="false"/>
-        <env name="CENTRAL_DOMAINS" value="localhost,127.0.0.1"/>
-        <env name="TENANT_BASE_DOMAIN" value="localhost"/>
+        <env name="CACHE_DRIVER" value="array" force="true"/>
+        <env name="DB_CONNECTION" value="sqlite" force="true"/>
+        <env name="DB_DATABASE" value=":memory:" force="true"/>
+        <env name="MAIL_MAILER" value="array" force="true"/>
+        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <env name="SESSION_DRIVER" value="array" force="true"/>
+        <env name="TELESCOPE_ENABLED" value="false" force="true"/>
+        <env name="HORIZON_ENABLED" value="false" force="true"/>
+        <env name="SENTRY_LARAVEL_DSN" value="" force="true"/>
+        <env name="SENTRY_DSN" value="" force="true"/>
+        <env name="HEALTH_ENABLED" value="true" force="true"/>
+        <env name="CENTRAL_DOMAINS" value="localhost,127.0.0.1" force="true"/>
+        <env name="TENANT_BASE_DOMAIN" value="localhost" force="true"/>
+        <env name="TRUSTED_PROXIES" value="" force="true"/>
+        <env name="PLATFORM_ADMIN_PASSWORD" value="" force="true"/>
     </php>
 </phpunit>

@@ -8,14 +8,31 @@ use Illuminate\Support\Facades\Hash;
 
 class PlatformUserSeeder extends Seeder
 {
+    public static function password(): string
+    {
+        $password = config('saas.platform_admin_password');
+
+        if (is_string($password) && $password !== '') {
+            return $password;
+        }
+
+        if (app()->environment('production')) {
+            throw new \RuntimeException(
+                'Definí PLATFORM_ADMIN_PASSWORD para sembrar el usuario staff en producción.'
+            );
+        }
+
+        return 'plataforma';
+    }
+
     public function run(): void
     {
         PlatformUser::updateOrCreate(
             ['email' => 'plataforma@arandutech.com'],
             [
                 'name' => 'AranduTech',
-                'password' => Hash::make('plataforma'),
-                'role' => 'admin',
+                'password' => Hash::make(self::password()),
+                'role' => PlatformUser::ROLE_ADMIN,
             ]
         );
     }
