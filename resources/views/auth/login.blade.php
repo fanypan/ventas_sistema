@@ -237,7 +237,7 @@
     <body class="auth-screen">
         @php
             if (!$errors->isEmpty()) {
-                alert()->error('Notificación', implode('<br>', $errors->all()))->toToast()->toHtml();
+                alert()->error('Revisá el formulario', implode(' · ', $errors->all()))->toToast();
             }
             $appName = Setting::getValue('app_name') ?? 'SISVEN';
             $logo = Setting::getValue('app_logo');

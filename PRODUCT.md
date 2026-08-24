@@ -27,13 +27,14 @@ Se usa en computadoras del local (mostrador y escritorio), en español. La app c
 - Funciones actuales: login, dashboard, POS, clientes, inventario, ventas, compras, créditos, proveedores, finanzas, usuarios/roles, ajustes.
 - Conservar la navegación y el esquema actual de menús y páginas. Se puede mejorar look, tipografía, densidad y pulido; no rearmar la información architecture.
 - Conservar logo y nombre configurables (`app_name`, `app_logo`).
+- Sistema visual en [DESIGN.md](DESIGN.md): Outfit, índigo en POS/plataforma, teal solo en landing.
 - Stack vigente: Laravel, AdminLTE 3, Bootstrap 4, módulos nwidart.
 
 ## Brand Commitments
 
 - Nombre y logo salen de la configuración del sistema, no están fijos en código.
 - Voz en español rioplatense en superficies de autenticación (“Ingresá”, “Usá tu correo”).
-- No hay paleta o identidad visual contractual aparte de esos assets.
+- No hay paleta o identidad visual contractual aparte de esos assets; los tokens viven en [DESIGN.md](DESIGN.md).
 
 ## Evidence on Hand
 

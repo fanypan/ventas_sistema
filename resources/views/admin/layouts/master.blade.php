@@ -23,7 +23,7 @@
         <!-- DataTables -->
         <link rel="stylesheet" href="{{ asset('template/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
         <!-- Premium UI CSS -->
-        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260817e">
+        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260824a">
         <script>
             (function () {
                 var pref = 'system';
@@ -41,13 +41,14 @@
         @stack('style')
     </head>
     <body class="hold-transition layout-top-nav layout-navbar-fixed">
+        <a class="skip-link" href="#contenido">Saltar al contenido</a>
         <script>
             document.body.classList.toggle('dark-mode', document.documentElement.classList.contains('dark-mode'));
             document.body.classList.toggle('light', !document.documentElement.classList.contains('dark-mode'));
         </script>
         @php
             if (!$errors->isEmpty()) {
-                alert()->error('Notificación', implode('<br>', $errors->all()))->toToast()->toHtml();
+                alert()->error('Revisá el formulario', implode(' · ', $errors->all()))->toToast();
             }
         @endphp
         <div class="wrapper">
@@ -67,6 +68,7 @@
             <!-- /.navbar -->
 
             <!-- Content Wrapper. Contains page content -->
+            <a id="contenido" class="sr-only" tabindex="-1">Inicio del contenido</a>
             @yield('content')
             <!-- /.content-wrapper -->
             @yield('modal')

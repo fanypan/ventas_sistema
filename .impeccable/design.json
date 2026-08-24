@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-24T18:31:00.000Z",
+  "title": "Design System: AranduTech Ventas",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Índigo de caja",
+        "canonical": "#4f46e5",
+        "tonalRamp": ["#1e1b4b", "#312e81", "#3730a3", "#4338ca", "#4f46e5", "#6366f1", "#a5b4fc", "#eef2ff"]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Índigo hover",
+        "canonical": "#4338ca",
+        "tonalRamp": ["#1e1b4b", "#312e81", "#3730a3", "#4338ca", "#4f46e5", "#6366f1", "#a5b4fc", "#eef2ff"]
+      },
+      "landing": {
+        "role": "secondary",
+        "displayName": "Teal de landing",
+        "canonical": "#0f766e",
+        "tonalRamp": ["#042f2e", "#115e59", "#0f766e", "#0d9488", "#14b8a6", "#5eead4", "#99f6e4", "#ccfbf1"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#0f172a",
+        "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#cbd5e1", "#f8fafc"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Apagado",
+        "canonical": "#64748b",
+        "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#cbd5e1", "#f8fafc"]
+      },
+      "lead": {
+        "role": "neutral",
+        "displayName": "Lead",
+        "canonical": "#475569",
+        "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#cbd5e1", "#f8fafc"]
+      },
+      "page": {
+        "role": "neutral",
+        "displayName": "Página",
+        "canonical": "#f1f5f9",
+        "tonalRamp": ["#0b1220", "#1e293b", "#334155", "#64748b", "#94a3b8", "#e2e8f0", "#f1f5f9", "#f8fafc"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Superficie",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#0b1220", "#1e293b", "#334155", "#64748b", "#94a3b8", "#e2e8f0", "#f8fafc", "#ffffff"]
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "Superficie 2",
+        "canonical": "#f8fafc",
+        "tonalRamp": ["#0b1220", "#1e293b", "#334155", "#64748b", "#94a3b8", "#e2e8f0", "#f1f5f9", "#f8fafc"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Línea",
+        "canonical": "#e2e8f0",
+        "tonalRamp": ["#0b1220", "#1e293b", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f8fafc"]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Éxito",
+        "canonical": "#059669",
+        "tonalRamp": ["#064e3b", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0", "#ecfdf5"]
+      },
+      "warning": {
+        "role": "tertiary",
+        "displayName": "Gracia",
+        "canonical": "#d97706",
+        "tonalRamp": ["#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fde68a", "#fffbeb"]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Pausa",
+        "canonical": "#dc2626",
+        "tonalRamp": ["#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fecaca", "#fef2f2"]
+      },
+      "info": {
+        "role": "tertiary",
+        "displayName": "Info",
+        "canonical": "#0284c7",
+        "tonalRamp": ["#0c4a6e", "#075985", "#0369a1", "#0284c7", "#0ea5e9", "#7dd3fc", "#bae6fd", "#eff6ff"]
+      },
+      "on-accent": {
+        "role": "neutral",
+        "displayName": "Sobre acento",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#0f172a", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f8fafc", "#ffffff"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero de landing. No en el POS." },
+      "headline": { "displayName": "Headline", "purpose": "Título de página. Sin kicker encima." },
+      "title": { "displayName": "Title", "purpose": "Header de card, precio, botón." },
+      "body": { "displayName": "Body", "purpose": "Lectura. Lead ~40–42rem." },
+      "label": { "displayName": "Label", "purpose": "Thead uppercase; labels de form en sentence case." }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "0 8px 24px rgba(15, 23, 42, 0.08)",
+        "purpose": "Cards de POS y plataforma."
+      },
+      {
+        "name": "button-primary",
+        "value": "0 1px 2px rgba(15, 23, 42, 0.12)",
+        "purpose": "Botón primario en reposo."
+      }
+    ],
+    "motion": [
+      {
+        "name": "platform-in",
+        "value": "0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Una entrada de la shell de plataforma. Honrar prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "575.98px" },
+      { "name": "md", "value": "991.98px" },
+      { "name": "wide", "value": "1600px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción que cobra, guarda o aprovisiona.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Ingresá</button>",
+      "css": ".ds-btn-primary { background: #4f46e5; color: #fff; border: 0; border-radius: 8px; font-family: Outfit, system-ui, sans-serif; font-weight: 600; font-size: 1.15rem; padding: 0.55rem 1.25rem; white-space: nowrap; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12); cursor: pointer; } .ds-btn-primary:hover, .ds-btn-primary:focus { background: #4338ca; color: #fff; } .ds-btn-primary:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }"
+    },
+    {
+      "name": "Landing CTA",
+      "kind": "button",
+      "refersTo": "landing-cta",
+      "description": "WhatsApp y planes en la landing. No usar en POS ni plataforma.",
+      "html": "<a class=\"ds-landing-cta\" href=\"#\">Hablar por WhatsApp</a>",
+      "css": ".ds-landing-cta { display: inline-block; background: #0f766e; color: #fff; text-decoration: none; padding: 12px 20px; border-radius: 10px; font-family: Outfit, system-ui, sans-serif; font-weight: 600; } .ds-landing-cta:hover, .ds-landing-cta:focus { filter: brightness(1.08); color: #fff; } .ds-landing-cta:focus-visible { outline: 2px solid #0f766e; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo de form con label 600 y foco índigo.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Correo</span><input class=\"ds-input\" type=\"email\" placeholder=\"staff@comercio.com\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.35rem; font-family: Outfit, system-ui, sans-serif; } .ds-field-label { font-weight: 600; color: #0f172a; } .ds-input { border: 1px solid #e2e8f0; border-radius: 8px; min-height: 2.75rem; padding: 0.55rem 0.85rem; background: #fff; color: #0f172a; font-size: 1rem; } .ds-input::placeholder { color: #64748b; } .ds-input:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.16); outline: none; } .ds-input:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Contenedor de tablas y forms en app.",
+      "html": "<article class=\"ds-card\"><header class=\"ds-card-header\">Últimos clientes</header><div class=\"ds-card-body\">Demo · Starter</div></article>",
+      "css": ".ds-card { background: #fff; color: #0f172a; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); overflow: hidden; font-family: Outfit, system-ui, sans-serif; } .ds-card-header { padding: 0.9rem 1.15rem; font-weight: 600; border-bottom: 1px solid #e2e8f0; } .ds-card-body { padding: 1.25rem; }"
+    },
+    {
+      "name": "Dark nav",
+      "kind": "nav",
+      "refersTo": "nav-dark",
+      "description": "Barra de POS y plataforma. Activo = píldora índigo.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-brand\">AranduTech Ventas</span><a class=\"ds-nav-link ds-nav-link-active\" href=\"#\">Inicio</a><a class=\"ds-nav-link\" href=\"#\">Clientes</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 0.5rem; background: #0f172a; padding: 0.6rem 1.25rem; font-family: Outfit, system-ui, sans-serif; } .ds-nav-brand { color: #fff; font-weight: 700; margin-right: 0.75rem; } .ds-nav-link { color: rgba(255,255,255,0.78); text-decoration: none; font-weight: 500; padding: 0.45rem 0.8rem; border-radius: 8px; } .ds-nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); } .ds-nav-link-active { color: #fff; background: #4f46e5; } .ds-nav-link:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }"
+    },
+    {
+      "name": "Status badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Estado de tenant o plan. Texto del mismo hue que el fondo.",
+      "html": "<span class=\"ds-badge ds-badge-ok\">Activo</span> <span class=\"ds-badge ds-badge-warn\">En gracia</span> <span class=\"ds-badge ds-badge-bad\">Pausado</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; padding: 0.15rem 0.55rem; border-radius: 999px; font-family: Outfit, system-ui, sans-serif; font-size: 0.78rem; font-weight: 600; line-height: 1.4; } .ds-badge-ok { color: #047857; background: #ecfdf5; } .ds-badge-warn { color: #b45309; background: #fffbeb; } .ds-badge-bad { color: #b91c1c; background: #fef2f2; }"
+    },
+    {
+      "name": "Skip link",
+      "kind": "custom",
+      "refersTo": "nav-dark",
+      "description": "Primer foco de teclado en POS y plataforma.",
+      "html": "<a class=\"ds-skip\" href=\"#contenido\">Saltar al contenido</a>",
+      "css": ".ds-skip { position: absolute; left: 1rem; top: 0.75rem; z-index: 1100; padding: 0.5rem 1rem; background: #4f46e5; color: #fff; border-radius: 8px; font-family: Outfit, system-ui, sans-serif; font-weight: 600; text-decoration: none; } .ds-skip:focus { outline: 2px solid #fff; outline-offset: 2px; color: #fff; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La caja no espera",
+    "overview": "Sistema de gestión que se cobra en el mostrador. El look es el de un POS familiar (AdminLTE, Bootstrap 4) vestido con Outfit, índigo y densidad de escritorio: no es un marketing site ni un dashboard de métricas vacías. Caja y administración se sienten el mismo producto; la plataforma de staff usa la misma piel.\n\nEl acento del producto es el índigo. El teal de la landing y el CTA de WhatsApp no se copian al POS ni al panel staff. Logo y nombre salen de la configuración del comercio (`app_name`, `app_logo`); no hay paleta contractual aparte de esos assets y estos tokens.\n\nVoz en pantalla: español rioplatense (“Ingresá”, “Usá tu correo”). Acciones primarias grandes, un paso, texto que no se parte.",
+    "keyCharacteristics": [
+      "Una cara (Outfit + índigo + slate) para POS y plataforma; teal solo en landing",
+      "Densidad útil en pantallas anchas; no dejar un control de 360px perdido en 1800px",
+      "Lo familiar de un sistema de gestión se queda; el adorno que no ayuda a cobrar, se va",
+      "AdminLTE es el andamio, no la identidad: se pule look, no se rearma la navegación"
+    ],
+    "rules": [
+      { "name": "La regla de una voz", "body": "El índigo es el acento del producto. El teal queda en landing y WhatsApp.", "section": "colors" },
+      { "name": "La regla del diez por ciento", "body": "El índigo pinta controles y estado activo, no fondos de página ni bloques enteros.", "section": "colors" },
+      { "name": "La regla de un paso", "body": "El texto del botón de caja nombra la acción y no se parte (white-space: nowrap).", "section": "typography" },
+      { "name": "La regla de sombra con oficio", "body": "Offset y blur suaves. Nunca box-shadow: 4px 4px 0 ni glow de color sin desplazamiento.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar Outfit 400/500/600/700 y {colors.primary} para la acción que cobra o guarda.",
+      "Do formatear dinero con money() (Gs. + miles con punto).",
+      "Do conservar la IA de menús del POS; se puede pulir densidad, tipo y color.",
+      "Do estados vacíos, error y éxito en cada lista y formulario de plataforma.",
+      "Do tabular-nums en montos y contadores."
+    ],
+    "donts": [
+      "Don't pintar el POS o /plataforma con el teal de landing.",
+      "Don't poner un kicker/eyebrow encima del h1.",
+      "Don't dejar un a.btn-primary con color de link: el texto del primario es blanco.",
+      "Don't introducir signup público, checkout Stripe/Mercado Pago, ni una segunda piel “admin”.",
+      "Don't usar gradient text, glass de adorno, ni emoji como ícono (Font Awesome en POS; texto en plataforma)."
+    ]
+  }
+}

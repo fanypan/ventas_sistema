@@ -1013,3 +1013,23 @@ html.dark-mode .theme-option.active .theme-option-check,
 body.dark-mode .theme-option.active .theme-option-check {
     color: #c7d2fe;
 }
+
+.skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    z-index: 1100;
+    padding: 0.5rem 1rem;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.skip-link:focus {
+    top: 0.75rem;
+    color: #fff;
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}

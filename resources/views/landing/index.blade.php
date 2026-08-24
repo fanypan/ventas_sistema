@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $brand }} — Sistema de ventas para Paraguay</title>
+    <link rel="icon" href="{{ asset('brand/favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('brand/favicon-128.png') }}" type="image/png" sizes="128x128">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -22,13 +24,11 @@
         .price { font-size:1.6rem; font-weight:700; }
         .price span { font-size:.95rem; color:var(--muted); font-weight:500; }
         ul { padding-left:18px; color:var(--muted); }
-        .staff { font-size:.9rem; color:var(--muted); }
     </style>
 </head>
 <body>
     <header>
         <strong>{{ $brand }}</strong>
-        <a class="staff" href="{{ route('platform.login') }}">Acceso staff</a>
     </header>
     <section class="hero">
         <h1>Cobrás en el mostrador. Cerrás caja con números claros.</h1>

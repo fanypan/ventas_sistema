@@ -1,0 +1,16 @@
+---
+description: Tokens y reglas visuales (DESIGN.md) al tocar vistas o CSS
+globs: "**/*.blade.php,public/css/**/*.css"
+alwaysApply: false
+---
+
+# UI — DESIGN.md
+
+Antes de cambiar look, layout o copy de pantalla: leé [DESIGN.md](../../DESIGN.md).
+
+- POS y plataforma: Outfit + índigo `#4f46e5`. Teal `#0f766e` solo en landing/WhatsApp.
+- No rearmar la arquitectura de menús del POS. Se puede pulir densidad, tipo y color.
+- Primarios con texto blanco (también en `<a class="btn-primary">`).
+- Voz rioplatense. Acciones de caja en un paso, texto que no se parte.
+- Dinero con `money()`. Estados de tenant con badges semánticos, no el string crudo.
+- Logo y `app_name` salen de settings del comercio; no hardcodear marca.
