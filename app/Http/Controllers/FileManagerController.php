@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class FileManagerController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $x['title']     = 'File Manager';
+        File::ensureDirectoryExists(Storage::disk('filemanager')->path(''));
+
+        $x['title'] = 'Gestor de archivos';
+
         return view('admin.filemanager', $x);
     }
 }

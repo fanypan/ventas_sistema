@@ -36,6 +36,12 @@ return [
             'throw' => false,
         ],
 
+        'filemanager' => [
+            'driver' => 'local',
+            'root' => storage_path('app/file-manager'),
+            'throw' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
