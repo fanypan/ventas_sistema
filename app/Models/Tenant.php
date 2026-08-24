@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Support\TenantDatabaseName;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use InvalidArgumentException;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDomains;
@@ -42,6 +44,17 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     protected $casts = [
         'provisioned_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $tenant) {
+            if ($tenant->slug && ! TenantDatabaseName::slugIsValid($tenant->slug)) {
+                throw new InvalidArgumentException(
+                    'El slug solo puede tener letras minúsculas y números, sin guion ni guion bajo.'
+                );
+            }
+        });
+    }
 
     public function plan(): BelongsTo
     {
@@ -91,5 +104,29 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     public function isBlocked(): bool
     {
         return in_array($this->status, [self::STATUS_SUSPENDED, self::STATUS_CANCELLED, self::STATUS_PENDING], true);
+    }
+
+    public function statusLabel(): string
+    {
+        return [
+            self::STATUS_PENDING => 'Pendiente',
+            self::STATUS_ACTIVE => 'Activo',
+            self::STATUS_GRACE => 'En gracia',
+            self::STATUS_READONLY => 'Solo lectura',
+            self::STATUS_SUSPENDED => 'Pausado',
+            self::STATUS_CANCELLED => 'Baja',
+        ][$this->status] ?? $this->status;
+    }
+
+    public function statusTone(): string
+    {
+        return [
+            self::STATUS_PENDING => 'info',
+            self::STATUS_ACTIVE => 'ok',
+            self::STATUS_GRACE => 'warn',
+            self::STATUS_READONLY => 'info',
+            self::STATUS_SUSPENDED => 'bad',
+            self::STATUS_CANCELLED => 'neutral',
+        ][$this->status] ?? 'neutral';
     }
 }

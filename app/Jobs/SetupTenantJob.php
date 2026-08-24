@@ -6,16 +6,17 @@ use App\Mail\TenantCredentialsMail;
 use App\Models\Setting;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\Tenancy\TenantProvisioningRollback;
 use Database\Seeders\TenantDatabaseSeeder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use Modules\Customers\Entities\Customer;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 class SetupTenantJob implements ShouldQueue
@@ -33,13 +34,26 @@ class SetupTenantJob implements ShouldQueue
 
     public function handle(): void
     {
-        $this->tenant->run(function () {
-            Artisan::call('db:seed', [
-                '--class' => TenantDatabaseSeeder::class,
-                '--force' => true,
-            ]);
+        try {
+            $this->provision();
+        } catch (\Throwable $e) {
+            app(TenantProvisioningRollback::class)->rollback($this->tenant);
 
-            app()[PermissionRegistrar::class]->forgetCachedPermissions();
+            throw $e;
+        }
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        app(TenantProvisioningRollback::class)->rollback($this->tenant);
+    }
+
+    private function provision(): void
+    {
+        $this->tenant->run(function () {
+            app(TenantDatabaseSeeder::class)->run();
+
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
 
             $user = User::updateOrCreate(
                 ['email' => $this->tenant->admin_email],
@@ -48,6 +62,8 @@ class SetupTenantJob implements ShouldQueue
                     'password' => $this->tenant->admin_password_hash,
                 ]
             );
+
+            Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
             $user->syncRoles(['admin']);
 
             if ($this->tenant->name) {
@@ -82,6 +98,8 @@ class SetupTenantJob implements ShouldQueue
                     'status' => 1,
                 ]
             );
+
+            File::ensureDirectoryExists(storage_path('app/file-manager'));
         });
 
         $storage = storage_path();

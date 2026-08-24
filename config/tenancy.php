@@ -39,7 +39,7 @@ return [
      * Database tenancy config. Used by DatabaseTenancyBootstrapper.
      */
     'database' => [
-        'central_connection' => env('DB_CONNECTION', 'mysql'),
+        'central_connection' => env('DB_CONNECTION', 'pgsql'),
 
         /**
          * Connection used as a "template" for the dynamically created tenant database connection.
@@ -48,8 +48,8 @@ return [
         'template_tenant_connection' => null,
 
         /**
-         * Tenant database names are created like this:
-         * prefix + tenant_id + suffix.
+         * Nombre por defecto si no hay slug (prefix + tenant_id + suffix).
+         * En producción usamos tenant_{slug} vía TenancyServiceProvider.
          */
         'prefix' => 'tenant',
         'suffix' => '',
@@ -103,6 +103,7 @@ return [
         'disks' => [
             'local',
             'public',
+            'filemanager',
             // 's3',
         ],
 
@@ -115,6 +116,7 @@ return [
             // Disks whose roots should be overridden after storage_path() is suffixed.
             'local' => '%storage_path%/app/',
             'public' => '%storage_path%/app/public/',
+            'filemanager' => '%storage_path%/app/file-manager/',
         ],
 
         /**

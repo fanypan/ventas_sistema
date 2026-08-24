@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Models\Tenant;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use RuntimeException;
+use Symfony\Component\Process\Process;
 
 class BackupTenantsCommand extends Command
 {
@@ -39,8 +41,9 @@ class BackupTenantsCommand extends Command
 
         $connection = config('database.default');
         $config = config("database.connections.{$connection}");
+        $driver = $config['driver'] ?? '';
 
-        if (($config['driver'] ?? '') === 'sqlite') {
+        if ($driver === 'sqlite') {
             $source = $config['database'] === ':memory:' ? null : $config['database'];
             if ($source && is_file($source)) {
                 File::copy($source, $file);
@@ -49,17 +52,27 @@ class BackupTenantsCommand extends Command
             return;
         }
 
-        $cmd = sprintf(
-            'mysqldump --host=%s --port=%s --user=%s --password=%s %s > %s',
-            escapeshellarg($config['host'] ?? '127.0.0.1'),
-            escapeshellarg((string) ($config['port'] ?? 3306)),
-            escapeshellarg($config['username'] ?? ''),
-            escapeshellarg($config['password'] ?? ''),
-            escapeshellarg($database),
-            escapeshellarg($file)
-        );
+        if ($driver !== 'pgsql') {
+            throw new RuntimeException(
+                "tenants:backup solo soporta pgsql (actual: {$driver})."
+            );
+        }
 
         $this->info('Dump '.$database);
-        passthru($cmd);
+
+        $process = new Process([
+            'pg_dump',
+            '--host='.($config['host'] ?? '127.0.0.1'),
+            '--port='.($config['port'] ?? 5432),
+            '--username='.($config['username'] ?? ''),
+            '--dbname='.$database,
+            '--no-owner',
+            '--format=plain',
+            '--file='.$file,
+        ]);
+        $process->setTimeout(300);
+        $process->mustRun(null, [
+            'PGPASSWORD' => (string) ($config['password'] ?? ''),
+        ]);
     }
 }

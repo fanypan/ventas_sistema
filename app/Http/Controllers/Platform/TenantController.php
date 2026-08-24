@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Platform;
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Rules\RucParaguay;
+use App\Rules\TenantSlug;
 use App\Services\Billing\SubscriptionService;
+use App\Support\RucParaguay as RucParaguaySupport;
+use App\Support\TenantSetupPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -31,8 +35,8 @@ class TenantController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'alpha_dash', 'max:63', 'unique:tenants,slug'],
-            'ruc' => ['nullable', 'string', 'max:30'],
+            'slug' => ['required', 'string', 'max:56', new TenantSlug, 'unique:tenants,slug'],
+            'ruc' => ['nullable', 'string', 'max:30', new RucParaguay(allowConsumidorFinal: false)],
             'plan_id' => ['required', 'exists:plans,id'],
             'admin_name' => ['required', 'string', 'max:255'],
             'admin_email' => ['required', 'email'],
@@ -43,22 +47,36 @@ class TenantController extends Controller
         $password = Str::random(12);
         $plan = Plan::findOrFail($data['plan_id']);
 
-        $tenant = Tenant::create([
-            'name' => $data['name'],
-            'slug' => $data['slug'],
-            'ruc' => $data['ruc'] ?? null,
-            'status' => Tenant::STATUS_PENDING,
-            'plan_id' => $plan->id,
-            'admin_name' => $data['admin_name'],
-            'admin_email' => $data['admin_email'],
-            'admin_password_hash' => Hash::make($password),
-            'brand_color' => $data['brand_color'] ?? null,
-            'setup_password' => $password,
-        ]);
+        app()->instance(TenantSetupPassword::PENDING, $password);
+
+        try {
+            $tenant = Tenant::create([
+                'name' => $data['name'],
+                'slug' => $data['slug'],
+                'ruc' => $data['ruc'] ? RucParaguaySupport::format($data['ruc']) : null,
+                'status' => Tenant::STATUS_PENDING,
+                'plan_id' => $plan->id,
+                'admin_name' => $data['admin_name'],
+                'admin_email' => $data['admin_email'],
+                'admin_password_hash' => Hash::make($password),
+                'brand_color' => $data['brand_color'] ?? null,
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            Alert::error(
+                'No se pudo crear el cliente',
+                'Falló el aprovisionamiento. Revisá los logs o probá de nuevo con el mismo slug.'
+            )->toToast();
+
+            return back()->withInput();
+        } finally {
+            app()->forgetInstance(TenantSetupPassword::PENDING);
+        }
 
         $subscriptions->start($tenant, $plan, $data['interval']);
 
-        Alert::success('Cliente creado', 'Se está aprovisionando '.$tenant->url())->toToast();
+        Alert::success('Cliente creado', 'Se aprovisionó '.$tenant->url())->toToast();
 
         return redirect()->route('platform.tenants.show', $tenant)->with('plain_password', $password);
     }

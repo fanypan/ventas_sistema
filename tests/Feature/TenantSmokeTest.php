@@ -12,10 +12,11 @@ class TenantSmokeTest extends TenantTestCase
 {
     public function test_tenant_login_page_and_auth(): void
     {
-        $this->tenantGet('/login')->assertOk();
+        $this->tenantGet('/')->assertOk();
+        $this->tenantGet('/login')->assertRedirect('/');
 
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
-            ->post('http://demo.localhost/login', [
+            ->post('http://demo.localhost/', [
                 'email' => 'admin@demo.test',
                 'password' => 'password',
             ])

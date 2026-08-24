@@ -5,11 +5,17 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Jobs\SetupTenantJob;
+use App\Jobs\Tenant\CreateTenantDatabaseJob;
+use App\Jobs\Tenant\MigrateTenantDatabaseJob;
+use App\Support\TenantDatabaseName;
+use App\Support\TenantPermissionCache;
+use App\Support\TenantSetupPassword;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Spatie\Permission\PermissionRegistrar;
+use Illuminate\Support\Str;
 use Stancl\JobPipeline\JobPipeline;
+use Stancl\Tenancy\DatabaseConfig;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
@@ -24,7 +30,11 @@ class TenancyServiceProvider extends ServiceProvider
         $queueProvisioning = config('queue.default') !== 'sync';
 
         return [
-            Events\CreatingTenant::class => [],
+            Events\CreatingTenant::class => [
+                function (Events\CreatingTenant $event) {
+                    TenantSetupPassword::captureFromCreating($event->tenant);
+                },
+            ],
             Events\TenantCreated::class => [
                 function (Events\TenantCreated $event) {
                     $tenant = $event->tenant;
@@ -35,8 +45,8 @@ class TenancyServiceProvider extends ServiceProvider
                     }
                 },
                 JobPipeline::make([
-                    Jobs\CreateDatabase::class,
-                    Jobs\MigrateDatabase::class,
+                    CreateTenantDatabaseJob::class,
+                    MigrateTenantDatabaseJob::class,
                 ])->send(function (Events\TenantCreated $event) {
                     return $event->tenant;
                 })->shouldBeQueued($queueProvisioning),
@@ -61,13 +71,28 @@ class TenancyServiceProvider extends ServiceProvider
             Events\DomainUpdated::class => [],
             Events\DeletingDomain::class => [],
             Events\DomainDeleted::class => [],
+            Events\CreatingDatabase::class => [
+                function (Events\CreatingDatabase $event) {
+                    $tenant = $event->tenant;
+
+                    if ($tenant->provisioned_at !== null) {
+                        return;
+                    }
+
+                    $manager = $tenant->database()->manager();
+                    $name = $tenant->database()->getName();
+
+                    if ($manager->databaseExists($name)) {
+                        $manager->deleteDatabase($tenant);
+                    }
+                },
+            ],
             Events\DatabaseCreated::class => [],
             Events\DatabaseMigrated::class => [
                 function (Events\DatabaseMigrated $event) {
-                    $key = 'tenant-setup-password:'.$event->tenant->getTenantKey();
-                    $password = cache()->pull($key)
-                        ?? $event->tenant->setup_password
-                        ?? \Illuminate\Support\Str::random(12);
+                    $password = TenantSetupPassword::pull((string) $event->tenant->getTenantKey())
+                        ?? Str::random(12);
+
                     SetupTenantJob::dispatchSync($event->tenant, $password);
                 },
             ],
@@ -85,11 +110,15 @@ class TenancyServiceProvider extends ServiceProvider
             Events\BootstrappingTenancy::class => [],
             Events\TenancyBootstrapped::class => [
                 function () {
-                    app()[PermissionRegistrar::class]->forgetCachedPermissions();
+                    TenantPermissionCache::scopeToCurrentTenant();
                 },
             ],
             Events\RevertingToCentralContext::class => [],
-            Events\RevertedToCentralContext::class => [],
+            Events\RevertedToCentralContext::class => [
+                function () {
+                    TenantPermissionCache::scopeToCentral();
+                },
+            ],
             Events\SyncedResourceSaved::class => [
                 Listeners\UpdateSyncedResource::class,
             ],
@@ -104,6 +133,10 @@ class TenancyServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        DatabaseConfig::generateDatabaseNamesUsing(
+            fn ($tenant) => TenantDatabaseName::for($tenant)
+        );
+
         $this->bootEvents();
         $this->mapRoutes();
         $this->makeTenancyMiddlewareHighestPriority();
