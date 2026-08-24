@@ -17,7 +17,9 @@ class AuthenticateSession
             return $next($request);
         }
 
-        foreach (['web', 'platform'] as $guard) {
+        $this->forgetForeignGuard($request);
+
+        foreach ($this->guardsForCurrentContext() as $guard) {
             $user = $request->user($guard);
             if ($user === null) {
                 continue;
@@ -27,13 +29,36 @@ class AuthenticateSession
         }
 
         return tap($next($request), function () use ($request) {
-            foreach (['web', 'platform'] as $guard) {
+            foreach ($this->guardsForCurrentContext() as $guard) {
                 $user = $request->user($guard);
                 if ($user !== null) {
                     $request->session()->put('password_hash_'.$guard, $user->getAuthPassword());
                 }
             }
         });
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function guardsForCurrentContext(): array
+    {
+        return tenancy()->initialized ? ['web'] : ['platform'];
+    }
+
+    private function forgetForeignGuard(Request $request): void
+    {
+        $foreign = tenancy()->initialized ? 'platform' : 'web';
+        $auth = $this->auth->guard($foreign);
+
+        $request->session()->forget($auth->getName());
+        $request->session()->forget('password_hash_'.$foreign);
+
+        if (method_exists($auth, 'getRecallerName')) {
+            $recaller = $auth->getRecallerName();
+            $request->cookies->remove($recaller);
+            cookie()->queue(cookie()->forget($recaller));
+        }
     }
 
     private function validateGuard(Request $request, string $guard, object $user): void

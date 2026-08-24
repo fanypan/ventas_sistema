@@ -108,4 +108,15 @@ class LandingAndPlatformTest extends TestCase
             ->post("/{$path}/clientes", $payload + ['slug' => 'mi_negocio'])
             ->assertSessionHasErrors('slug');
     }
+
+    public function test_platform_login_ignores_stale_tenant_web_session(): void
+    {
+        $path = config('saas.platform_path');
+        $webSessionKey = $this->app['auth']->guard('web')->getName();
+
+        $this->withSession([$webSessionKey => 2])
+            ->get("/{$path}/login")
+            ->assertOk()
+            ->assertSee('Ingresá a la plataforma');
+    }
 }

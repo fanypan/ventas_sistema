@@ -62,4 +62,13 @@ class AuthenticateSessionTest extends TenantTestCase
             ->tenantGet('/admin/dashboard')
             ->assertOk();
     }
+
+    public function test_tenant_login_ignores_stale_platform_session(): void
+    {
+        $platformSessionKey = $this->app['auth']->guard('platform')->getName();
+
+        $this->withSession([$platformSessionKey => 1])
+            ->tenantGet('/')
+            ->assertOk();
+    }
 }
