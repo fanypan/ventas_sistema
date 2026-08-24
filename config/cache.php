@@ -107,4 +107,10 @@ return [
 
     'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
 
+    /*
+    | Laravel 13: no unserializar objetos arbitrarios desde cache.
+    | Spatie Permission guarda arrays hidratables, no modelos Eloquent.
+    */
+    'serializable_classes' => false,
+
 ];

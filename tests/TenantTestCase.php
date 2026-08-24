@@ -56,12 +56,16 @@ abstract class TenantTestCase extends TestCase
 
     protected function tenantPost(string $uri, array $data = [])
     {
-        return $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+        return $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->post('http://demo.localhost'.$uri, $data);
     }
 
     protected function tearDown(): void
     {
+        if (tenancy()->initialized) {
+            tenancy()->end();
+        }
+
         foreach (glob(database_path('tenant*')) ?: [] as $file) {
             @unlink($file);
         }

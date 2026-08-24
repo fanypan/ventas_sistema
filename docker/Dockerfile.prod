@@ -1,7 +1,7 @@
 # Imagen de producción: PHP-FPM + Nginx (targets `app` y `nginx`).
 # No usar este Dockerfile con `php artisan serve`.
 
-FROM php:8.2-fpm-bookworm AS app
+FROM php:8.3-fpm-bookworm AS app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git unzip curl gnupg ca-certificates \

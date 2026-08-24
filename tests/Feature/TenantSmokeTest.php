@@ -15,7 +15,7 @@ class TenantSmokeTest extends TenantTestCase
         $this->tenantGet('/')->assertOk();
         $this->tenantGet('/login')->assertRedirect('/');
 
-        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+        $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->post('http://demo.localhost/', [
                 'email' => 'admin@demo.test',
                 'password' => 'password',

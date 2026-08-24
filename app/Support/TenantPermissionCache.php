@@ -24,7 +24,8 @@ final class TenantPermissionCache
 
     private static function useKey(string $key): void
     {
-        PermissionRegistrar::$cacheKey = $key;
-        app(PermissionRegistrar::class)->clearClassPermissions();
+        $registrar = app(PermissionRegistrar::class);
+        $registrar->cacheKey = $key;
+        $registrar->clearPermissionsCollection();
     }
 }

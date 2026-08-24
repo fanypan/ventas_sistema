@@ -32,7 +32,7 @@ class LandingAndPlatformTest extends TestCase
 
         $this->get("/{$path}/login")->assertOk();
 
-        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+        $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->post("/{$path}/login", [
                 'email' => 'plataforma@arandutech.com',
                 'password' => 'plataforma',
@@ -63,7 +63,7 @@ class LandingAndPlatformTest extends TestCase
         $path = config('saas.platform_path');
 
         $this->from("/{$path}/login")
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->followingRedirects()
             ->post("/{$path}/login", [
                 'email' => 'nadie@arandutech.com',
@@ -98,13 +98,13 @@ class LandingAndPlatformTest extends TestCase
 
         $this->actingAs(PlatformUser::first(), 'platform')
             ->from("/{$path}/clientes/nuevo")
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->post("/{$path}/clientes", $payload + ['slug' => 'mi-negocio'])
             ->assertSessionHasErrors('slug');
 
         $this->actingAs(PlatformUser::first(), 'platform')
             ->from("/{$path}/clientes/nuevo")
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->post("/{$path}/clientes", $payload + ['slug' => 'mi_negocio'])
             ->assertSessionHasErrors('slug');
     }

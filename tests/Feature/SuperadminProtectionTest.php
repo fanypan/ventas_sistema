@@ -23,12 +23,12 @@ class SuperadminProtectionTest extends TenantTestCase
         });
 
         $this->actingAs($this->tenantUser)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->delete('http://demo.localhost/admin/user', ['id' => $superId])
             ->assertForbidden();
 
         $this->actingAs($this->tenantUser)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->put('http://demo.localhost/admin/user', [
                 'id' => $superId,
                 'name' => 'Hackeado',
@@ -52,12 +52,12 @@ class SuperadminProtectionTest extends TenantTestCase
         });
 
         $this->actingAs($this->tenantUser)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->delete('http://demo.localhost/admin/role', ['id' => $roleId])
             ->assertForbidden();
 
         $this->actingAs($this->tenantUser)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->put('http://demo.localhost/admin/role', [
                 'id' => $roleId,
                 'name' => 'no-super',
@@ -67,7 +67,7 @@ class SuperadminProtectionTest extends TenantTestCase
             ->assertForbidden();
 
         $this->actingAs($this->tenantUser)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->post('http://demo.localhost/admin/role', [
                 'name' => 'superadmin',
                 'guard_name' => 'web',

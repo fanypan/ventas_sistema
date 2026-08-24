@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Http\Middleware\VerifyCsrfToken;
+use App\Http\Middleware\PreventRequestForgery;
 use App\Models\PlatformUser;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -36,7 +36,7 @@ class AuthenticateSessionTest extends TenantTestCase
     {
         $path = config('saas.platform_path');
 
-        $this->withoutMiddleware(VerifyCsrfToken::class)
+        $this->withoutMiddleware(PreventRequestForgery::class)
             ->post("/{$path}/login", [
                 'email' => 'plataforma@arandutech.com',
                 'password' => 'plataforma',

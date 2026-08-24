@@ -12,7 +12,7 @@ class TenantLoginSecurityTest extends TenantTestCase
         $this->tenantGet('/');
         $before = $this->app['session']->getId();
 
-        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+        $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->post('http://demo.localhost/', [
                 'email' => 'admin@demo.test',
                 'password' => 'password',
@@ -27,7 +27,7 @@ class TenantLoginSecurityTest extends TenantTestCase
     {
         $recaller = Auth::guard('web')->getRecallerName();
 
-        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+        $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->post('http://demo.localhost/', [
                 'email' => 'admin@demo.test',
                 'password' => 'password',
@@ -40,7 +40,7 @@ class TenantLoginSecurityTest extends TenantTestCase
     {
         $recaller = Auth::guard('web')->getRecallerName();
 
-        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+        $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->post('http://demo.localhost/', [
                 'email' => 'admin@demo.test',
                 'password' => 'password',

@@ -64,6 +64,10 @@ class AuthenticateSession
         $this->auth->guard($guard)->logout();
         $request->session()->flush();
 
-        throw new AuthenticationException('Unauthenticated.', [$guard]);
+        throw new AuthenticationException(
+            'Unauthenticated.',
+            [$guard],
+            $guard === 'platform' ? route('platform.login') : route('login')
+        );
     }
 }

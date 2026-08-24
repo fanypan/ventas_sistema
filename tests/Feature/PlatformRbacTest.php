@@ -60,12 +60,12 @@ class PlatformRbacTest extends TestCase
         $plan = Plan::first();
 
         $this->actingAs($staff, 'platform')
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->delete("/{$this->path}/clientes/{$tenant->id}")
             ->assertForbidden();
 
         $this->actingAs($staff, 'platform')
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->post("/{$this->path}/clientes/{$tenant->id}/baja")
             ->assertForbidden();
 
@@ -74,7 +74,7 @@ class PlatformRbacTest extends TestCase
             ->assertForbidden();
 
         $this->actingAs($staff, 'platform')
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
             ->put("/{$this->path}/planes/{$plan->id}", [
                 'name' => 'Hack',
                 'price_monthly' => 1,

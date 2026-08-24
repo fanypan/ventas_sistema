@@ -13,12 +13,12 @@ class TenantPermissionIsolationTest extends TenantTestCase
         $tenantKey = $central.'.'.$this->tenant->getTenantKey();
 
         $this->tenant->run(function () use ($tenantKey) {
-            $this->assertSame($tenantKey, PermissionRegistrar::$cacheKey);
+            $this->assertSame($tenantKey, app(PermissionRegistrar::class)->cacheKey);
             app(PermissionRegistrar::class)->getPermissions();
             $this->assertTrue(cache()->has($tenantKey));
         });
 
-        $this->assertSame($central, PermissionRegistrar::$cacheKey);
+        $this->assertSame($central, app(PermissionRegistrar::class)->cacheKey);
         $this->assertTrue(cache()->has($tenantKey));
     }
 }

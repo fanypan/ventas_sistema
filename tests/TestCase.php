@@ -14,4 +14,13 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
         RateLimiter::clear('platform-login');
     }
+
+    protected function tearDown(): void
+    {
+        if (function_exists('tenancy') && tenancy()->initialized) {
+            tenancy()->end();
+        }
+
+        parent::tearDown();
+    }
 }

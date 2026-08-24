@@ -1,4 +1,4 @@
-FROM php:8.2-cli-bookworm
+FROM php:8.3-cli-bookworm
 
 # pg_dump debe coincidir con el major de postgres:16 (el cliente de Bookworm es 15).
 RUN apt-get update && apt-get install -y --no-install-recommends \
