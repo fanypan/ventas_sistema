@@ -4,6 +4,7 @@ namespace App\Services\Tenancy;
 
 use App\Models\Tenant;
 use App\Support\TenantSetupPassword;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\DatabaseManager;
@@ -44,6 +45,27 @@ class TenantProvisioningRollback
             } else {
                 app(DatabaseManager::class)->reconnectToCentral();
             }
+
+            $this->deleteFilesystem((string) $tenantId);
+        }
+    }
+
+    public function deleteFilesystem(string $tenantId): void
+    {
+        $dir = base_path('storage/tenant'.$tenantId);
+
+        if (! is_dir($dir)) {
+            return;
+        }
+
+        try {
+            File::deleteDirectory($dir);
+        } catch (\Throwable $e) {
+            Log::error('Tenant provisioning rollback: no se pudo borrar el storage del tenant', [
+                'tenant_id' => $tenantId,
+                'path' => $dir,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 

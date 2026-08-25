@@ -5,13 +5,17 @@ namespace Tests\Feature;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Support\TenantSetupPassword;
+use Database\Seeders\PlanSeeder;
+use Database\Seeders\PlatformUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Tests\CleansTenantArtifacts;
 use Tests\TestCase;
 
 class TenantSetupPasswordPersistenceTest extends TestCase
 {
+    use CleansTenantArtifacts;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -25,8 +29,8 @@ class TenantSetupPasswordPersistenceTest extends TestCase
         ]);
 
         $this->seed([
-            \Database\Seeders\PlanSeeder::class,
-            \Database\Seeders\PlatformUserSeeder::class,
+            PlanSeeder::class,
+            PlatformUserSeeder::class,
         ]);
     }
 
@@ -45,6 +49,7 @@ class TenantSetupPasswordPersistenceTest extends TestCase
             'admin_password_hash' => Hash::make($plain),
             'setup_password' => $plain,
         ]);
+        $this->rememberTenantArtifact($tenant->getTenantKey());
 
         $this->assertNull($tenant->fresh()->setup_password);
         $this->assertNull(TenantSetupPassword::pull($tenant->getTenantKey()));
@@ -55,9 +60,7 @@ class TenantSetupPasswordPersistenceTest extends TestCase
 
     protected function tearDown(): void
     {
-        foreach (glob(database_path('tenant*')) ?: [] as $file) {
-            @unlink($file);
-        }
+        $this->cleanupTenantArtifacts();
 
         parent::tearDown();
     }

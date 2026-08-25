@@ -2,14 +2,18 @@
 
 namespace Tests;
 
+use App\Http\Middleware\PreventRequestForgery;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
+use Database\Seeders\PlanSeeder;
+use Database\Seeders\PlatformUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
 abstract class TenantTestCase extends TestCase
 {
+    use CleansTenantArtifacts;
     use RefreshDatabase;
 
     protected Tenant $tenant;
@@ -27,8 +31,8 @@ abstract class TenantTestCase extends TestCase
         ]);
 
         $this->seed([
-            \Database\Seeders\PlanSeeder::class,
-            \Database\Seeders\PlatformUserSeeder::class,
+            PlanSeeder::class,
+            PlatformUserSeeder::class,
         ]);
 
         $plan = Plan::where('slug', 'negocio')->first() ?? Plan::first();
@@ -44,6 +48,8 @@ abstract class TenantTestCase extends TestCase
             'setup_password' => 'password',
         ]);
 
+        $this->rememberTenantArtifact($this->tenant->getTenantKey());
+
         $this->tenantUser = $this->tenant->run(function () {
             return User::where('email', 'admin@demo.test')->firstOrFail();
         });
@@ -56,19 +62,14 @@ abstract class TenantTestCase extends TestCase
 
     protected function tenantPost(string $uri, array $data = [])
     {
-        return $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+        return $this->withoutMiddleware(PreventRequestForgery::class)
             ->post('http://demo.localhost'.$uri, $data);
     }
 
     protected function tearDown(): void
     {
-        if (tenancy()->initialized) {
-            tenancy()->end();
-        }
-
-        foreach (glob(database_path('tenant*')) ?: [] as $file) {
-            @unlink($file);
-        }
+        $tenantId = isset($this->tenant) ? $this->tenant->getTenantKey() : null;
+        $this->cleanupTenantArtifacts($tenantId);
 
         parent::tearDown();
     }

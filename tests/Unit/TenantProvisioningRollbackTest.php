@@ -5,14 +5,17 @@ namespace Tests\Unit;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Services\Tenancy\TenantProvisioningRollback;
+use Database\Seeders\PlanSeeder;
 use Database\Seeders\TenantDatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Tests\CleansTenantArtifacts;
 use Tests\TestCase;
 
 class TenantProvisioningRollbackTest extends TestCase
 {
+    use CleansTenantArtifacts;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -25,7 +28,7 @@ class TenantProvisioningRollbackTest extends TestCase
             'queue.default' => 'sync',
         ]);
 
-        $this->seed(\Database\Seeders\PlanSeeder::class);
+        $this->seed(PlanSeeder::class);
     }
 
     public function test_rollback_removes_unprovisioned_tenant(): void
@@ -43,10 +46,16 @@ class TenantProvisioningRollbackTest extends TestCase
         ]);
         $tenant->id = (string) Str::uuid();
         $tenant->saveQuietly();
+        $this->rememberTenantArtifact($tenant->getTenantKey());
+
+        $storageDir = base_path('storage/tenant'.$tenant->getTenantKey());
+        mkdir($storageDir.'/app/public', 0777, true);
+        $this->assertDirectoryExists($storageDir);
 
         app(TenantProvisioningRollback::class)->rollback($tenant);
 
         $this->assertDatabaseMissing('tenants', ['slug' => 'rollbacktest']);
+        $this->assertDirectoryDoesNotExist($storageDir);
     }
 
     public function test_rollback_skips_provisioned_tenant(): void
@@ -95,5 +104,12 @@ class TenantProvisioningRollbackTest extends TestCase
         }
 
         $this->assertDatabaseMissing('tenants', ['slug' => 'failtest']);
+    }
+
+    protected function tearDown(): void
+    {
+        $this->cleanupTenantArtifacts();
+
+        parent::tearDown();
     }
 }
