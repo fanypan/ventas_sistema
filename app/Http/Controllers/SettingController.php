@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSettingRequest;
+use App\Http\Requests\UpdateSettingsRequest;
 use App\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -12,63 +13,50 @@ class SettingController extends Controller
 {
     public function index()
     {
-        $x['title']     = 'Setting';
-        $x['category']  = Setting::select('category')->groupBy('category')->get();
+        $x['title'] = 'Setting';
+        $x['category'] = Setting::select('category')->groupBy('category')->get();
+
         return view('admin.setting', $x);
     }
 
-    public function store(Request $request)
+    public function store(StoreSettingRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name'     => ['required', 'string', 'max:255'],
-            'key'      => ['required', 'string', 'max:255', 'unique:settings'],
-            'value'    => ['nullable', 'string'],
-            'category' => ['required', 'string'],
-            'type'     => ['required', 'string'],
-        ]);
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
         try {
-            Setting::create($request->all());
+            Setting::create($request->validated());
             Alert::success('Listo', 'Ajuste creado.')->toToast();
         } catch (\Throwable $th) {
             report($th);
             Alert::error('No se pudo crear el ajuste', 'Revisá los datos e intentá de nuevo.')->toToast();
         }
+
         return back();
     }
 
     public function show(Request $request)
     {
         $setting = Setting::find($request->id);
+
         return response()->json([
-            'status'    => Response::HTTP_OK,
-            'message'   => 'Datos del ajuste',
-            'data'      => $setting
+            'status' => Response::HTTP_OK,
+            'message' => 'Datos del ajuste',
+            'data' => $setting,
         ], Response::HTTP_OK);
     }
 
-    public function update(Request $request)
+    public function update(UpdateSettingsRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'key'       => ['required', 'array'],
-            'value'     => ['required', 'array']
-        ]);
-        
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
         try {
-            for ($i = 0; $i < count($request->key); $i++) { 
-                Setting::where(['key' => $request->key[$i]])->update(['value' => $request->value[$i]]);
+            $keys = $request->validated('key');
+            $values = $request->validated('value');
+            for ($i = 0; $i < count($keys); $i++) {
+                Setting::where(['key' => $keys[$i]])->update(['value' => $values[$i]]);
             }
             Alert::success('Listo', 'Configuración guardada.')->toToast();
         } catch (\Throwable $th) {
             report($th);
             Alert::error('No se pudieron guardar los ajustes', 'Intentá de nuevo.')->toToast();
         }
+
         return back();
     }
 
@@ -83,6 +71,7 @@ class SettingController extends Controller
             report($th);
             Alert::error('No se pudo eliminar el ajuste', 'Intentá de nuevo.')->toToast();
         }
+
         return back();
     }
 }

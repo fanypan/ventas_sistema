@@ -10,6 +10,7 @@ SaaS sales-assisted de POS para Paraguay (Laravel 13, una PostgreSQL por cliente
 4. Operación: `docs/SAAS.md`. Producto: `PRODUCT.md`. Visual: `DESIGN.md` (tokens en el frontmatter; sidecar `.impeccable/design.json`).
 5. UI: no rearmar menús del POS. Índigo en producto (POS + plataforma); teal solo en landing/WhatsApp. Outfit, densidad de escritorio, voz rioplatense.
 6. Este POS **no se conecta a SIFEN**. FE = HTTP a `api_facturacion_electronica` (`/api/v1`), configurada en el panel admin del comercio.
+7. PHP: controller delgado + FormRequest + Action/Service. Eloquent en la Action/Service (CRUD chico puede crear desde `validated()`). No repositorios genéricos ni dominio hexagonal. Regla: `.cursor/rules/laravel-code.mdc`.
 
 ## Guardarraíles
 

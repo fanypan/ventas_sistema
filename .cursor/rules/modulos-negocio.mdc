@@ -16,5 +16,6 @@ Al crear o tocar un módulo:
 4. Conservar menús/rutas actuales; pulir UI sin rearmar navegación. Tokens y reglas: [DESIGN.md](../../DESIGN.md).
 5. Voz rioplatense en textos nuevos (“Ingresá”, “Guardá”).
 6. La caja es crítica: acciones de venta en un paso, sin wizards. Índigo para primarios; no copiar el teal de la landing.
+7. Capas: FormRequest en `Http/Requests/`, Action en `Actions/`, Service en `Services/`. El controller no valida ni abre transacciones. Ver `.cursor/rules/laravel-code.mdc`.
 
-POS: las ventas se cierran en `SalesAjaxController@processSale`, no en `SaleController@store` (está vacío). Factura electrónica: HTTP a la API **después** del `DB::commit`; no a SIFEN.
+POS: las ventas se cierran en `SalesAjaxController@processSale` → `Modules\Sales\Actions\ProcessSale` (no en `SaleController@store`). Stock del carrito: `CartService`. Factura electrónica: HTTP a la API **después** del `DB::commit`; no a SIFEN.

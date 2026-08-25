@@ -25,9 +25,17 @@ El stub (`stubs/module-generator`) ya sale con `TenantMiddleware::web()` y **sin
 
 Si usás `module:make` (nwidart), los stubs están en `stubs/nwidart-stubs` (`config/modules.php`).
 
+## Capas
+
+- Validación: `Modules/{Name}/Http/Requests/` (no `$request->validate` ni `Validator::make` en el controller).
+- Escritura con transacción/efectos: `Modules/{Name}/Actions/{Verb}{Thing}.php` con `execute(...)`.
+- Varios métodos con las mismas invariantes: `Modules/{Name}/Services/`.
+- CRUD chico: FormRequest + `Model::create($request->validated())`. No `FooRepository`.
+- Stubs de alta: controller delgado + `Store{Model}Request` / `Update{Model}Request`.
+
 ## POS
 
-Cerrar venta = `SalesAjaxController@processSale`. Stock se descuenta al carrito. Factura electrónica = HTTP a la API de facturación **después** del `DB::commit`. Este POS no habla con SIFEN.
+Cerrar venta = `SalesAjaxController@processSale` → `ProcessSale`. Stock se descuenta al carrito (`CartService`). Factura electrónica = HTTP a la API de facturación **después** del `DB::commit`. Este POS no habla con SIFEN.
 
 ## UI
 

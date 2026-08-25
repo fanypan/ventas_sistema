@@ -1,0 +1,38 @@
+---
+description: Capas Laravel pragmáticas — controllers delgados, FormRequests, Actions/Services
+globs: app/**/*.php,Modules/**/*.php
+alwaysApply: false
+---
+
+# Capas Laravel (pragmático)
+
+Controller delgado + FormRequest + Action/Service. Eloquent vive en la Action/Service (o en CRUD chico). **No** Clean Architecture hexagonal: ni repositorio genérico por modelo ni entidades paralelas a Eloquent.
+
+## Qué va dónde
+
+- **Controller**: HTTP. Autoriza (middleware / `AuthorizesCrud`), type-hint del FormRequest, llama **una** Action/Service, responde (view, redirect + Alert, JSON). Sin `$request->validate`, sin `DB::transaction`, sin reglas de stock/caja.
+- **FormRequest**: reglas + mensajes. `authorize()` solo si no alcanza el middleware. `validated()` es el contrato de entrada.
+  - Módulos: `Modules/{Name}/Http/Requests/StoreFooRequest.php`
+  - Plataforma: `app/Http/Requests/Platform/`
+  - Tenant (app): `app/Http/Requests/`
+- **Action**: un caso de uso de escritura con transacción o efectos (`execute(...)`). Ej. `Modules/Sales/Actions/ProcessSale.php`.
+- **Service**: varios métodos que comparten invariantes. Ej. `CartService`, `SubscriptionService`.
+- **Eloquent**: persistencia en Action/Service. Listados simples (`::paginate`) pueden quedar en el controller.
+- **Support**: funciones puras sin I/O (`app/Support`, `parse_currency`). No un cajón `Utils`.
+
+CRUD chico (alta de cliente/proveedor): FormRequest + `Model::create($request->validated())` en el controller. No inventar un Service de 10 líneas.
+
+## No hacer
+
+- `FooRepository` que envuelve `Foo::` (en `config/modules.php` `repository.generate` ya está en `false`)
+- Entidades de dominio duplicando models
+- God-service que absorba todo un controller
+- Cambiar contratos JSON del POS (`sales/ajax/*`) ni rearmar menús
+- Mezclar este refactor con upgrade de Laravel
+
+## Estilo
+
+- Una responsabilidad por método. Si un método valida + transacciona + manda mail, extraé.
+- Clases/métodos en inglés; textos de UI en rioplatense.
+- Errores de negocio: `App\Exceptions\BusinessRuleException` (o `ValidationException`). El renderer en `bootstrap/app.php` traduce a JSON `{'error': ...}` o back().
+- FE: HTTP a la API **después** del `DB::commit`, dentro de la Action de cierre, no en el controller.

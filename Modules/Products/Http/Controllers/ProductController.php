@@ -2,20 +2,22 @@
 
 namespace Modules\Products\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
+use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Routing\Controller;
+use Modules\Products\Entities\Brand;
+use Modules\Products\Entities\Category;
 use Modules\Products\Entities\Product;
+use Modules\Products\Http\Requests\StoreProductRequest;
+use Modules\Products\Http\Requests\UpdateProductRequest;
+use Modules\Products\Services\ProductImageService;
+use Modules\Purchases\Entities\PurchaseDetail;
 
 class ProductController extends Controller
 {
     use AuthorizesCrud;
 
-    private const IMAGE_RULES = 'nullable|file|mimes:jpeg,png,jpg,gif,webp|max:2048';
-
-    public function __construct()
+    public function __construct(private ProductImageService $images)
     {
         $this->authorizeCrud('product', [
             'expiringProducts',
@@ -25,19 +27,16 @@ class ProductController extends Controller
         ]);
     }
 
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
     public function index()
     {
-        $products = \Modules\Products\Entities\Product::with('category')->latest()->paginate(10);
+        $products = Product::with('category')->latest()->paginate(10);
+
         return view('products::index', compact('products'));
     }
 
     public function expiringProducts()
     {
-        $expiringBatches = \Modules\Purchases\Entities\PurchaseDetail::with(['product', 'purchase.supplier'])
+        $expiringBatches = PurchaseDetail::with(['product', 'purchase.supplier'])
             ->whereNotNull('expiration_date')
             ->where('expiration_date', '<=', now()->addDays(30))
             ->where('expiration_date', '>=', now())
@@ -49,7 +48,7 @@ class ProductController extends Controller
 
     public function zeroStock()
     {
-        $products = \Modules\Products\Entities\Product::with('category', 'brand')
+        $products = Product::with('category', 'brand')
             ->where('status', 1)
             ->where('stock', '<=', 0)
             ->orderBy('description')
@@ -68,7 +67,7 @@ class ProductController extends Controller
 
     public function printBarcode($id)
     {
-        $product = \Modules\Products\Entities\Product::findOrFail($id);
+        $product = Product::findOrFail($id);
 
         if (empty($product->code)) {
             return back()->with('error', 'Este producto no tiene código para imprimir barras.');
@@ -77,62 +76,37 @@ class ProductController extends Controller
         return view('products::barcode', compact('product'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
     public function create()
     {
-        $categories = \Modules\Products\Entities\Category::where('status', 1)->get();
-        $brands = \Modules\Products\Entities\Brand::where('status', 1)->get();
+        $categories = Category::where('status', 1)->get();
+        $brands = Brand::where('status', 1)->get();
+
         return view('products::create', compact('categories', 'brands'));
     }
 
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        merge_currency_fields($request, ['price', 'cost']);
-
-        $request->validate([
-            'code' => 'nullable|string|unique:products,code',
-            'description' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'cost' => 'required|numeric|min:0',
-            'category_id' => 'required|exists:categories,id',
-            'brand_id' => 'nullable|exists:brands,id',
-            'stock' => 'integer|min:0',
-            'model_name' => 'nullable|string|max:100',
-            'warranty_months' => 'nullable|integer|min:0',
-            'image' => self::IMAGE_RULES,
-        ]);
-
-        $this->ensureDefaultProductImage();
-
-        $imagePath = Product::DEFAULT_IMAGE;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-        }
+        $data = $request->validated();
 
         Product::create([
-            'code' => $request->code,
-            'description' => $request->description,
-            'price' => $request->price,
-            'cost' => $request->cost,
-            'stock' => $request->stock ?? 0,
-            'category_id' => $request->category_id,
-            'brand_id' => $request->brand_id,
+            'code' => $data['code'] ?? null,
+            'description' => $data['description'],
+            'price' => $data['price'],
+            'cost' => $data['cost'],
+            'stock' => $data['stock'] ?? 0,
+            'category_id' => $data['category_id'],
+            'brand_id' => $data['brand_id'] ?? null,
             'user_id' => auth()->id(),
             'status' => 1,
-            'model_name' => $request->model_name,
-            'warranty_months' => $this->resolveWarrantyMonths($request),
-            'image' => $imagePath,
+            'model_name' => $data['model_name'] ?? null,
+            'warranty_months' => $this->resolveWarrantyMonths($data),
+            'image' => $this->images->storeUploaded($request->file('image')),
         ]);
 
         return redirect()->route('products.index')->with('success', 'Producto creado con éxito.');
     }
 
     /**
-     * Show the specified resource.
-     * @param int $id
      * @return Renderable
      */
     public function show($id)
@@ -140,68 +114,35 @@ class ProductController extends Controller
         return view('products::show');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
     public function edit($id)
     {
-        $product = \Modules\Products\Entities\Product::findOrFail($id);
-        $categories = \Modules\Products\Entities\Category::where('status', 1)->get();
-        $brands = \Modules\Products\Entities\Brand::where('status', 1)->get();
+        $product = Product::findOrFail($id);
+        $categories = Category::where('status', 1)->get();
+        $brands = Brand::where('status', 1)->get();
+
         return view('products::edit', compact('product', 'categories', 'brands'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
+    public function update(UpdateProductRequest $request, $id)
     {
-        $product = \Modules\Products\Entities\Product::findOrFail($id);
-
-        merge_currency_fields($request, ['price', 'cost']);
-
-        $request->validate([
-            'code' => 'nullable|string|unique:products,code,' . $product->id,
-            'description' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'cost' => 'required|numeric|min:0',
-            'category_id' => 'required|exists:categories,id',
-            'brand_id' => 'nullable|exists:brands,id',
-            'stock' => 'integer|min:0',
-            'model_name' => 'nullable|string|max:100',
-            'warranty_months' => 'nullable|integer|min:0',
-            'status' => 'required|integer|in:0,1',
-            'image' => self::IMAGE_RULES,
-        ]);
-
-        if ($request->hasFile('image')) {
-            if ($product->image && ! $product->usesDefaultImage()) {
-                Storage::disk('public')->delete($product->image);
-            }
-            $imagePath = $request->file('image')->store('products', 'public');
-            $product->image = $imagePath;
-        }
+        $product = Product::findOrFail($id);
+        $data = $request->validated();
 
         $updateData = [
-            'code' => $request->code,
-            'description' => $request->description,
-            'price' => $request->price,
-            'cost' => $request->cost,
-            'stock' => $request->stock ?? 0,
-            'category_id' => $request->category_id,
-            'brand_id' => $request->brand_id,
-            'model_name' => $request->model_name,
-            'warranty_months' => $request->integer('warranty_months'),
-            'status' => $request->status,
+            'code' => $data['code'] ?? null,
+            'description' => $data['description'],
+            'price' => $data['price'],
+            'cost' => $data['cost'],
+            'stock' => $data['stock'] ?? 0,
+            'category_id' => $data['category_id'],
+            'brand_id' => $data['brand_id'] ?? null,
+            'model_name' => $data['model_name'] ?? null,
+            'warranty_months' => (int) ($data['warranty_months'] ?? 0),
+            'status' => $data['status'],
         ];
 
-        if (isset($imagePath)) {
-            $updateData['image'] = $imagePath;
+        if ($request->hasFile('image')) {
+            $updateData['image'] = $this->images->replace($product, $request->file('image'));
         }
 
         $product->update($updateData);
@@ -209,47 +150,21 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Producto actualizado con éxito.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
     public function destroy($id)
     {
-        $product = \Modules\Products\Entities\Product::findOrFail($id);
-        if ($product->image && ! $product->usesDefaultImage()) {
-            Storage::disk('public')->delete($product->image);
-        }
+        $product = Product::findOrFail($id);
+        $this->images->deleteCustom($product);
         $product->delete();
 
         return redirect()->route('products.index')->with('success', 'Producto eliminado exitosamente.');
     }
 
-    private function resolveWarrantyMonths(Request $request): int
+    private function resolveWarrantyMonths(array $data): int
     {
-        if ($request->has('warranty_months') && $request->input('warranty_months') !== '') {
-            return $request->integer('warranty_months');
+        if (array_key_exists('warranty_months', $data) && $data['warranty_months'] !== null && $data['warranty_months'] !== '') {
+            return (int) $data['warranty_months'];
         }
 
         return 12;
-    }
-
-    private function ensureDefaultProductImage(): void
-    {
-        $path = storage_path('app/public/' . Product::DEFAULT_IMAGE);
-
-        if (file_exists($path)) {
-            return;
-        }
-
-        $directory = dirname($path);
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        $fallback = storage_path('app/public/logo.png');
-        if (file_exists($fallback)) {
-            copy($fallback, $path);
-        }
     }
 }

@@ -2,12 +2,11 @@
 
 namespace Modules\Customers\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
-use App\Rules\RucParaguay;
-use App\Support\RucParaguay as RucParaguaySupport;
+use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Routing\Controller;
+use Modules\Customers\Entities\Customer;
+use Modules\Customers\Http\Requests\StoreCustomerRequest;
 
 class CustomerController extends Controller
 {
@@ -18,13 +17,10 @@ class CustomerController extends Controller
         $this->authorizeCrud('customer');
     }
 
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
     public function index()
     {
-        $customers = \Modules\Customers\Entities\Customer::latest()->paginate(10);
+        $customers = Customer::latest()->paginate(10);
+
         return view('customers::index', compact('customers'));
     }
 
@@ -33,30 +29,14 @@ class CustomerController extends Controller
         return view('customers::create');
     }
 
-    public function store(Request $request)
+    public function store(StoreCustomerRequest $request)
     {
-        $request->validate([
-            'nit' => ['nullable', new RucParaguay(), 'unique:customers,nit'],
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
-        ]);
-
-        \Modules\Customers\Entities\Customer::create([
-            'nit' => RucParaguaySupport::format($request->nit),
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'user_id' => auth()->id(),
-            'status' => 1,
-        ]);
+        Customer::create($request->customerPayload(auth()->id()));
 
         return redirect()->route('customers.index')->with('success', 'Cliente registrado con éxito.');
     }
 
     /**
-     * Show the specified resource.
-     * @param int $id
      * @return Renderable
      */
     public function show($id)
@@ -64,32 +44,16 @@ class CustomerController extends Controller
         return view('customers::show');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
     public function edit($id)
     {
         return view('customers::edit');
     }
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
+    public function update($id)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
     public function destroy($id)
     {
         //

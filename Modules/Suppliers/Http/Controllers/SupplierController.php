@@ -2,12 +2,11 @@
 
 namespace Modules\Suppliers\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
-use App\Rules\RucParaguay;
-use App\Support\RucParaguay as RucParaguaySupport;
+use Illuminate\Routing\Controller;
+use Modules\Suppliers\Entities\Supplier;
+use Modules\Suppliers\Http\Requests\StoreSupplierRequest;
+use Modules\Suppliers\Http\Requests\UpdateSupplierRequest;
 
 class SupplierController extends Controller
 {
@@ -18,13 +17,10 @@ class SupplierController extends Controller
         $this->authorizeCrud('supplier');
     }
 
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
     public function index()
     {
-        $suppliers = \Modules\Suppliers\Entities\Supplier::latest()->paginate(10);
+        $suppliers = Supplier::latest()->paginate(10);
+
         return view('suppliers::index', compact('suppliers'));
     }
 
@@ -33,58 +29,31 @@ class SupplierController extends Controller
         return view('suppliers::create');
     }
 
-    public function store(Request $request)
+    public function store(StoreSupplierRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'nit' => ['nullable', new RucParaguay(allowConsumidorFinal: false), 'string', 'max:50'],
-            'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string|max:255',
-        ]);
-
-        \Modules\Suppliers\Entities\Supplier::create([
-            'name' => $request->name,
-            'nit' => RucParaguaySupport::format($request->nit),
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'address' => $request->address,
-        ]);
+        Supplier::create($request->supplierPayload());
 
         return redirect()->route('suppliers.index')->with('success', 'Proveedor creado con éxito');
     }
 
     public function edit($id)
     {
-        $supplier = \Modules\Suppliers\Entities\Supplier::findOrFail($id);
+        $supplier = Supplier::findOrFail($id);
+
         return view('suppliers::edit', compact('supplier'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateSupplierRequest $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'nit' => ['nullable', new RucParaguay(allowConsumidorFinal: false), 'string', 'max:50'],
-            'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string|max:255',
-        ]);
-
-        $supplier = \Modules\Suppliers\Entities\Supplier::findOrFail($id);
-        $supplier->update([
-            'name' => $request->name,
-            'nit' => RucParaguaySupport::format($request->nit),
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'address' => $request->address,
-        ]);
+        $supplier = Supplier::findOrFail($id);
+        $supplier->update($request->supplierPayload());
 
         return redirect()->route('suppliers.index')->with('success', 'Proveedor actualizado con éxito');
     }
 
     public function destroy($id)
     {
-        $supplier = \Modules\Suppliers\Entities\Supplier::findOrFail($id);
+        $supplier = Supplier::findOrFail($id);
         $supplier->delete();
 
         return redirect()->route('suppliers.index')->with('success', 'Proveedor eliminado con éxito');

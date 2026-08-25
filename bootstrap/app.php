@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\HealthController;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
@@ -65,6 +66,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->dontReport([
             TenantCouldNotBeIdentifiedException::class,
+            BusinessRuleException::class,
         ]);
 
         $exceptions->render(function (TenantCouldNotBeIdentifiedException $e, Request $request) {
@@ -73,6 +75,14 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return response()->view('errors.404', ['exception' => $e], 404);
+        });
+
+        $exceptions->render(function (BusinessRuleException $e, Request $request) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json($e->payload(), $e->status());
+            }
+
+            return back()->with('error', $e->getMessage());
         });
     })
     ->withSchedule(function (Schedule $schedule) {

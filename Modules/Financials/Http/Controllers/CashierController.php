@@ -4,6 +4,7 @@ namespace Modules\Financials\Http\Controllers;
 
 use App\Services\Billing\PlanLimitService;
 use Illuminate\Http\Request;
+use Modules\Financials\Http\Requests\OpenCajaRequest;
 use Illuminate\Routing\Controller;
 use Modules\Financials\Entities\Caja;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
@@ -28,23 +29,18 @@ class CashierController extends Controller
         return view('financials::cajas.create');
     }
 
-    public function store(Request $request)
+    public function store(OpenCajaRequest $request)
     {
         if (! app(PlanLimitService::class)->canOpenCaja()) {
             return back()->with('error', app(PlanLimitService::class)->cajaLimitMessage());
         }
-        merge_currency_fields($request, ['monto_inicial']);
-
-        $request->validate([
-            'monto_inicial' => 'required|numeric|min:0',
-        ]);
 
         Caja::create([
             'user_id' => auth()->id(),
-            'opening_amount' => $request->monto_inicial,
+            'opening_amount' => $request->validated('monto_inicial'),
             'closing_amount' => 0,
             'opened_at' => now(),
-            'status' => 1, // Open
+            'status' => 1,
         ]);
 
         return redirect()->route('financials.cajas.index')->with('success', 'Caja abierta con éxito');
