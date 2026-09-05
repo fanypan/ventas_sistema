@@ -54,7 +54,7 @@
                                                                 <input type="hidden" name="key[]" value="{{ $set->key }}">
                                                                 <textarea type="text" name="value[]" rows="3" class="form-control" id="{{ $set->key }}" placeholder="{{ $set->name }}" required>{{ $set->value }}</textarea>
                                                             @elseif($set->type == 'file')
-                                                                <img src="{{ asset($set->value) }}" alt="{{ $set->name }}" id="{{ $set->key }}-image" width="8%">
+                                                                <img src="{{ setting_file_url($set->value) }}" alt="{{ $set->name }}" id="{{ $set->key }}-image" width="8%">
                                                                 <div class="input-group">
                                                                     <input type="hidden" name="key[]" value="{{ $set->key }}">
                                                                     <input type="text" readonly class="form-control" placeholder="{{ $set->name }}" name="value[]" id="{{ $set->key }}" value="{{ $set->value }}" readonly required>
@@ -103,8 +103,11 @@
             // input
             let inputId = '';
             function fmSetLink($url) {
-                $(inputId).val($url.substring(1));
-                $(inputId+'-image').attr("src", "{{ asset(null) }}"+$url.substring(1));
+                const value = ($url.indexOf('http://') === 0 || $url.indexOf('https://') === 0)
+                    ? $url
+                    : $url.substring(1);
+                $(inputId).val(value);
+                $(inputId+'-image').attr("src", value.indexOf('http') === 0 ? value : "{{ url('/') }}/" + value);
             }
             
             window.fmSetLink = fmSetLink;

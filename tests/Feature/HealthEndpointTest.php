@@ -17,7 +17,8 @@ class HealthEndpointTest extends TestCase
             ->assertJsonPath('checks.app', 'ok')
             ->assertJsonPath('checks.database', 'ok')
             ->assertJsonPath('checks.storage', 'ok')
-            ->assertJsonPath('checks.redis', 'skipped');
+            ->assertJsonPath('checks.redis', 'skipped')
+            ->assertJsonPath('checks.minio', 'skipped');
     }
 
     public function test_health_endpoint_is_hidden_when_disabled(): void

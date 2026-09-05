@@ -24,6 +24,13 @@
             </div>
         </div>
         <div class="form-group">
+            <label for="is_public">Landing</label>
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="is_public" id="is_public" value="1" @checked(old('is_public', $plan->is_public))>
+                <label class="form-check-label" for="is_public">Visible en la landing</label>
+            </div>
+        </div>
+        <div class="form-group">
             <label for="price_monthly">Precio mensual (Gs.)</label>
             <input class="form-control @error('price_monthly') is-invalid @enderror" id="price_monthly" type="number" name="price_monthly" value="{{ old('price_monthly', $plan->price_monthly) }}" min="0" required>
         </div>

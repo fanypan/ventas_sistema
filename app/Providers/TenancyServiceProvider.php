@@ -10,10 +10,10 @@ use App\Jobs\Tenant\MigrateTenantDatabaseJob;
 use App\Support\TenantDatabaseName;
 use App\Support\TenantPermissionCache;
 use App\Support\TenantSetupPassword;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 use Stancl\JobPipeline\JobPipeline;
 use Stancl\Tenancy\DatabaseConfig;
 use Stancl\Tenancy\Events;
@@ -90,10 +90,8 @@ class TenancyServiceProvider extends ServiceProvider
             Events\DatabaseCreated::class => [],
             Events\DatabaseMigrated::class => [
                 function (Events\DatabaseMigrated $event) {
-                    $password = TenantSetupPassword::pull((string) $event->tenant->getTenantKey())
-                        ?? Str::random(12);
-
-                    SetupTenantJob::dispatchSync($event->tenant, $password);
+                    TenantSetupPassword::forget((string) $event->tenant->getTenantKey());
+                    SetupTenantJob::dispatchSync($event->tenant);
                 },
             ],
             Events\DatabaseSeeded::class => [],
@@ -177,7 +175,7 @@ class TenancyServiceProvider extends ServiceProvider
         ];
 
         foreach (array_reverse($tenancyMiddleware) as $middleware) {
-            $this->app[\Illuminate\Contracts\Http\Kernel::class]->prependToMiddlewarePriority($middleware);
+            $this->app[Kernel::class]->prependToMiddlewarePriority($middleware);
         }
     }
 }

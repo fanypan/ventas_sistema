@@ -20,4 +20,6 @@ return [
         : 'up',
 
     'health_check_redis' => filter_var(env('HEALTH_CHECK_REDIS', true), FILTER_VALIDATE_BOOLEAN),
+
+    'health_check_minio' => filter_var(env('HEALTH_CHECK_MINIO', true), FILTER_VALIDATE_BOOLEAN),
 ];

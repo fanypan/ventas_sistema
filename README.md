@@ -5,6 +5,7 @@ POS/ERP SaaS para comercios en Paraguay (Laravel 13, AdminLTE). **Una PostgreSQL
 - Operación y dominios: [docs/SAAS.md](docs/SAAS.md)
 - Producto: [PRODUCT.md](PRODUCT.md)
 - Visual: [DESIGN.md](DESIGN.md) (índigo en POS y plataforma; teal solo en landing)
+- Tras instalar: [crear comercios SaaS o un solo comercio](#crear-comercios-saas-o-un-solo-comercio)
 
 ## Requisitos
 
@@ -177,6 +178,76 @@ reCAPTCHA es opcional en local. Si lo usás: [consola reCAPTCHA v2](https://www.
 
 `*.localhost` resuelve solo. El tenant de prueba aparece después de dar de alta un cliente en el panel staff.
 
+---
+
+## Crear comercios: SaaS o un solo comercio
+
+El stack es **el mismo** (central + cola + una PostgreSQL por comercio). Lo que cambia es cuántos tenants creás, el plan y el DNS. Detalle operativo: [docs/SAAS.md](docs/SAAS.md).
+
+### A) SaaS — varios comercios en un servidor
+
+Para AranduTech (o un partner) que vende suscripciones mensuales/anuales.
+
+1. Levantá el stack (Docker local o `docker-compose.prod.yml`) con DNS **wildcard** `*.tudominio.com` y las vars de dominio:
+
+```env
+CENTRAL_DOMAINS=tudominio.com,www.tudominio.com,admin.tudominio.com
+TENANT_BASE_DOMAIN=tudominio.com
+PLATFORM_PATH=a7k9m2p4
+PLATFORM_DOMAIN=admin.tudominio.com
+```
+
+2. Confirmá que `queue` esté `Up` (sin worker el alta queda en `pending`).
+3. Entrá al panel staff → **Nuevo cliente**: nombre, RUC, slug, plan público (Starter / Negocio / …), período **mensual** o **anual**, mail del admin.
+4. El job crea `tenant_{slug}`, migra el POS, siembra roles y manda el mail con el enlace de 48 h para definir contraseña.
+5. En la ficha del cliente, **Registrar pago** para arrancar/renovar el período.
+6. El comercio opera en `https://{slug}.tudominio.com`. Staff en `https://admin.tudominio.com/{PLATFORM_PATH}/login`.
+
+Opcional en el alta o en la ficha: **Copiar catálogo** desde otro comercio (stock en 0).
+
+Estados de suscripción: activo → gracia 7 d → solo lectura 3 d → suspendido (`subscriptions:tick` en el scheduler).
+
+### B) Un solo comercio — instalación propia (on-prem)
+
+El comercio hostea en su VPS o en la LAN. Un tenant, plan interno **Instalación propia** (`onprem`): no sale en la landing, sin tope de usuarios/cajas, **sin vencimiento**, sin FE en el cupo del plan. La licencia se cobra afuera del panel.
+
+1. Mismo compose de producción (o el de desarrollo en LAN):
+
+```bash
+cp .env.example .env
+# Editá APP_URL, DB_*, REDIS_*, MAIL_* y dominios (abajo)
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+2. En `.env`, apuntá al host del comercio (no hace falta wildcard si hay un solo POS):
+
+```env
+APP_URL=https://pos.minegocio.com
+CENTRAL_DOMAINS=pos.minegocio.com,admin.minegocio.com
+TENANT_BASE_DOMAIN=minegocio.com
+PLATFORM_PATH=plataforma
+PLATFORM_DOMAIN=admin.minegocio.com
+```
+
+Ejemplo LAN / sin DNS público: `TENANT_BASE_DOMAIN=localhost` y `CENTRAL_DOMAINS=localhost,127.0.0.1` (igual que en desarrollo).
+
+3. Con el seed (`RUN_SEED=true` la primera vez, o `php artisan db:seed`) queda el plan **Instalación propia**.
+4. Staff → **Nuevo cliente** → plan **Instalación propia**. El período se fuerza a **Sin vencimiento**. No registres pago mensual: `subscriptions:tick` no pausa este plan.
+5. El POS queda en `{slug}.{TENANT_BASE_DOMAIN}` (ej. slug `pos` → `pos.minegocio.com`). Si el comercio quiere entrar por el apex (`minegocio.com`), agregá ese host en la tabla `domains` del tenant (además del subdominio que crea el alta).
+6. Cambiá la clave del staff sembrado y poné `RUN_SEED=false`.
+
+No uses un plan “gratis” público para esto: canibaliza Starter/Negocio y aparece en la landing.
+
+| | SaaS | Instalación propia |
+|---|---|---|
+| Plan | público (Starter, Negocio, …) | `onprem` (interno) |
+| Período | mensual / anual | sin vencimiento |
+| Pago en panel | sí (renueva) | no (licencia afuera) |
+| DNS | wildcard `*.dominio` | un host o LAN alcanza |
+| Cantidad de comercios | muchos | uno (puede haber más, pero el caso típico es uno) |
+
+---
+
 ### Observabilidad y calidad
 
 Apagado por default. Variables en `.env` (detalle: [docs/SAAS.md](docs/SAAS.md)):
@@ -193,7 +264,7 @@ TELESCOPE_ENABLED=false
 ```bash
 docker compose exec app php artisan test
 docker compose exec app vendor/bin/pint --test
-docker compose exec app vendor/bin/phpstan analyse
+docker compose exec app vendor/bin/phpstan analyse --memory-limit=2G
 docker compose --profile obs up -d   # Dozzle + Uptime Kuma
 ```
 
@@ -203,6 +274,8 @@ Healthcheck de la app: `GET /up`.
 
 ## Puesta en producción
 
+Después del arranque, creá el primer comercio según el modo: [SaaS o instalación propia](#crear-comercios-saas-o-un-solo-comercio).
+
 `docker-compose.yml` es **solo desarrollo** (`php artisan serve`). En producción usá **`docker-compose.prod.yml`**: Nginx + PHP-FPM 8.3 + PostgreSQL 16 + Redis + **worker de cola** + **scheduler**. El código va **dentro de la imagen** (no se monta el disco). Postgres y Redis **no** se publican al host.
 
 Proyecto Compose aparte (`name: ventas_sistema_prod`): no pisa volúmenes ni red del stack local.
@@ -210,7 +283,7 @@ Proyecto Compose aparte (`name: ventas_sistema_prod`): no pisa volúmenes ni red
 ### Qué tenés que tener
 
 - Un VPS **Linux** (Ubuntu 22.04/24.04) con Docker Engine + plugin Compose v2.
-- Dominio + DNS wildcard `*.tudominio.com` apuntando a la IP del servidor (el POS es `{slug}.tudominio.com`).
+- Dominio: en **SaaS**, DNS wildcard `*.tudominio.com` (POS = `{slug}.tudominio.com`). En **instalación propia**, alcanza un host o LAN; ver [crear comercios](#crear-comercios-saas-o-un-solo-comercio).
 - Un `.env` **de producción** en el servidor: no copies el `.env` de tu notebook con `APP_DEBUG=true` y claves `ventas/ventas`.
 
 Este compose sirve **HTTP en el puerto 80**. En internet poné un reverse proxy con certificado (Caddy, Nginx, Traefik o el panel del VPS) delante. Laravel ya confía en el proxy (`TrustProxies` con `*`).

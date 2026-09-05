@@ -18,9 +18,7 @@ class MigrateTenantDatabaseJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public Tenant $tenant)
-    {
-    }
+    public function __construct(public Tenant $tenant) {}
 
     public function handle(): void
     {

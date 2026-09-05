@@ -2,9 +2,11 @@
 
 namespace Modules\Products\Http\Controllers;
 
+use App\Exports\ZeroStockExport;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Routing\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use Modules\Products\Entities\Brand;
 use Modules\Products\Entities\Category;
 use Modules\Products\Entities\Product;
@@ -49,8 +51,8 @@ class ProductController extends Controller
     public function zeroStock()
     {
         $products = Product::with('category', 'brand')
-            ->where('status', 1)
-            ->where('stock', '<=', 0)
+            ->active()
+            ->zeroStock()
             ->orderBy('description')
             ->get();
 
@@ -59,8 +61,8 @@ class ProductController extends Controller
 
     public function zeroStockExcel()
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\ZeroStockExport,
+        return Excel::download(
+            new ZeroStockExport,
             'productos_sin_existencia.xlsx'
         );
     }
@@ -78,8 +80,8 @@ class ProductController extends Controller
 
     public function create()
     {
-        $categories = Category::where('status', 1)->get();
-        $brands = Brand::where('status', 1)->get();
+        $categories = Category::active()->get();
+        $brands = Brand::active()->get();
 
         return view('products::create', compact('categories', 'brands'));
     }
@@ -117,8 +119,8 @@ class ProductController extends Controller
     public function edit($id)
     {
         $product = Product::findOrFail($id);
-        $categories = Category::where('status', 1)->get();
-        $brands = Brand::where('status', 1)->get();
+        $categories = Category::active()->get();
+        $brands = Brand::active()->get();
 
         return view('products::edit', compact('product', 'categories', 'brands'));
     }

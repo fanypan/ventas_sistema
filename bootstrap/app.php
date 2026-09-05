@@ -2,12 +2,35 @@
 
 use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\HealthController;
+use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\AuthenticateSession;
+use App\Http\Middleware\EnsureAdminPasswordIsSet;
+use App\Http\Middleware\EnsureCentralDomain;
+use App\Http\Middleware\EnsurePlanFeature;
+use App\Http\Middleware\EnsurePlatformAccess;
+use App\Http\Middleware\EnsurePlatformAdmin;
+use App\Http\Middleware\EnsurePlatformPermission;
+use App\Http\Middleware\EnsureTenantSubscription;
+use App\Http\Middleware\PreventRequestForgery;
+use App\Http\Middleware\PreventRequestsDuringMaintenance;
+use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\TrimStrings;
+use App\Http\Middleware\TrustHosts;
+use App\Http\Middleware\TrustProxies;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
+use Illuminate\Foundation\Http\Middleware\ValidatePostSize;
+use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Stancl\Tenancy\Contracts\TenantCouldNotBeIdentifiedException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -23,34 +46,37 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->use([
-            \App\Http\Middleware\TrustHosts::class,
-            \App\Http\Middleware\TrustProxies::class,
-            \Illuminate\Http\Middleware\HandleCors::class,
-            \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
-            \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
-            \App\Http\Middleware\TrimStrings::class,
-            \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+            TrustHosts::class,
+            TrustProxies::class,
+            HandleCors::class,
+            PreventRequestsDuringMaintenance::class,
+            ValidatePostSize::class,
+            TrimStrings::class,
+            ConvertEmptyStringsToNull::class,
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\AuthenticateSession::class,
+            AuthenticateSession::class,
         ]);
 
         $middleware->web(replace: [
-            \Illuminate\Cookie\Middleware\EncryptCookies::class => \App\Http\Middleware\EncryptCookies::class,
-            \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class => \App\Http\Middleware\PreventRequestForgery::class,
+            EncryptCookies::class => App\Http\Middleware\EncryptCookies::class,
+            Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class => PreventRequestForgery::class,
         ]);
 
         $middleware->alias([
-            'auth' => \App\Http\Middleware\Authenticate::class,
-            'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            'tenant.subscription' => \App\Http\Middleware\EnsureTenantSubscription::class,
-            'central' => \App\Http\Middleware\EnsureCentralDomain::class,
-            'platform.access' => \App\Http\Middleware\EnsurePlatformAccess::class,
-            'platform.admin' => \App\Http\Middleware\EnsurePlatformAdmin::class,
+            'auth' => Authenticate::class,
+            'guest' => RedirectIfAuthenticated::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'tenant.subscription' => EnsureTenantSubscription::class,
+            'plan.feature' => EnsurePlanFeature::class,
+            'tenant.password' => EnsureAdminPasswordIsSet::class,
+            'central' => EnsureCentralDomain::class,
+            'platform.access' => EnsurePlatformAccess::class,
+            'platform.admin' => EnsurePlatformAdmin::class,
+            'platform.permission' => EnsurePlatformPermission::class,
         ]);
 
         $middleware->redirectGuestsTo(function ($request) {
@@ -75,6 +101,12 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return response()->view('errors.404', ['exception' => $e], 404);
+        });
+
+        $exceptions->render(function (InvalidSignatureException $e, Request $request) {
+            if ($request->routeIs('password.setup.show', 'password.setup.store') || $request->is('activar')) {
+                return response()->view('auth.setup-password-invalid', [], 403);
+            }
         });
 
         $exceptions->render(function (BusinessRuleException $e, Request $request) {

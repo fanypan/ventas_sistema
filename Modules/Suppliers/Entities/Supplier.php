@@ -2,11 +2,14 @@
 
 namespace Modules\Suppliers\Entities;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasActiveStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Suppliers\Database\factories\SupplierFactory;
 
 class Supplier extends Model
 {
+    use HasActiveStatus;
     use HasFactory;
 
     protected $fillable = [
@@ -17,9 +20,9 @@ class Supplier extends Model
         'address',
         'status',
     ];
-    
+
     protected static function newFactory()
     {
-        return \Modules\Suppliers\Database\factories\SupplierFactory::new();
+        return SupplierFactory::new();
     }
 }

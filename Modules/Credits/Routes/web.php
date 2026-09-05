@@ -11,7 +11,7 @@
 |
 */
 
-Route::prefix('admin')->middleware(['auth'])->group(function() {
+Route::prefix('admin')->middleware(['auth', 'plan.feature:credits'])->group(function () {
     Route::get('credits/receivables', 'CreditController@receivables')->name('credits.receivables');
     Route::get('credits/payables', 'CreditController@payables')->name('credits.payables');
     Route::get('credits/kardex/customer/{id}', 'CreditController@customerKardex')->name('credits.kardex.customer');

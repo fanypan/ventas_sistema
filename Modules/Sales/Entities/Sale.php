@@ -2,12 +2,24 @@
 
 namespace Modules\Sales\Entities;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Credits\Entities\Abono;
+use Modules\Customers\Entities\Customer;
+use Modules\Sales\Database\factories\SaleFactory;
 
 class Sale extends Model
 {
     use HasFactory;
+
+    public const STATUS_VOIDED = 0;
+
+    public const STATUS_PAID = 1;
+
+    public const STATUS_CREDIT = 2;
 
     protected $fillable = [
         'user_id',
@@ -27,7 +39,7 @@ class Sale extends Model
 
     public function customer()
     {
-        return $this->belongsTo(\Modules\Customers\Entities\Customer::class);
+        return $this->belongsTo(Customer::class);
     }
 
     public function details()
@@ -37,7 +49,7 @@ class Sale extends Model
 
     public function abonos()
     {
-        return $this->morphMany(\Modules\Credits\Entities\Abono::class, 'abonable');
+        return $this->morphMany(Abono::class, 'abonable');
     }
 
     public function installments()
@@ -55,16 +67,60 @@ class Sale extends Model
         $paid = $this->total_paid();
         $pending = $this->total - $paid;
         \Log::info("Venta #{$this->id}: Total={$this->total}, Pagado={$paid}, Pendiente={$pending}");
+
         return $pending;
     }
 
     public function creator()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
-    
+
+    public function isPaid(): bool
+    {
+        return (int) $this->status === self::STATUS_PAID;
+    }
+
+    public function isCredit(): bool
+    {
+        return (int) $this->status === self::STATUS_CREDIT;
+    }
+
+    public function isVoided(): bool
+    {
+        return (int) $this->status === self::STATUS_VOIDED;
+    }
+
+    #[Scope]
+    protected function paid(Builder $query): void
+    {
+        $query->where('status', self::STATUS_PAID);
+    }
+
+    #[Scope]
+    protected function credit(Builder $query): void
+    {
+        $query->where('status', self::STATUS_CREDIT);
+    }
+
+    #[Scope]
+    protected function notVoided(Builder $query): void
+    {
+        $query->where('status', '!=', self::STATUS_VOIDED);
+    }
+
+    #[Scope]
+    protected function receivable(Builder $query): void
+    {
+        $query->where(function (Builder $inner) {
+            $inner->where('payment_type', 'credito')
+                ->orWhereIn('status', [self::STATUS_CREDIT, 3])
+                ->orWhereHas('abonos');
+        });
+    }
+
     protected static function newFactory()
     {
-        return \Modules\Sales\Database\factories\SaleFactory::new();
+        return SaleFactory::new();
     }
 }

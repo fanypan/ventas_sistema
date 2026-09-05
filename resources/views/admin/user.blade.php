@@ -161,7 +161,10 @@
                         <div class="input-group">
                             <label>Contraseña</label>
                             <div class="input-group">
-                                <input type="password" class="form-control @error('password') is-invalid @enderror" placeholder="Mínimo 8 caracteres" name="password" value="{{ old('password') }}" minlength="8" autocomplete="new-password">
+                                <input type="password" id="user-create-password" class="form-control @error('password') is-invalid @enderror" placeholder="Mínimo 8 caracteres" name="password" value="{{ old('password') }}" minlength="8" autocomplete="new-password">
+                                <div class="input-group-append">
+                                    @include('auth.partials.password-toggle-btn', ['target' => '#user-create-password'])
+                                </div>
                                 @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -179,6 +182,9 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                            @can('read role')
+                                <small class="form-text text-muted">Si no está en la lista, <a href="{{ route('role.index') }}">creá un rol</a>.</small>
+                            @endcan
                         </div>
                 </div>
                 <div class="modal-footer justify-content-between">
@@ -226,7 +232,10 @@
                         <div class="input-group">
                             <label>Contraseña</label>
                             <div class="input-group">
-                                <input type="password" class="form-control @error('password') is-invalid @enderror" placeholder="Dejá vacío para no cambiar" name="password" value="{{ old('password') }}" minlength="8" autocomplete="new-password">
+                                <input type="password" id="user-edit-password" class="form-control @error('password') is-invalid @enderror" placeholder="Dejá vacío para no cambiar" name="password" value="{{ old('password') }}" minlength="8" autocomplete="new-password">
+                                <div class="input-group-append">
+                                    @include('auth.partials.password-toggle-btn', ['target' => '#user-edit-password'])
+                                </div>
                                 @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -244,6 +253,9 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                            @can('read role')
+                                <small class="form-text text-muted">Si no está en la lista, <a href="{{ route('role.index') }}">creá un rol</a>.</small>
+                            @endcan
                         </div>
                 </div>
                 <div class="modal-footer justify-content-between">
@@ -286,3 +298,7 @@
         <!-- /.modal-dialog -->
     </div>
 @endsection
+
+@push('script')
+@include('auth.partials.password-toggle-script')
+@endpush

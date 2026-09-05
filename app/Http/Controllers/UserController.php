@@ -9,6 +9,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Support\TenantAssignableRole;
 use Illuminate\Http\Request;
 use RealRashid\SweetAlert\Facades\Alert;
 use Spatie\Permission\Models\Role;
@@ -16,13 +17,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
-    private const PROTECTED_ROLE = 'superadmin';
-
     public function index()
     {
         $x['title'] = 'User';
         $x['data'] = User::get();
-        $x['role'] = Role::whereIn('name', StoreUserRequest::ASSIGNABLE_ROLES)->orderBy('name')->get();
+        $x['role'] = Role::query()
+            ->where('guard_name', 'web')
+            ->whereRaw('lower(name) != ?', [TenantAssignableRole::PROTECTED])
+            ->orderBy('name')
+            ->get();
 
         return view('admin.user', $x);
     }
@@ -94,7 +97,7 @@ class UserController extends Controller
             abort(404);
         }
 
-        if ($user->hasRole(self::PROTECTED_ROLE)) {
+        if ($user->hasRole(TenantAssignableRole::PROTECTED)) {
             abort(403, 'No se puede modificar el superadmin.');
         }
     }

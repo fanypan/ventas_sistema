@@ -2,7 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Models\Tenant;
+use App\Tenancy\PostgreSQLDatabaseManager;
+use Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper;
+use Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper;
+use Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper;
 use Stancl\Tenancy\Database\Models\Domain;
+use Stancl\Tenancy\TenantDatabaseManagers\MySQLDatabaseManager;
+use Stancl\Tenancy\TenantDatabaseManagers\SQLiteDatabaseManager;
+use Stancl\Tenancy\UUIDGenerator;
 
 $tenantMigrationPaths = array_values(array_filter(array_merge(
     [database_path('migrations/tenant')],
@@ -10,8 +18,8 @@ $tenantMigrationPaths = array_values(array_filter(array_merge(
 )));
 
 return [
-    'tenant_model' => \App\Models\Tenant::class,
-    'id_generator' => Stancl\Tenancy\UUIDGenerator::class,
+    'tenant_model' => Tenant::class,
+    'id_generator' => UUIDGenerator::class,
 
     'domain_model' => Domain::class,
 
@@ -29,9 +37,9 @@ return [
      * To configure their behavior, see the config keys below.
      */
     'bootstrappers' => [
-        Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper::class,
-        Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper::class,
-        Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper::class,
+        DatabaseTenancyBootstrapper::class,
+        FilesystemTenancyBootstrapper::class,
+        QueueTenancyBootstrapper::class,
         // Stancl\Tenancy\Bootstrappers\RedisTenancyBootstrapper::class, // Note: phpredis is needed
     ],
 
@@ -58,9 +66,9 @@ return [
          * TenantDatabaseManagers are classes that handle the creation & deletion of tenant databases.
          */
         'managers' => [
-            'sqlite' => Stancl\Tenancy\TenantDatabaseManagers\SQLiteDatabaseManager::class,
-            'mysql' => Stancl\Tenancy\TenantDatabaseManagers\MySQLDatabaseManager::class,
-            'pgsql' => Stancl\Tenancy\TenantDatabaseManagers\PostgreSQLDatabaseManager::class,
+            'sqlite' => SQLiteDatabaseManager::class,
+            'mysql' => MySQLDatabaseManager::class,
+            'pgsql' => PostgreSQLDatabaseManager::class,
 
         /**
          * Use this database manager for MySQL to have a DB user created for each tenant database.
@@ -104,7 +112,7 @@ return [
             'local',
             'public',
             'filemanager',
-            // 's3',
+            'minio',
         ],
 
         /**
@@ -112,12 +120,13 @@ return [
          *
          * See https://tenancyforlaravel.com/docs/v3/tenancy-bootstrappers/#filesystem-tenancy-boostrapper
          */
-        'root_override' => [
-            // Disks whose roots should be overridden after storage_path() is suffixed.
+        'root_override' => array_filter([
             'local' => '%storage_path%/app/',
             'public' => '%storage_path%/app/public/',
-            'filemanager' => '%storage_path%/app/file-manager/',
-        ],
+            'filemanager' => env('FILEMANAGER_DRIVER', 'local') === 's3'
+                ? null
+                : '%storage_path%/app/file-manager/',
+        ]),
 
         /**
          * Should storage_path() be suffixed.

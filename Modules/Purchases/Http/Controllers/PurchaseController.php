@@ -31,8 +31,8 @@ class PurchaseController extends Controller
 
     public function create()
     {
-        $suppliers = Supplier::where('status', 1)->orderBy('name')->get();
-        $products = Product::with('brand', 'category')->where('status', 1)->orderBy('description')->get();
+        $suppliers = Supplier::active()->orderBy('name')->get();
+        $products = Product::with('brand', 'category')->active()->orderBy('description')->get();
         $categories = Category::orderBy('name')->get();
 
         return view('purchases::create', compact('suppliers', 'products', 'categories'));

@@ -4,49 +4,53 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Modules\Customers\Entities\Customer;
+use Modules\Products\Entities\Product;
+use Modules\Purchases\Entities\Purchase;
+use Modules\Sales\Entities\Sale;
+use Modules\Sales\Entities\SaleDetail;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Modules\Sales\Entities\SaleDetail;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
         $x['title'] = 'Dashboard';
-        $x['user']       = User::get();
-        $x['role']       = Role::get();
+        $x['user'] = User::get();
+        $x['role'] = Role::get();
         $x['permission'] = Permission::get();
 
         // Business metrics
         $today = now()->toDateString();
 
-        $x['total_products']  = \Modules\Products\Entities\Product::where('status', 1)->count();
-        $x['low_stock']       = \Modules\Products\Entities\Product::where('status', 1)->where('stock', '<=', 5)->count();
-        $x['zero_stock']      = \Modules\Products\Entities\Product::where('status', 1)->where('stock', '<=', 0)->count();
-        $x['total_customers'] = \Modules\Customers\Entities\Customer::count();
+        $x['total_products'] = Product::active()->count();
+        $x['low_stock'] = Product::active()->lowStock()->count();
+        $x['zero_stock'] = Product::active()->zeroStock()->count();
+        $x['total_customers'] = Customer::count();
 
-        $x['sales_today']     = \Modules\Sales\Entities\Sale::whereDate('created_at', $today)->sum('total');
-        $x['sales_month']     = \Modules\Sales\Entities\Sale::whereMonth('created_at', now()->month)
-                                    ->whereYear('created_at', now()->year)->sum('total');
-        $x['sales_count']     = \Modules\Sales\Entities\Sale::whereDate('created_at', $today)->count();
+        $x['sales_today'] = Sale::whereDate('created_at', $today)->sum('total');
+        $x['sales_month'] = Sale::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)->sum('total');
+        $x['sales_count'] = Sale::whereDate('created_at', $today)->count();
 
-        $x['purchases_month'] = \Modules\Purchases\Entities\Purchase::whereMonth('created_at', now()->month)
-                                    ->whereYear('created_at', now()->year)->sum('total');
+        $x['purchases_month'] = Purchase::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)->sum('total');
 
-        $x['recent_sales'] = \Modules\Sales\Entities\Sale::with('customer')->latest()->take(8)->get();
+        $x['recent_sales'] = Sale::with('customer')->latest()->take(8)->get();
 
         // Stock value
-        $x['stock_value'] = \Modules\Products\Entities\Product::where('status', 1)
-                              ->selectRaw('SUM(stock * price) as total')
-                              ->value('total') ?? 0;
+        $x['stock_value'] = Product::active()
+            ->selectRaw('SUM(stock * price) as total')
+            ->value('total') ?? 0;
 
-        $x['invest_value'] = \Modules\Products\Entities\Product::where('status', 1)
-                               ->selectRaw('SUM(stock * cost) as total')
-                               ->value('total') ?? 0;
+        $x['invest_value'] = Product::active()
+            ->selectRaw('SUM(stock * cost) as total')
+            ->value('total') ?? 0;
 
         // Top 6 productos más vendidos del mes
         $x['top_products'] = SaleDetail::selectRaw('product_id, SUM(quantity) as total_qty')
-            ->whereHas('sale', function($q) {
+            ->whereHas('sale', function ($q) {
                 $q->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
             })
             ->with('product:id,description')
@@ -56,8 +60,8 @@ class DashboardController extends Controller
             ->get();
 
         // Top 6 productos con stock más bajo (activos)
-        $x['low_stock_products'] = \Modules\Products\Entities\Product::where('status', 1)
-            ->where('stock', '>', 0)
+        $x['low_stock_products'] = Product::active()
+            ->inStock()
             ->orderBy('stock', 'asc')
             ->take(6)
             ->get(['description', 'stock']);

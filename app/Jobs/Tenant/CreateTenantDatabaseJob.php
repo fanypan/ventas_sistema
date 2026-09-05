@@ -19,9 +19,7 @@ class CreateTenantDatabaseJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public Tenant $tenant)
-    {
-    }
+    public function __construct(public Tenant $tenant) {}
 
     public function handle(DatabaseManager $databaseManager): void
     {

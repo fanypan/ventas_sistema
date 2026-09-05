@@ -88,18 +88,12 @@
         align-items: center;
         justify-content: center;
     }
-    .cart-checkout-actions kbd,
-    .checkout-confirm-kbd {
-        display: inline-block;
-        margin-left: .4rem;
-        padding: .05rem .35rem;
-        font-size: .68rem;
-        font-weight: 600;
-        color: rgba(255,255,255,.9);
-        background: rgba(0,0,0,.18);
-        border: 0;
-        border-radius: 4px;
-        box-shadow: none;
+    .pos-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        flex-wrap: wrap;
     }
     .checkout-hero {
         text-align: center;
@@ -242,8 +236,12 @@
 
 <div class="content-wrapper">
     <div class="content-header pb-1">
-        <div class="container-fluid">
+        <div class="container-fluid pos-page-header">
             <h1 class="m-0 text-premium"><i class="fas fa-th mr-2"></i>Punto de Venta Interactivo</h1>
+            @if ($cashOpen)
+                <p class="text-muted mb-0 small">Tu caja #{{ $cashOpen->id }} · inicial {{ money($cashOpen->opening_amount) }}</p>
+            @endif
+            @include('admin.partials.pos-screen-actions', ['context' => 'sale'])
         </div>
     </div>
 
@@ -253,9 +251,9 @@
                 <div class="alert alert-warning shadow-sm border-0 p-4 text-center mt-3">
                     <i class="fas fa-exclamation-triangle fa-4x mb-3 text-warning"></i>
                     <h2 class="font-weight-bold">CAJA CERRADA</h2>
-                    <p class="lead">Debe abrir una caja antes de poder realizar ventas en el sistema.</p>
-                    <a href="{{ route('financials.cajas.index') }}" class="btn btn-warning btn-lg px-5 font-weight-bold">
-                        <i class="fas fa-cash-register mr-2"></i> IR A CAJA
+                    <p class="lead">Abrí tu caja para vender. Cada cajero usa la suya.</p>
+                    <a href="{{ route('financials.cajas.create') }}" class="btn btn-warning btn-lg px-5 font-weight-bold">
+                        <i class="fas fa-cash-register mr-2"></i> ABRIR MI CAJA
                     </a>
                 </div>
                 <div style="opacity: 0.3; pointer-events: none;">
@@ -360,12 +358,14 @@
                             <input type="hidden" id="txt_raw_subtotal" value="0">
                             <input type="hidden" id="selected_payment_method" value="efectivo">
                             <div class="cart-checkout-actions">
-                                <button type="button" class="btn btn-success font-weight-bold text-uppercase shadow-sm" id="btn_process_sale" disabled aria-keyshortcuts="Enter">
-                                    <i class="fas fa-cash-register mr-2"></i> Cobrar <kbd>Enter</kbd>
+                                <button type="button" class="btn btn-success font-weight-bold text-uppercase shadow-sm" id="btn_process_sale" disabled aria-keyshortcuts="F8 Enter">
+                                    <i class="fas fa-cash-register mr-2"></i> Cobrar <kbd>F8</kbd>
                                 </button>
-                                <button type="button" class="btn btn-warning font-weight-bold" id="btn_credit_sale" disabled title="Venta a crédito">
-                                    <i class="fas fa-clock mr-1"></i> Crédito
+                                @if (plan_has('credits'))
+                                <button type="button" class="btn btn-warning font-weight-bold" id="btn_credit_sale" disabled title="Venta a crédito" aria-keyshortcuts="F9">
+                                    <i class="fas fa-clock mr-1"></i> Crédito <kbd>F9</kbd>
                                 </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -719,7 +719,7 @@
             </div>
             <div class="modal-footer bg-light p-3 d-flex justify-content-between">
                 <button type="button" class="btn btn-outline-secondary px-4" data-dismiss="modal">Volver al carrito</button>
-                <button type="button" id="btn_confirm_final_payment" class="btn btn-success btn-lg px-4 font-weight-bold shadow-sm" aria-keyshortcuts="Enter">
+                <button type="button" id="btn_confirm_final_payment" class="btn btn-success btn-lg px-4 font-weight-bold shadow-sm" aria-keyshortcuts="F8 Enter">
                     <i class="fas fa-check-circle mr-2"></i> Registrar venta <kbd class="checkout-confirm-kbd">Enter</kbd>
                 </button>
             </div>
@@ -750,6 +750,8 @@
         </div>
     </div>
 </div>
+
+@include('admin.partials.pos-shortcuts-modal', ['context' => 'sale'])
 
 @endsection
 
@@ -1425,6 +1427,58 @@ $(document).ready(function() {
             alert(r.responseJSON ? r.responseJSON.error : 'Error al actualizar');
             $btn.prop('disabled', false).text('Actualizar Ítem');
         });
+    });
+
+    function toggleShortcutHelp() {
+        $('#modalPosShortcuts').modal('toggle');
+    }
+
+    function focusProductSearch() {
+        $('#filter_search').trigger('focus').trigger('select');
+    }
+
+    initPosShortcuts({
+        allowWhenTyping: ['F2', 'F4', 'F8', 'F9', 'Shift+F4', 'Alt+Shift+H'],
+        actions: {
+            F2: focusProductSearch,
+            '/': focusProductSearch,
+            F4: function () {
+                $('#customer_search').trigger('focus').trigger('select');
+            },
+            'Shift+F4': function () {
+                $('#btn_list_customers').trigger('click');
+            },
+            F8: function () {
+                if ($('#modalSaleSuccess').hasClass('show')) {
+                    finishSaleAndReset();
+                    return;
+                }
+                if ($('#modalPayment').hasClass('show')) {
+                    $('#btn_confirm_final_payment').trigger('click');
+                    return;
+                }
+                if ($('#creditModal').hasClass('show')) {
+                    $('#btn_confirm_credit').trigger('click');
+                    return;
+                }
+                if ($('.modal.show').length) {
+                    return;
+                }
+                if (!$('#btn_process_sale').prop('disabled')) {
+                    $('#btn_process_sale').trigger('click');
+                }
+            },
+            F9: function () {
+                if ($('.modal.show').length) {
+                    return;
+                }
+                if (!$('#btn_credit_sale').prop('disabled')) {
+                    $('#btn_credit_sale').trigger('click');
+                }
+            },
+            '?': toggleShortcutHelp,
+            'Alt+Shift+H': toggleShortcutHelp
+        }
     });
 });
 

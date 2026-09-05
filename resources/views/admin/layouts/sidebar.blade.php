@@ -1,7 +1,7 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4 premium-sidebar">
     <!-- Brand Logo -->
     <a href="{{ route('dashboard') }}" class="brand-link">
-    <img src="{{ asset(Setting::getValue('app_logo')) }}" alt="{{ Setting::getName('app_name') }}" class="brand-image img-circle elevation-3 brand-glow" style="opacity: .8">
+    <img src="{{ setting_file_url(Setting::getValue('app_logo')) }}" alt="{{ Setting::getName('app_name') }}" class="brand-image img-circle elevation-3 brand-glow" style="opacity: .8">
     <span class="brand-text font-weight-bold">{{ Setting::getValue('app_name') }}</span>
     </a>
 
@@ -162,6 +162,7 @@
                     </ul>
                 </li>
                 @endcanany
+                @if (plan_has('purchases'))
                 @canany(['read purchase', 'create purchase', 'read supplier'])
                 <li class="nav-item {{ request()->routeIs('purchases*') || request()->routeIs('suppliers*') ? 'menu-open':'' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('purchases*') || request()->routeIs('suppliers*') ? 'active':'' }}">
@@ -196,6 +197,7 @@
                     </ul>
                 </li>
                 @endcanany
+                @endif
                 @canany(['read cash', 'read expense', 'consume insumo'])
                 <li class="nav-item {{ request()->routeIs('financials*') ? 'menu-open':'' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('financials*') ? 'active':'' }}">
@@ -238,6 +240,7 @@
                     </ul>
                 </li>
                 @endcanany
+                @if (plan_has('credits'))
                 @canany(['read credit', 'read supplier'])
                 <li class="nav-item {{ request()->routeIs('credits*') ? 'menu-open':'' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('credits*') ? 'active':'' }}">
@@ -264,6 +267,7 @@
                     </ul>
                 </li>
                 @endcanany
+                @endif
                 @can('read report')
                 <li class="nav-item">
                     <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports*') ? 'active':'' }}">

@@ -46,20 +46,27 @@
                         <tr>
                             <td>{{ $caja->user->name ?? 'Usuario no encontrado' }}</td>
                             <td>Gs. {{ number_format($caja->opening_amount, 0, ',', '.') }}</td>
-                            <td class="text-success" title="Ventas Contado + Abonos"><strong>Gs. {{ number_format($caja->sales->where('status', 1)->sum('total') + $caja->abonos->sum('amount'), 0, ',', '.') }}</strong></td>
+                            <td class="text-success" title="Ventas Contado + Abonos"><strong>Gs. {{ number_format($caja->paidSalesTotal() + $caja->abonos->sum('amount'), 0, ',', '.') }}</strong></td>
                             <td>Gs. {{ number_format($caja->closing_amount, 0, ',', '.') }}</td>
                             <td>{{ $caja->opened_at }}</td>
                             <td>{{ $caja->closed_at ?? '-' }}</td>
                             <td>
-                                <span class="badge badge-{{ $caja->status == 1 ? 'success' : 'danger' }}">
-                                    {{ $caja->status == 1 ? 'Abierta' : 'Cerrada' }}
+                                <span class="badge badge-{{ $caja->isOpen() ? 'success' : 'danger' }}">
+                                    {{ $caja->isOpen() ? 'Abierta' : 'Cerrada' }}
                                 </span>
                             </td>
                             <td>
+                                @if($caja->isOpen() && (int) $caja->user_id === (int) auth()->id())
+                                    @can('create sale')
+                                    <a href="{{ route('sales.pos') }}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-cash-register"></i> Ir a vender
+                                    </a>
+                                    @endcan
+                                @endif
                                 <a href="{{ route('financials.cajas.arqueo', $caja->id) }}" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-balance-scale"></i> {{ $caja->status == 1 ? 'Arqueo' : 'Ver' }}
+                                    <i class="fas fa-balance-scale"></i> {{ $caja->isOpen() ? 'Arqueo' : 'Ver' }}
                                 </a>
-                                @if($caja->status == 1)
+                                @if($caja->isOpen())
                                 @can('update cash')
                                 <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modalCloseCaja{{ $caja->id }}">
                                     <i class="fas fa-lock"></i> Cerrar

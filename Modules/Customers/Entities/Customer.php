@@ -2,11 +2,15 @@
 
 namespace Modules\Customers\Entities;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasActiveStatus;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Customers\Database\factories\CustomerFactory;
 
 class Customer extends Model
 {
+    use HasActiveStatus;
     use HasFactory;
 
     protected $fillable = [
@@ -20,11 +24,11 @@ class Customer extends Model
 
     public function creator()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
-    
+
     protected static function newFactory()
     {
-        return \Modules\Customers\Database\factories\CustomerFactory::new();
+        return CustomerFactory::new();
     }
 }

@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Modules\Products\Entities\Category;
+use Modules\Products\Entities\Product;
 use Tests\TenantTestCase;
 
 class ProductImageUploadTest extends TenantTestCase
@@ -60,7 +62,13 @@ class ProductImageUploadTest extends TenantTestCase
             ->assertRedirect();
 
         $this->tenant->run(function () {
-            $this->assertDatabaseHas('products', ['description' => 'Producto JPEG']);
+            $product = Product::where('description', 'Producto JPEG')->first();
+            $this->assertNotNull($product);
+            $this->assertNotNull($product->image);
+            $this->assertStringStartsWith('products/', $product->image);
+            $this->assertStringEndsWith('.jpg', $product->image);
+            $this->assertFalse($product->usesDefaultImage());
+            Storage::disk(config('media.public_disk'))->assertExists($product->image);
         });
     }
 }

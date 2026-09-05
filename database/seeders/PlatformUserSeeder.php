@@ -27,7 +27,9 @@ class PlatformUserSeeder extends Seeder
 
     public function run(): void
     {
-        PlatformUser::updateOrCreate(
+        $this->call(PlatformPermissionSeeder::class);
+
+        $user = PlatformUser::updateOrCreate(
             ['email' => 'plataforma@arandutech.com'],
             [
                 'name' => 'AranduTech',
@@ -35,5 +37,8 @@ class PlatformUserSeeder extends Seeder
                 'role' => PlatformUser::ROLE_ADMIN,
             ]
         );
+
+        $user->syncRoles([PlatformUser::ROLE_ADMIN]);
+        $user->syncLegacyRoleColumn();
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\PlanSeeder;
+use Database\Seeders\PlatformUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,8 +24,8 @@ class PlatformDomainTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\PlanSeeder::class);
-        $this->seed(\Database\Seeders\PlatformUserSeeder::class);
+        $this->seed(PlanSeeder::class);
+        $this->seed(PlatformUserSeeder::class);
     }
 
     public function test_platform_only_on_configured_domain(): void

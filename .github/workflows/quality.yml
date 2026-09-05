@@ -14,7 +14,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
-          extensions: mbstring, pdo_sqlite, sqlite, tokenizer, xml, ctype, json, bcmath
+          extensions: mbstring, pdo_sqlite, sqlite, tokenizer, xml, ctype, json, bcmath, gd
           coverage: none
           tools: composer:v2
 
@@ -22,10 +22,10 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Pint
-        run: vendor/bin/pint --test app/Observability app/Http/Controllers/HealthController.php app/Providers/ObservabilityServiceProvider.php app/Providers/HorizonServiceProvider.php app/Providers/TelescopeServiceProvider.php config/observability.php
+        run: vendor/bin/pint --test
 
       - name: PHPStan
-        run: vendor/bin/phpstan analyse --memory-limit=1G
+        run: vendor/bin/phpstan analyse --memory-limit=2G
 
       - name: Tests
         run: php artisan test

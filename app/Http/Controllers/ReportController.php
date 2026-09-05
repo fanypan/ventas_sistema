@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Exports\ProductsExport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Modules\Financials\Entities\Gasto;
 use Modules\Products\Entities\Product;
+use Modules\Purchases\Entities\Purchase;
 use Modules\Sales\Entities\Sale;
 use Modules\Sales\Entities\SaleDetail;
-use Modules\Purchases\Entities\Purchase;
-use Modules\Financials\Entities\Gasto;
 
 class ReportController extends Controller
 {
@@ -19,40 +21,43 @@ class ReportController extends Controller
 
     public function index()
     {
-        $lowStockCount = Product::where('status', 1)->where('stock', '<=', 5)->count();
-        $productsCount = Product::where('status', 1)->count();
+        $lowStockCount = Product::active()->lowStock()->count();
+        $productsCount = Product::active()->count();
+
         return view('admin.reports.index', compact('lowStockCount', 'productsCount'));
     }
 
     public function productsPdf()
     {
-        $products  = Product::with('category')->where('status', 1)->get();
-        $inversion = $products->sum(fn($p) => $p->stock * $p->cost);
-        $proyeccion= $products->sum(fn($p) => $p->stock * $p->price);
-        $ganancia  = $proyeccion - $inversion;
-        $utilidad  = ($inversion > 0) ? ($ganancia / $inversion) * 100 : 0;
+        $products = Product::with('category')->active()->get();
+        $inversion = $products->sum(fn ($p) => $p->stock * $p->cost);
+        $proyeccion = $products->sum(fn ($p) => $p->stock * $p->price);
+        $ganancia = $proyeccion - $inversion;
+        $utilidad = ($inversion > 0) ? ($ganancia / $inversion) * 100 : 0;
 
         $pdf = Pdf::loadView('admin.reports.products_pdf', compact('products', 'inversion', 'proyeccion', 'utilidad'))
-                  ->setPaper('a4', 'landscape');
+            ->setPaper('a4', 'landscape');
+
         return $pdf->stream('reporte_productos.pdf');
     }
 
     public function productsExcel()
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\ProductsExport, 'reporte_productos.xlsx');
+        return Excel::download(new ProductsExport, 'reporte_productos.xlsx');
     }
 
     /** Reporte: Stock mínimo / Productos con bajo inventario **/
     public function lowStockPdf(Request $request)
     {
         $threshold = (int) $request->get('threshold', 5);
-        $products  = Product::with('category')
-                        ->where('status', 1)
-                        ->where('stock', '<=', $threshold)
-                        ->orderBy('stock')
-                        ->get();
+        $products = Product::with('category')
+            ->active()
+            ->lowStock($threshold)
+            ->orderBy('stock')
+            ->get();
 
         $pdf = Pdf::loadView('admin.reports.low_stock_pdf', compact('products', 'threshold'));
+
         return $pdf->stream('reporte_stock_minimo.pdf');
     }
 
@@ -60,20 +65,21 @@ class ReportController extends Controller
     public function salesByPaymentPdf(Request $request)
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
-        $endDate   = $request->end_date   ?? now()->toDateString();
+        $endDate = $request->end_date ?? now()->toDateString();
 
         $sales = Sale::with('customer')
-                     ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
-                     ->where('status', 1)
-                     ->get();
+            ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
+            ->paid()
+            ->get();
 
-        $byMethod = $sales->groupBy('payment_type')->map(fn($g) => [
+        $byMethod = $sales->groupBy('payment_type')->map(fn ($g) => [
             'count' => $g->count(),
             'total' => $g->sum('total'),
         ]);
 
         $pdf = Pdf::loadView('admin.reports.sales_by_payment_pdf',
-                    compact('sales', 'byMethod', 'startDate', 'endDate'));
+            compact('sales', 'byMethod', 'startDate', 'endDate'));
+
         return $pdf->stream('ventas_por_tipo_pago.pdf');
     }
 
@@ -81,17 +87,17 @@ class ReportController extends Controller
     public function salesByProductPdf(Request $request)
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
-        $endDate   = $request->end_date   ?? now()->toDateString();
+        $endDate = $request->end_date ?? now()->toDateString();
 
         $details = SaleDetail::with('product', 'sale')
-                    ->whereHas('sale', fn($q) =>
-                        $q->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
-                          ->where('status', 1))
-                    ->get()
-                    ->groupBy('product_id');
+            ->whereHas('sale', fn ($q) => $q->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
+                ->paid())
+            ->get()
+            ->groupBy('product_id');
 
         $pdf = Pdf::loadView('admin.reports.sales_by_product_pdf',
-                    compact('details', 'startDate', 'endDate'));
+            compact('details', 'startDate', 'endDate'));
+
         return $pdf->stream('ventas_por_producto.pdf');
     }
 
@@ -99,13 +105,14 @@ class ReportController extends Controller
     public function salesPdf(Request $request)
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
-        $endDate   = $request->end_date   ?? now()->toDateString();
+        $endDate = $request->end_date ?? now()->toDateString();
 
         $sales = Sale::with('customer')
-                     ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
-                     ->get();
+            ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
+            ->get();
 
         $pdf = Pdf::loadView('admin.reports.sales_pdf', compact('sales', 'startDate', 'endDate'));
+
         return $pdf->stream('reporte_ventas.pdf');
     }
 
@@ -113,13 +120,14 @@ class ReportController extends Controller
     public function purchasesPdf(Request $request)
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
-        $endDate   = $request->end_date   ?? now()->toDateString();
+        $endDate = $request->end_date ?? now()->toDateString();
 
         $purchases = Purchase::with('supplier')
-                             ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
-                             ->get();
+            ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
+            ->get();
 
         $pdf = Pdf::loadView('admin.reports.purchases_pdf', compact('purchases', 'startDate', 'endDate'));
+
         return $pdf->stream('reporte_compras.pdf');
     }
 
@@ -128,13 +136,14 @@ class ReportController extends Controller
     {
         $date = $request->date ?? now()->toDateString();
 
-        $salesTotal     = Sale::whereDate('created_at', $date)->where('status', 1)->sum('total');
+        $salesTotal = Sale::whereDate('created_at', $date)->paid()->sum('total');
         $purchasesTotal = Purchase::whereDate('created_at', $date)->sum('total');
-        $expensesTotal  = Gasto::whereDate('date', $date)->sum('amount');
+        $expensesTotal = Gasto::whereDate('date', $date)->sum('amount');
         $net = $salesTotal - $purchasesTotal - $expensesTotal;
 
         $pdf = Pdf::loadView('admin.reports.cash_pdf',
-                    compact('date', 'salesTotal', 'purchasesTotal', 'expensesTotal', 'net'));
+            compact('date', 'salesTotal', 'purchasesTotal', 'expensesTotal', 'net'));
+
         return $pdf->stream('arqueo_caja.pdf');
     }
 
@@ -142,25 +151,26 @@ class ReportController extends Controller
     public function financialStatusPdf(Request $request)
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
-        $endDate   = $request->end_date   ?? now()->toDateString();
+        $endDate = $request->end_date ?? now()->toDateString();
 
-        $salesTotal     = Sale::whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
-                              ->where('status', 1)->sum('total');
+        $salesTotal = Sale::whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
+            ->paid()->sum('total');
         $purchasesTotal = Purchase::whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])->sum('total');
-        $expensesTotal  = Gasto::whereBetween('date', [$startDate, $endDate])->sum('amount');
+        $expensesTotal = Gasto::whereBetween('date', [$startDate, $endDate])->sum('amount');
 
         $utilidadBruta = $salesTotal - $purchasesTotal;
-        $utilidadNeta  = $utilidadBruta - $expensesTotal;
+        $utilidadNeta = $utilidadBruta - $expensesTotal;
 
         $pdf = Pdf::loadView('admin.reports.financial_status_pdf',
-                    compact('startDate', 'endDate', 'salesTotal', 'purchasesTotal', 'expensesTotal', 'utilidadBruta', 'utilidadNeta'));
+            compact('startDate', 'endDate', 'salesTotal', 'purchasesTotal', 'expensesTotal', 'utilidadBruta', 'utilidadNeta'));
+
         return $pdf->stream('estado_resultados.pdf');
     }
 
     public function expensesPdf(Request $request)
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
-        $endDate   = $request->end_date   ?? now()->toDateString();
+        $endDate = $request->end_date ?? now()->toDateString();
 
         $expenses = Gasto::with(['user', 'insumo'])
             ->whereBetween('date', [$startDate, $endDate])

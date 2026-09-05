@@ -12,7 +12,7 @@ class CreateRole
         return DB::transaction(function () use ($data) {
             $role = Role::create([
                 'name' => $data['name'],
-                'guard_name' => $data['guard_name'],
+                'guard_name' => 'web',
             ]);
             $role->givePermissionTo($data['permissions']);
 

@@ -2,8 +2,8 @@
 
 namespace Modules\Purchases\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Products\Entities\Product;
 
 class PurchaseDetail extends Model
@@ -18,7 +18,7 @@ class PurchaseDetail extends Model
         'expiration_date',
         'lot_number',
     ];
-    
+
     public function purchase()
     {
         return $this->belongsTo(Purchase::class);

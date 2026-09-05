@@ -17,6 +17,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
         "laravel/ui": "^4.6.3",
+        "league/flysystem-aws-s3-v3": "^3.0",
         "maatwebsite/excel": "^3.1",
         "nwidart/laravel-modules": "^13.0",
         "realrashid/sweet-alert": "^7.0",
@@ -64,7 +65,7 @@
             "@php artisan key:generate --ansi"
         ],
         "lint": "pint --test",
-        "analyse": "phpstan analyse --memory-limit=1G",
+        "analyse": "phpstan analyse --memory-limit=2G",
         "test": "@php artisan test"
     },
     "extra": {

@@ -11,6 +11,6 @@
 |
 */
 
-Route::prefix('admin')->middleware(['auth'])->group(function() {
+Route::prefix('admin')->middleware(['auth', 'plan.feature:purchases'])->group(function () {
     Route::resource('purchases', 'PurchaseController');
 });

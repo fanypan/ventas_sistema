@@ -2,12 +2,12 @@
 
 namespace Modules\Financials\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Financials\Entities\Caja;
 use Modules\Financials\Entities\Gasto;
 use Modules\Financials\Entities\Insumo;
-use Modules\Financials\Entities\Caja;
-use App\Http\Controllers\Concerns\AuthorizesCrud;
 
 class ExpenseController extends Controller
 {
@@ -21,13 +21,15 @@ class ExpenseController extends Controller
     public function index()
     {
         $expenses = Gasto::with(['user', 'insumo'])->latest()->paginate(10);
+
         return view('financials::expenses.index', compact('expenses'));
     }
 
     public function create()
     {
         $insumos = Insumo::orderBy('name', 'asc')->get();
-        $openCash = Caja::where('status', 1)->first();
+        $openCash = Caja::openForUser();
+
         return view('financials::expenses.create', compact('insumos', 'openCash'));
     }
 
@@ -44,9 +46,9 @@ class ExpenseController extends Controller
             'new_insumo' => 'nullable|boolean',
         ]);
 
-        $cash = Caja::where('status', 1)->first();
-        if (!$cash) {
-            return back()->with('error', 'Debe tener una caja abierta para registrar egresos.')->withInput();
+        $cash = Caja::openForUser();
+        if (! $cash) {
+            return back()->with('error', 'Abrí tu caja para registrar egresos.')->withInput();
         }
 
         $insumo_id = $request->insumo_id;
@@ -85,6 +87,7 @@ class ExpenseController extends Controller
     {
         $term = $request->term;
         $insumos = Insumo::where('name', 'LIKE', "%$term%")->get();
+
         return response()->json($insumos);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\PlanSeeder;
+use Database\Seeders\PlatformUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,8 +21,8 @@ class PlatformCustomPathTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\PlanSeeder::class);
-        $this->seed(\Database\Seeders\PlatformUserSeeder::class);
+        $this->seed(PlanSeeder::class);
+        $this->seed(PlatformUserSeeder::class);
     }
 
     public function test_custom_platform_path_blocks_legacy_url(): void

@@ -37,5 +37,10 @@
         <env name="TENANT_BASE_DOMAIN" value="localhost" force="true"/>
         <env name="TRUSTED_PROXIES" value="" force="true"/>
         <env name="PLATFORM_ADMIN_PASSWORD" value="" force="true"/>
+        <env name="MEDIA_PUBLIC_DISK" value="public" force="true"/>
+        <env name="MEDIA_PRIVATE_DISK" value="filemanager" force="true"/>
+        <env name="MEDIA_PAYMENT_DISK" value="local" force="true"/>
+        <env name="FILEMANAGER_DRIVER" value="local" force="true"/>
+        <env name="HEALTH_CHECK_MINIO" value="false" force="true"/>
     </php>
 </phpunit>

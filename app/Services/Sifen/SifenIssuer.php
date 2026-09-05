@@ -2,6 +2,7 @@
 
 namespace App\Services\Sifen;
 
+use App\Helpers\SettingHelper;
 use App\Models\SifenDocument;
 use App\Services\Billing\PlanLimitService;
 use Modules\Sales\Entities\Sale;
@@ -11,8 +12,7 @@ class SifenIssuer
     public function __construct(
         private SifenGateway $gateway,
         private PlanLimitService $limits,
-    ) {
-    }
+    ) {}
 
     public function issueForSale(Sale $sale): ?SifenDocument
     {
@@ -39,8 +39,8 @@ class SifenIssuer
         $payload = [
             'sale_id' => $sale->id,
             'total' => $sale->total,
-            'ruc' => \App\Helpers\SettingHelper::getValue('company_nit'),
-            'company' => \App\Helpers\SettingHelper::getValue('company_name'),
+            'ruc' => SettingHelper::getValue('company_nit'),
+            'company' => SettingHelper::getValue('company_name'),
             'customer_id' => $sale->customer_id,
         ];
 

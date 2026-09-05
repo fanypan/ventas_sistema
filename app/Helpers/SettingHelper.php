@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\Setting;
+use App\Services\Media\MediaUrl;
 use Illuminate\Support\Facades\Schema;
 
 class SettingHelper
@@ -49,6 +50,15 @@ class SettingHelper
         $setting = Setting::where(['key' => $key])->first();
 
         return $setting ? $setting->ext : null;
+    }
+
+    public static function fileUrl(?string $key = null, ?string $value = null): string
+    {
+        if ($key !== null && $value === null) {
+            $value = static::getValue($key);
+        }
+
+        return app(MediaUrl::class)->settingUrl($value);
     }
 
     private static function available(): bool

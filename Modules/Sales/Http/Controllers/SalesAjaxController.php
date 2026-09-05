@@ -25,7 +25,7 @@ class SalesAjaxController extends Controller
     public function searchProduct(Request $request)
     {
         $term = $request->term;
-        $product = Product::where('status', 1)
+        $product = Product::active()
             ->where(function ($query) use ($term) {
                 $query->where('code', $term)
                     ->orWhere('description', 'LIKE', "%$term%");
@@ -69,7 +69,7 @@ class SalesAjaxController extends Controller
     public function searchCustomer(Request $request)
     {
         $term = $request->term;
-        $customer = Customer::where('status', 1)
+        $customer = Customer::active()
             ->where(function ($query) use ($term) {
                 $query->where('nit', $term)
                     ->orWhere('name', 'LIKE', "%$term%");
@@ -84,7 +84,7 @@ class SalesAjaxController extends Controller
 
     public function listCustomers()
     {
-        return response()->json(Customer::where('status', 1)->orderBy('name')->get());
+        return response()->json(Customer::active()->orderBy('name')->get());
     }
 
     public function storeCustomer(StorePosCustomerRequest $request)

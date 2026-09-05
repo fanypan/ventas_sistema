@@ -44,15 +44,21 @@ abstract class TenantTestCase extends TestCase
             'plan_id' => $plan->id,
             'admin_name' => 'Admin Demo',
             'admin_email' => 'admin@demo.test',
-            'admin_password_hash' => Hash::make('password'),
-            'setup_password' => 'password',
         ]);
 
         $this->rememberTenantArtifact($this->tenant->getTenantKey());
 
         $this->tenantUser = $this->tenant->run(function () {
-            return User::where('email', 'admin@demo.test')->firstOrFail();
+            $user = User::where('email', 'admin@demo.test')->firstOrFail();
+            $user->forceFill([
+                'password' => Hash::make('password'),
+                'must_change_password' => false,
+            ])->save();
+
+            return $user->fresh();
         });
+        $this->tenant->update(['admin_password_set_at' => now()]);
+        $this->tenant->refresh();
     }
 
     protected function tenantGet(string $uri)

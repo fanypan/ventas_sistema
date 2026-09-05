@@ -1,0 +1,1327 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Purchases\\Entities\\Purchase\>\|Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Sales\\Entities\\Sale\>\|Modules\\Purchases\\Entities\\Purchase\|Modules\\Sales\\Entities\\Sale\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Actions/StoreAbono.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$installments_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Actions/StoreAbono.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Sales\\Entities\\SaleInstallment\>\|Modules\\Sales\\Entities\\SaleInstallment\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Sales\\Entities\\SaleInstallment\>\|Modules\\Sales\\Entities\\SaleInstallment\:\:\$installment_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Sales\\Entities\\SaleInstallment\>\|Modules\\Sales\\Entities\\SaleInstallment\:\:\$paid_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Sales\\Entities\\SaleInstallment\>\|Modules\\Sales\\Entities\\SaleInstallment\:\:\$sale_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Sales\\Entities\\SaleInstallment\>\|Modules\\Sales\\Entities\\SaleInstallment\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 3
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Relation ''customer'' is not found in Modules\\Sales\\Entities\\Sale model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Relation ''details'' is not found in Modules\\Sales\\Entities\\Sale model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Relation ''supplier'' is not found in Modules\\Purchases\\Entities\\Purchase model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Relation ''user'' is not found in Modules\\Credits\\Entities\\Abono model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Credits/Http/Controllers/CreditController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Purchases\\Entities\\Purchase\:\:\$abonos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Services/KardexService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Purchases\\Entities\\Purchase\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Services/KardexService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Purchases\\Entities\\Purchase\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Services/KardexService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$abonos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Services/KardexService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Services/KardexService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Credits/Services/KardexService.php
+
+		-
+			message: '#^Relation ''abonos'' is not found in Modules\\Purchases\\Entities\\Purchase model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: Modules/Credits/Services/KardexService.php
+
+		-
+			message: '#^Relation ''abonos'' is not found in Modules\\Sales\\Entities\\Sale model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: Modules/Credits/Services/KardexService.php
+
+		-
+			message: '#^Call to static method new\(\) on an unknown class Modules\\Customers\\Database\\factories\\CustomerFactory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Customers/Entities/Customer.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: Modules/Customers/Http/Controllers/CustomerController.php
+
+		-
+			message: '#^Call to static method new\(\) on an unknown class Modules\\Financials\\Database\\factories\\CajaFactory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Financials/Entities/Caja.php
+
+		-
+			message: '#^Call to static method new\(\) on an unknown class Modules\\Financials\\Database\\factories\\GastoFactory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Financials/Entities/Gasto.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Financials\\Entities\\Caja\>\|Modules\\Financials\\Entities\\Caja\:\:\$opening_amount\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Financials/Http/Controllers/CashierController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Financials\\Entities\\Caja\:\:\$abonos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Financials/Http/Controllers/CashierController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Financials\\Entities\\Caja\:\:\$expenses\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Financials/Http/Controllers/CashierController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Financials\\Entities\\Caja\:\:\$sales\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Financials/Http/Controllers/CashierController.php
+
+		-
+			message: '#^Call to static method info\(\) on an unknown class Log\.$#'
+			identifier: class.notFound
+			count: 2
+			path: Modules/Financials/Http/Controllers/CashierController.php
+
+		-
+			message: '#^Relation ''abonos'' is not found in Modules\\Financials\\Entities\\Caja model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: Modules/Financials/Http/Controllers/CashierController.php
+
+		-
+			message: '#^Relation ''expenses'' is not found in Modules\\Financials\\Entities\\Caja model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Financials/Http/Controllers/CashierController.php
+
+		-
+			message: '#^Relation ''sales'' is not found in Modules\\Financials\\Entities\\Caja model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: Modules/Financials/Http/Controllers/CashierController.php
+
+		-
+			message: '#^Relation ''user'' is not found in Modules\\Financials\\Entities\\Caja model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: Modules/Financials/Http/Controllers/CashierController.php
+
+		-
+			message: '#^Relation ''insumo'' is not found in Modules\\Financials\\Entities\\Gasto model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Financials/Http/Controllers/ExpenseController.php
+
+		-
+			message: '#^Relation ''user'' is not found in Modules\\Financials\\Entities\\Gasto model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Financials/Http/Controllers/ExpenseController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Financials\\Entities\\ConsumoInsumo\>\|Modules\\Financials\\Entities\\ConsumoInsumo\:\:\$insumo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Financials/Http/Controllers/InsumoConsumptionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Financials\\Entities\\ConsumoInsumo\>\|Modules\\Financials\\Entities\\ConsumoInsumo\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Financials/Http/Controllers/InsumoConsumptionController.php
+
+		-
+			message: '#^Relation ''insumo'' is not found in Modules\\Financials\\Entities\\ConsumoInsumo model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: Modules/Financials/Http/Controllers/InsumoConsumptionController.php
+
+		-
+			message: '#^Relation ''user'' is not found in Modules\\Financials\\Entities\\ConsumoInsumo model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Financials/Http/Controllers/InsumoConsumptionController.php
+
+		-
+			message: '#^Call to static method new\(\) on an unknown class Modules\\Products\\Database\\factories\\CategoryFactory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Products/Entities/Category.php
+
+		-
+			message: '#^Call to static method new\(\) on an unknown class Modules\\Products\\Database\\factories\\EntradaFactory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Products/Entities/Entrada.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$image\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Products/Entities/Product.php
+
+		-
+			message: '#^Call to static method new\(\) on an unknown class Modules\\Products\\Database\\factories\\ProductFactory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Products/Entities/Product.php
+
+		-
+			message: '#^Method Modules\\Products\\Http\\Controllers\\CategoryController\:\:destroy\(\) should return Illuminate\\Contracts\\Support\\Renderable but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Modules/Products/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method Modules\\Products\\Http\\Controllers\\CategoryController\:\:update\(\) should return Illuminate\\Contracts\\Support\\Renderable but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Modules/Products/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Products/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Products/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Relation ''category'' is not found in Modules\\Products\\Entities\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: Modules/Products/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Relation ''purchase'' is not found in Modules\\Purchases\\Entities\\PurchaseDetail model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Products/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$image\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Products/Services/ProductImageService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Purchases/Actions/DestroyPurchase.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Purchases\\Entities\\Purchase\:\:\$details\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Purchases/Actions/DestroyPurchase.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Purchases\\Entities\\Purchase\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Purchases/Actions/DestroyPurchase.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Purchases\\Entities\\PurchaseDetail\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Purchases/Actions/DestroyPurchase.php
+
+		-
+			message: '#^Relation ''purchase'' is not found in Modules\\Purchases\\Entities\\PurchaseDetail model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Purchases/Actions/DestroyPurchase.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Products\\Entities\\Product\>\|Modules\\Products\\Entities\\Product\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Purchases/Actions/StorePurchase.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Products\\Entities\\Product\>\|Modules\\Products\\Entities\\Product\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Purchases/Actions/StorePurchase.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Purchases\\Entities\\Purchase\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Purchases/Entities/Purchase.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Purchases\\Entities\\Purchase\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Purchases/Http/Controllers/PurchaseController.php
+
+		-
+			message: '#^Relation ''brand'' is not found in Modules\\Products\\Entities\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Purchases/Http/Controllers/PurchaseController.php
+
+		-
+			message: '#^Relation ''details'' is not found in Modules\\Purchases\\Entities\\Purchase model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Purchases/Http/Controllers/PurchaseController.php
+
+		-
+			message: '#^Relation ''supplier'' is not found in Modules\\Purchases\\Entities\\Purchase model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: Modules/Purchases/Http/Controllers/PurchaseController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Actions/ProcessSale.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$discount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Actions/ProcessSale.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$interest_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Actions/ProcessSale.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Sales/Actions/ProcessSale.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Actions/ProcessSale.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Sales/Actions/ProcessSale.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$details\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Actions/VoidSale.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$payment_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Actions/VoidSale.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Sales/Actions/VoidSale.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Sales/Entities/Sale.php
+
+		-
+			message: '#^Call to static method info\(\) on an unknown class Log\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Sales/Entities/Sale.php
+
+		-
+			message: '#^Call to static method new\(\) on an unknown class Modules\\Sales\\Database\\factories\\SaleFactory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Sales/Entities/Sale.php
+
+		-
+			message: '#^Call to static method new\(\) on an unknown class Modules\\Sales\\Database\\factories\\SaleDetailFactory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Sales/Entities/SaleDetail.php
+
+		-
+			message: '#^Call to static method new\(\) on an unknown class Modules\\Sales\\Database\\factories\\TemporaryDetailFactory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Sales/Entities/TemporaryDetail.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$customer_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$payment_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 2
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Method Modules\\Sales\\Http\\Controllers\\SaleController\:\:edit\(\) should return Illuminate\\Contracts\\Support\\Renderable but returns Illuminate\\Http\\RedirectResponse\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Method Modules\\Sales\\Http\\Controllers\\SaleController\:\:printTicket\(\) should return Illuminate\\Contracts\\Support\\Renderable but returns Illuminate\\Http\\Response\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Method Modules\\Sales\\Http\\Controllers\\SaleController\:\:store\(\) should return Illuminate\\Contracts\\Support\\Renderable but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Method Modules\\Sales\\Http\\Controllers\\SaleController\:\:update\(\) should return Illuminate\\Contracts\\Support\\Renderable but returns Illuminate\\Http\\RedirectResponse\.$#'
+			identifier: return.type
+			count: 2
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Relation ''brand'' is not found in Modules\\Products\\Entities\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Relation ''customer'' is not found in Modules\\Sales\\Entities\\Sale model\.$#'
+			identifier: larastan.relationExistence
+			count: 5
+			path: Modules/Sales/Http/Controllers/SaleController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Products\\Entities\\Product\>\|Modules\\Products\\Entities\\Product\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Services/CartService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Services/CartService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Services/CartService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Sales/Services/CartService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$discount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Services/CartService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$interest_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Services/CartService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/Services/CartService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: Modules/Sales/Services/CartService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\TemporaryDetail\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 6
+			path: Modules/Sales/Services/CartService.php
+
+		-
+			message: '#^Relation ''product'' is not found in Modules\\Sales\\Entities\\TemporaryDetail model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/Sales/Services/CartService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/StockAdjustments/Actions/AdjustInventory.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 4
+			path: Modules/StockAdjustments/Actions/AdjustInventory.php
+
+		-
+			message: '#^Relation ''brand'' is not found in Modules\\Products\\Entities\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/StockAdjustments/Http/Controllers/InventoryAdjustmentController.php
+
+		-
+			message: '#^Relation ''product'' is not found in App\\Models\\InventoryAdjustment model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: Modules/StockAdjustments/Http/Controllers/InventoryAdjustmentController.php
+
+		-
+			message: '#^Call to static method new\(\) on an unknown class Modules\\Suppliers\\Database\\factories\\SupplierFactory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Suppliers/Entities/Supplier.php
+
+		-
+			message: '#^Method App\\Actions\\CreateRole\:\:execute\(\) should return Spatie\\Permission\\Models\\Role but returns Spatie\\Permission\\Contracts\\Role\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Actions/CreateRole.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Category\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Category\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$brand_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$category_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$image\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$model_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$warranty_months\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Call to function method_exists\(\) with Illuminate\\Contracts\\Filesystem\\Filesystem and ''path'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Products\\Entities\\Category\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Products\\Entities\\Product\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Actions/Platform/CloneCatalog.php
+
+		-
+			message: '#^Method App\\Actions\\Platform\\CreatePlatformRole\:\:execute\(\) should return Spatie\\Permission\\Models\\Role but returns Spatie\\Permission\\Contracts\\Role\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Actions/Platform/CreatePlatformRole.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Tenant\:\:\$pending_logo_path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Platform/DeleteTenant.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\|string\)\: mixed, Closure\(App\\Models\\Tenant\)\: void given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/BackupTenantsCommand.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:mapWithKeys\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\|string\)\: array\<string, string\>, Closure\(App\\Models\\Tenant\)\: non\-empty\-array\<string, string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/CleanupOrphanTenantDatabasesCommand.php
+
+		-
+			message: '#^Relation ''category'' is not found in Modules\\Products\\Entities\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Exports/ProductsExport.php
+
+		-
+			message: '#^Relation ''category'' is not found in Modules\\Products\\Entities\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Exports/ZeroStockExport.php
+
+		-
+			message: '#^Unsafe call to private method App\\Helpers\\SettingHelper\:\:available\(\) through static\:\:\.$#'
+			identifier: staticClassAccess.privateMethod
+			count: 4
+			path: app/Helpers/SettingHelper.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\SaleDetail\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Relation ''customer'' is not found in Modules\\Sales\\Entities\\Sale model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Relation ''product'' is not found in Modules\\Sales\\Entities\\SaleDetail model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Relation ''sale'' is not found in Modules\\Sales\\Entities\\SaleDetail model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Platform/PaymentController.php
+
+		-
+			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, Carbon\\Carbon\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Platform/TenantController.php
+
+		-
+			message: '#^Relation ''domains'' is not found in App\\Models\\Tenant model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Platform/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ReportController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ReportController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/ReportController.php
+
+		-
+			message: '#^Relation ''category'' is not found in Modules\\Products\\Entities\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Http/Controllers/ReportController.php
+
+		-
+			message: '#^Relation ''customer'' is not found in Modules\\Sales\\Entities\\Sale model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Http/Controllers/ReportController.php
+
+		-
+			message: '#^Relation ''insumo'' is not found in Modules\\Financials\\Entities\\Gasto model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/ReportController.php
+
+		-
+			message: '#^Relation ''product'' is not found in Modules\\Sales\\Entities\\SaleDetail model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/ReportController.php
+
+		-
+			message: '#^Relation ''sale'' is not found in Modules\\Sales\\Entities\\SaleDetail model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/ReportController.php
+
+		-
+			message: '#^Relation ''supplier'' is not found in Modules\\Purchases\\Entities\\Purchase model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/ReportController.php
+
+		-
+			message: '#^Relation ''user'' is not found in Modules\\Financials\\Entities\\Gasto model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/ReportController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ends_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/EnsureTenantSubscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$grace_ends_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/EnsureTenantSubscription.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isLifetime\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Middleware/EnsureTenantSubscription.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\UserResource\:\:getRoleNames\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Tenant\:\:\$catalog_source_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Jobs/SetupTenantJob.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Tenant\:\:\$pending_logo_path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Jobs/SetupTenantJob.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:active\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Models/Plan.php
+
+		-
+			message: '#^Called ''first'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Models/PlatformUser.php
+
+		-
+			message: '#^Access to an undefined property Stancl\\Tenancy\\Contracts\\Domain\:\:\$domain\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Tenant.php
+
+		-
+			message: '#^Method App\\Models\\Tenant\:\:catalogSources\(\) should return Illuminate\\Database\\Eloquent\\Collection\<int, \$this\(App\\Models\\Tenant\)\> but returns Stancl\\Tenancy\\Database\\TenantCollection\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Tenant.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>domain" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/Tenant.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Models\\User\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Models\\User\:\:\$hidden is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$hidden\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Observability/SentryScrubber.php
+
+		-
+			message: '#^Access to an undefined property Stancl\\Tenancy\\Contracts\\Tenant\:\:\$provisioned_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Providers/TenancyServiceProvider.php
+
+		-
+			message: '#^Access to an undefined property Stancl\\Tenancy\\Contracts\\Tenant\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Providers/TenancyServiceProvider.php
+
+		-
+			message: '#^Call to an undefined method Stancl\\Tenancy\\Contracts\\Tenant\:\:database\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Providers/TenancyServiceProvider.php
+
+		-
+			message: '#^Call to an undefined method Stancl\\Tenancy\\Contracts\\Tenant\:\:domains\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Providers/TenancyServiceProvider.php
+
+		-
+			message: '#^Parameter \#1 \$tenant of job class App\\Jobs\\SetupTenantJob constructor expects App\\Models\\Tenant in App\\Jobs\\SetupTenantJob\:\:dispatchSync\(\), Stancl\\Tenancy\\Contracts\\Tenant given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Providers/TenancyServiceProvider.php
+
+		-
+			message: '#^Parameter \#1 \$tenant of static method App\\Support\\TenantSetupPassword\:\:captureFromCreating\(\) expects App\\Models\\Tenant, Stancl\\Tenancy\\Contracts\\Tenant given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Providers/TenancyServiceProvider.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ends_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$interval\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$reminded_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isLifetime\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Parameter \#1 \$subscription of method App\\Services\\Billing\\SubscriptionService\:\:statusFor\(\) expects App\\Models\\Subscription, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Parameter \#2 \$plan of method App\\Services\\Billing\\SubscriptionService\:\:start\(\) expects App\\Models\\Plan, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Parameter \#2 \$subscription of method App\\Services\\Billing\\SubscriptionService\:\:record\(\) expects App\\Models\\Subscription\|null, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Parameter \#2 \$subscription of method App\\Services\\Billing\\SubscriptionService\:\:record\(\) expects App\\Models\\Subscription\|null, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Parameter \#2 \$subscription of method App\\Services\\Billing\\SubscriptionService\:\:remind\(\) expects App\\Models\\Subscription, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>interval" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Billing/SubscriptionService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Tenant\:\:\$pending_logo_path\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/Media/TenantLogoService.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$customer_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Sifen/SifenIssuer.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Sifen/SifenIssuer.php
+
+		-
+			message: '#^Offset ''status'' on array\{status\: string, cdc\?\: string, reference\?\: string, response\?\: array, error\?\: string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Services/Sifen/SifenIssuer.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Tenant\:\:\$pending_logo_path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Tenancy/TenantProvisioningRollback.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Tenant\:\:\$setup_password\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/TenantSetupPassword.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Products\\Entities\\Product\>\|Modules\\Products\\Entities\\Product\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 2
+			path: tests/Feature/CartIdorTest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Sales\\Entities\\TemporaryDetail\>\|Modules\\Sales\\Entities\\TemporaryDetail\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/CartIdorTest.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Tenant\:\:\$catalog_source_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/CloneCatalogTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$category\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/CloneCatalogTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 2
+			path: tests/Feature/CloneCatalogTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 2
+			path: tests/Feature/CloneCatalogTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$image\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/CloneCatalogTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 5
+			path: tests/Feature/CloneCatalogTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 6
+			path: tests/Feature/CloneCatalogTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 1
+			path: tests/Feature/ExampleTest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$attachment_path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/PaymentAttachmentTest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/PaymentAttachmentTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$cash_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: tests/Feature/PlanLimitsTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 2
+			path: tests/Feature/PosCheckoutTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$payment_type\.$#'
+			identifier: property.notFound
+			count: 2
+			path: tests/Feature/PosCheckoutTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$payment_with\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/PosCheckoutTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: tests/Feature/PosCheckoutTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/PosCheckoutTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\SaleInstallment\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/PosCheckoutTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$image\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/ProductImageUploadTest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Products\\Entities\\Product\>\|Modules\\Products\\Entities\\Product\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/PurchaseAndCreditLayerTest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Products\\Entities\\Product\>\|Modules\\Products\\Entities\\Product\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 2
+			path: tests/Feature/PurchaseAndCreditLayerTest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Purchases\\Entities\\Purchase\>\|Modules\\Purchases\\Entities\\Purchase\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/PurchaseAndCreditLayerTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Entities\\Sale\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/PurchaseAndCreditLayerTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 3
+			path: tests/Feature/StockAdjustmentTest.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Contracts\\Auth\\StatefulGuard\:\:getRecallerName\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/Feature/TenantLoginSecurityTest.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Tenant\:\:\$pending_logo_path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/TenantLogoTest.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Tenant\:\:\$setup_password\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/TenantSetupPasswordPersistenceTest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Products\\Entities\\Product\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Feature/TenantSmokeTest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Sales\\Entities\\Sale\>\|Modules\\Sales\\Entities\\Sale\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: tests/Feature/UserFacingExceptionTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 1
+			path: tests/Unit/ExampleTest.php
+
+		-
+			message: '#^Parameter \#2 \$connection of static method App\\Support\\PostgreSqlTenantDatabase\:\:drop\(\) expects Illuminate\\Database\\ConnectionInterface\|null, Mockery\\MockInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Unit/PostgreSqlTenantDatabaseTest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ends_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: tests/Unit/SubscriptionServiceTest.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isLifetime\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Unit/SubscriptionServiceTest.php

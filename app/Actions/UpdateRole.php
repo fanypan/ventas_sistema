@@ -12,7 +12,7 @@ class UpdateRole
         return DB::transaction(function () use ($role, $data) {
             $role->update([
                 'name' => $data['name'],
-                'guard_name' => $data['guard_name'],
+                'guard_name' => 'web',
             ]);
             $role->syncPermissions($data['permissions']);
 

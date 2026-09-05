@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Tenant;
+use App\Support\PostgreSqlTenantDatabase;
 use App\Support\TenantDatabaseName;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -70,8 +71,6 @@ class CleanupOrphanTenantDatabasesCommand extends Command
 
     private function dropTenantDatabase(string $database): void
     {
-        $quoted = '"'.str_replace('"', '""', $database).'"';
-
-        DB::statement("DROP DATABASE IF EXISTS {$quoted} WITH (FORCE)");
+        PostgreSqlTenantDatabase::drop($database);
     }
 }

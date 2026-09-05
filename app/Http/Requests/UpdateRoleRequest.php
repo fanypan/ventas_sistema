@@ -8,6 +8,7 @@ class UpdateRoleRequest extends StoreRoleRequest
     {
         return array_merge(parent::rules(), [
             'id' => ['required', 'integer'],
+            'name' => $this->nameRules((int) $this->input('id')),
         ]);
     }
 }

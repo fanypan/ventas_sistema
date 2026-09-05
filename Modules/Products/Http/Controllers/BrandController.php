@@ -2,12 +2,11 @@
 
 namespace Modules\Products\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Products\Entities\Brand;
 use Illuminate\Support\Str;
-use App\Http\Controllers\Concerns\AuthorizesCrud;
+use Modules\Products\Entities\Brand;
 
 class BrandController extends Controller
 {
@@ -21,6 +20,7 @@ class BrandController extends Controller
     public function index()
     {
         $brands = Brand::latest()->get();
+
         return view('products::brands.index', compact('brands'));
     }
 
@@ -49,13 +49,14 @@ class BrandController extends Controller
     public function edit($id)
     {
         $brand = Brand::findOrFail($id);
+
         return view('products::brands.edit', compact('brand'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|unique:brands,name,' . $id,
+            'name' => 'required|unique:brands,name,'.$id,
         ]);
 
         $brand = Brand::findOrFail($id);
@@ -73,13 +74,14 @@ class BrandController extends Controller
     public function destroy($id)
     {
         $brand = Brand::findOrFail($id);
-        
+
         // Verificar si la marca tiene productos asociados
         if ($brand->products()->count() > 0) {
             return redirect()->route('brands.index')->with('error', 'No se puede eliminar la marca porque tiene productos asociados.');
         }
 
         $brand->delete();
+
         return redirect()->route('brands.index')->with('success', 'Marca eliminada correctamente.');
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\PlatformUser;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
@@ -53,7 +54,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     protected function gate(): void
     {
         Gate::define('viewTelescope', function ($user = null) {
-            return $user instanceof \App\Models\PlatformUser && $user->isAdmin();
+            return $user instanceof PlatformUser && $user->isAdmin();
         });
     }
 }

@@ -32,7 +32,7 @@
         </div>
         <div class="modal-body">
         <center>
-            <img src="{{ asset(Setting::getValue('app_loading_gif')) }}" alt="{{ Setting::getName('app_loading_gif') }}" class="img" width="200">
+            <img src="{{ setting_file_url(Setting::getValue('app_loading_gif')) }}" alt="{{ Setting::getName('app_loading_gif') }}" class="img" width="200">
         </center>
         </div>
     </div>

@@ -6,9 +6,12 @@
         <h1>Panel</h1>
         <p class="platform-lead">Clientes, vencimientos y los últimos cobros registrados.</p>
     </div>
-    <a class="btn btn-primary" href="{{ route('platform.tenants.create') }}">Nuevo cliente</a>
+    @if (platform_can('tenants.create'))
+        <a class="btn btn-primary" href="{{ route('platform.tenants.create') }}">Nuevo cliente</a>
+    @endif
 </div>
 
+@if (platform_can('tenants.view'))
 <div class="platform-stats">
     <div class="platform-stat">
         <p class="platform-stat__value">{{ $tenants }}</p>
@@ -33,7 +36,9 @@
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Últimos clientes</span>
-                <a href="{{ route('platform.tenants.index') }}">Ver todos</a>
+                @if (platform_can('tenants.view'))
+                    <a href="{{ route('platform.tenants.index') }}">Ver todos</a>
+                @endif
             </div>
             @forelse ($recentTenants as $tenant)
                 @if ($loop->first)
@@ -62,8 +67,8 @@
                 @include('platform.partials.empty', [
                     'title' => 'Todavía no hay clientes',
                     'body' => 'Cuando cobres el primer plan, dales de alta acá.',
-                    'actionUrl' => route('platform.tenants.create'),
-                    'actionLabel' => 'Nuevo cliente',
+                    'actionUrl' => platform_can('tenants.create') ? route('platform.tenants.create') : null,
+                    'actionLabel' => platform_can('tenants.create') ? 'Nuevo cliente' : null,
                 ])
             @endforelse
         </div>
@@ -111,4 +116,5 @@
         </div>
     </div>
 </div>
+@endif
 @endsection

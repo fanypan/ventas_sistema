@@ -50,17 +50,49 @@ Staff entra solo por `https://admin.tudominio.com/a7k9m2p4/login` (bookmark inte
 
 El seeder de staff en production exige `PLATFORM_ADMIN_PASSWORD`. En local, si está vacío, queda `plataforma@arandutech.com` / `plataforma`.
 
+Roles del panel: Spatie en la DB central, guard `platform` (independiente del POS). Tras migrar, corré `php artisan db:seed --class=PlatformPermissionSeeder` para mapear `platform_users.role` a Spatie. **Equipo** (`/{PLATFORM_PATH}/equipo`) asigna roles. Defaults: `admin` (todo), `staff` (alta, cobros, suspender, ver planes), `billing` (ver clientes y registrar pagos). El rol `admin` no se borra ni se recorta. No uses el nombre `superadmin` acá.
+
 Opcional: restringir por IP en Nginx (`docker/nginx/platform-staff.conf.example`). DNS wildcard `*.tudominio.com` + TLS wildcard delante de Nginx.
 
-## Alta de un cliente
+## Alta de un cliente (SaaS)
+
+Guía paso a paso también en el [README — Crear comercios](../README.md#crear-comercios-saas-o-un-solo-comercio).
 
 1. Cierre por WhatsApp y cobro (transferencia o efectivo).
-2. Staff → Plataforma → Nuevo cliente (slug, plan, mail del admin).
-3. El job crea la base `tenant_{slug}` (ej. `tenant_demo`), corre migraciones, semilla roles `admin`/`operator`, manda credenciales.
-4. Si falla el aprovisionamiento, se revierte solo: se borra la base y el registro central (podés reintentar con el mismo slug).
-5. Registrar el pago en la ficha del cliente para renovar el período.
+2. Staff → Plataforma → Nuevo cliente (slug, plan público, período mensual/anual, mail del admin).
+3. El job crea la base `tenant_{slug}` (ej. `tenant_demo`), corre migraciones, semilla roles `admin`/`operator` y manda un enlace para que el admin defina su contraseña. Hace falta el worker `queue` en `Up`.
+4. Opcional: en el alta o en la ficha, **Copiar catálogo** desde otro comercio (categorías, marcas, productos y fotos; stock en 0; no pisa códigos que ya existan). Permiso `tenants.catalog` (staff y admin). Tras desplegar, `php artisan db:seed --class=PlatformPermissionSeeder`.
+5. Si falla el aprovisionamiento, se revierte solo: se borra la base y el registro central (podés reintentar con el mismo slug).
+6. Registrar el pago en la ficha del cliente para renovar el período.
 
 Estados: activo → gracia 7 días → solo lectura 3 días → suspendido. Cron: `subscriptions:tick`.
+
+DNS obligatorio en multi-tenant: wildcard `*.{TENANT_BASE_DOMAIN}` + TLS. Cada comercio entra por `{slug}.{TENANT_BASE_DOMAIN}`.
+
+## On-premise (un solo comercio hostea)
+
+Mismo compose de producción en el VPS o la LAN del comercio. Un tenant, plan interno **Instalación propia** (`onprem`): no sale en la landing, sin cupo de FE en el plan, sin tope de usuarios/cajas, **sin vencimiento**. Resumen instalable: [README](../README.md#b-un-solo-comercio--instalación-propia-on-prem).
+
+1. Copiá `.env.example` → `.env` y ajustá `APP_URL`, claves de DB/Redis/MinIO, SMTP y dominios. Ejemplo típico:
+
+```env
+APP_URL=https://pos.minegocio.com
+CENTRAL_DOMAINS=pos.minegocio.com,admin.minegocio.com
+TENANT_BASE_DOMAIN=minegocio.com
+PLATFORM_PATH=plataforma
+PLATFORM_DOMAIN=admin.minegocio.com
+```
+
+En LAN sin DNS público podés usar `TENANT_BASE_DOMAIN=localhost` y `CENTRAL_DOMAINS=localhost,127.0.0.1` como en desarrollo.
+
+2. `docker compose -f docker-compose.prod.yml up -d --build` (o el compose de desarrollo en laboratorio).
+3. Migrar y sembrar si el entrypoint no lo hizo: `php artisan migrate` + `php artisan db:seed` (trae el plan `onprem`). En prod con seed: definí `PLATFORM_ADMIN_PASSWORD`.
+4. Staff → Nuevo cliente → plan **Instalación propia**. El formulario fuerza período **Sin vencimiento**. No registres pago mensual.
+5. El alta crea el dominio `{slug}.{TENANT_BASE_DOMAIN}` (ej. slug `pos` → `pos.minegocio.com`). Si el comercio quiere el apex (`minegocio.com`) u otro host único, agregalo en la tabla `domains` de ese tenant; no hace falta wildcard DNS.
+6. La licencia se cobra afuera del panel. `subscriptions:tick` no pausa tenants `lifetime` / plan `onprem`.
+7. Después del primer arranque: `RUN_SEED=false` y cambiá la clave del staff sembrado.
+
+No uses un plan “gratis” público: canibaliza Starter/Negocio y aparece en marketing.
 
 ## PostgreSQL y tenants
 
@@ -94,7 +126,26 @@ php artisan tenants:backup
 ./scripts/backup-tenants.sh
 ```
 
-Quedan en `storage/app/backups/{fecha}/` (central.sql + un dump por tenant).
+Quedan en `storage/app/backups/{fecha}/` (central.sql + un dump por tenant). El volumen MinIO (`minio_data`) se respalda aparte (snapshot del volumen o `mc mirror`).
+
+## MinIO (fotos y archivos)
+
+Un bucket público (`ventas-public`) y uno privado (`ventas-private`). **No** hay un bucket por cliente: stancl prefija las claves con `tenant{id}/`.
+
+| Disco | Uso |
+|---|---|
+| `minio` | Fotos de producto (públicas, redimensionadas a JPEG ≤ 1000 px) |
+| `filemanager` | Gestor de archivos del comercio (privado; driver `s3` en Docker) |
+| `minio_private` | Comprobantes de pago de la plataforma (sin prefijo de tenancy) |
+
+`FILESYSTEM_DISK` sigue en `local`. Consola MinIO en local: http://localhost:9001 (`minioadmin` / `minioadmin`). En producción no se publica 9000/9001; Nginx sirve `/media/` y `AWS_URL` apunta a `https://tudominio.com/media/ventas-public`.
+
+Migrar fotos ya guardadas en disco:
+
+```bash
+php artisan tenants:media-migrate --dry-run
+php artisan tenants:media-migrate
+```
 
 ## Facturación electrónica
 
@@ -110,11 +161,12 @@ Todo se prende o apaga por `.env`. Vacío / `false` = off.
 | `SENTRY_TRACES_SAMPLE_RATE` | `0` | Traces APM (0.1 en prod si querés sampling). |
 | `HORIZON_ENABLED` | `false` | El contenedor `queue` corre Horizon en vez de `queue:work`. UI en `/{PLATFORM_PATH}/horizon` (solo staff). |
 | `TELESCOPE_ENABLED` | `false` | Debug local. Solo con `APP_ENV=local` y paquete require-dev. UI en `/{PLATFORM_PATH}/telescope`. |
-| `HEALTH_ENABLED` | `true` | `GET /up` (DB central + Redis + disco). No recorre tenants. |
+| `HEALTH_ENABLED` | `true` | `GET /up` (DB central + Redis + disco + MinIO). No recorre tenants. |
+| `HEALTH_CHECK_MINIO` | `true` | HEAD al disco público S3. Skip si el disco no es S3. |
 
 Sentry taguea `surface` (tenant/central) y `tenant` / `tenant_slug`. No manda PII (`send_default_pii=false`) y filtra passwords, tokens, API keys de FE.
 
-CI (GitHub Actions): Pint (archivos de observabilidad), PHPStan, `php artisan test`, `composer audit` (informativo).
+CI (GitHub Actions): Pint y PHPStan sobre `app/`, `Modules/`, `database/`, `routes/` y `tests/` (sin `_archive` ni migraciones). `php artisan test`, `composer audit` (informativo).
 
 Logs de Docker y uptime en local:
 

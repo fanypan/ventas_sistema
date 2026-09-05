@@ -1,11 +1,19 @@
 <?php
 
+use App\Providers\AdminProvider;
+use App\Providers\AppServiceProvider;
+use App\Providers\AuthServiceProvider;
+use App\Providers\EventServiceProvider;
+use App\Providers\ObservabilityServiceProvider;
+use App\Providers\RouteServiceProvider;
+use App\Providers\TenancyServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\AuthServiceProvider::class,
-    App\Providers\ObservabilityServiceProvider::class,
-    App\Providers\EventServiceProvider::class,
-    App\Providers\RouteServiceProvider::class,
-    App\Providers\TenancyServiceProvider::class,
-    App\Providers\AdminProvider::class,
+    AppServiceProvider::class,
+    AuthServiceProvider::class,
+    ObservabilityServiceProvider::class,
+    EventServiceProvider::class,
+    RouteServiceProvider::class,
+    TenancyServiceProvider::class,
+    AdminProvider::class,
 ];

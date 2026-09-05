@@ -9,8 +9,7 @@ class RucParaguay implements Rule
 {
     public function __construct(
         private bool $allowConsumidorFinal = true,
-    ) {
-    }
+    ) {}
 
     public function passes($attribute, $value): bool
     {

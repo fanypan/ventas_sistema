@@ -17,7 +17,12 @@
                 </div>
                 <div class="form-group">
                     <label for="password">Contraseña</label>
-                    <input class="form-control @error('password') is-invalid @enderror" id="password" type="password" name="password" autocomplete="current-password" required>
+                    <div class="input-group">
+                        <input class="form-control @error('password') is-invalid @enderror" id="password" type="password" name="password" autocomplete="current-password" required>
+                        <div class="input-group-append">
+                            @include('auth.partials.password-toggle-btn', ['target' => '#password'])
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group form-check">
                     <input class="form-check-input" type="checkbox" name="remember" id="remember" value="1" @checked(old('remember'))>
@@ -29,3 +34,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+@include('auth.partials.password-toggle-script')
+@endpush

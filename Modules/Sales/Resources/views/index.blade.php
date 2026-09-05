@@ -141,7 +141,7 @@
                                 @endphp
                                 <span class="badge {{ $st[1] }} px-2 py-1 rounded-pill">{{ $st[0] }}</span>
                                 @if($sale->payment_type === 'credito' && $sale->installments_count > 1)
-                                    <small class="d-block text-muted mt-1">{{ $sale->installments()->where('status', 1)->count() }} / {{ $sale->installments_count }} cuotas</small>
+                                    <small class="d-block text-muted mt-1">{{ $sale->installments()->paid()->count() }} / {{ $sale->installments_count }} cuotas</small>
                                 @endif
                             </td>
                             <td class="text-right font-weight-bold">

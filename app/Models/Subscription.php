@@ -9,7 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Subscription extends Model
 {
     public const INTERVAL_MONTHLY = 'monthly';
+
     public const INTERVAL_YEARLY = 'yearly';
+
+    public const INTERVAL_LIFETIME = 'lifetime';
 
     protected $fillable = [
         'tenant_id',
@@ -49,5 +52,19 @@ class Subscription extends Model
     public function events(): HasMany
     {
         return $this->hasMany(SubscriptionEvent::class);
+    }
+
+    public function isLifetime(): bool
+    {
+        return $this->interval === self::INTERVAL_LIFETIME;
+    }
+
+    public function endsLabel(): string
+    {
+        if ($this->isLifetime()) {
+            return 'Sin vencimiento';
+        }
+
+        return $this->ends_at?->format('d/m/Y') ?: '—';
     }
 }

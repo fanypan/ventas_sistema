@@ -150,6 +150,7 @@
                                     </div>
                                 </div>
                                 <!-- Compras -->
+                                @if (plan_has('purchases'))
                                 <div class="col-md-4 mb-4">
                                     <div class="card card-outline card-danger">
                                         <div class="card-body">
@@ -165,6 +166,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                @endif
                                 <!-- Estado de Resultados -->
                                 <div class="col-md-4 mb-4">
                                     <div class="card card-outline card-warning">

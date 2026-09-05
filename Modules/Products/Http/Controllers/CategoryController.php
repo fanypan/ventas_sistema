@@ -2,10 +2,11 @@
 
 namespace Modules\Products\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesCrud;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use App\Http\Controllers\Concerns\AuthorizesCrud;
+use Modules\Products\Entities\Category;
 
 class CategoryController extends Controller
 {
@@ -18,16 +19,19 @@ class CategoryController extends Controller
 
     /**
      * Display a listing of the resource.
+     *
      * @return Renderable
      */
     public function index()
     {
-        $categories = \Modules\Products\Entities\Category::latest()->paginate(10);
+        $categories = Category::latest()->paginate(10);
+
         return view('products::categories.index', compact('categories'));
     }
 
     /**
      * Show the form for creating a new resource.
+     *
      * @return Renderable
      */
     public function create()
@@ -41,7 +45,7 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        \Modules\Products\Entities\Category::create([
+        Category::create([
             'name' => $request->name,
             'user_id' => auth()->id(),
             'status' => 1,
@@ -52,7 +56,8 @@ class CategoryController extends Controller
 
     /**
      * Show the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function show($id)
@@ -62,7 +67,8 @@ class CategoryController extends Controller
 
     /**
      * Show the form for editing the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function edit($id)
@@ -72,8 +78,8 @@ class CategoryController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function update(Request $request, $id)
@@ -83,7 +89,8 @@ class CategoryController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function destroy($id)

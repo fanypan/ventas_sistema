@@ -84,7 +84,7 @@ class BusinessPermissionSeeder extends Seeder
         $resources = [];
 
         foreach (Module::getOrdered() as $module) {
-            $jsonPath = $module->getPath() . '/module.json';
+            $jsonPath = $module->getPath().'/module.json';
             if (! is_file($jsonPath)) {
                 continue;
             }

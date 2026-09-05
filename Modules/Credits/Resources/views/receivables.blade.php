@@ -263,20 +263,20 @@
                         @php
                             $overdueInstallments = $sale->installments->filter(function ($installment) {
                                 $dueDate = \Carbon\Carbon::parse($installment->due_date);
-                                return (int) $installment->status === 0 && $dueDate->isPast() && !$dueDate->isToday();
+                                return $installment->isPending() && $dueDate->isPast() && !$dueDate->isToday();
                             });
 
                             $dueTodayInstallments = $sale->installments->filter(function ($installment) {
-                                return (int) $installment->status === 0 && \Carbon\Carbon::parse($installment->due_date)->isToday();
+                                return $installment->isPending() && \Carbon\Carbon::parse($installment->due_date)->isToday();
                             });
 
                             $dueSoonInstallments = $sale->installments->filter(function ($installment) {
                                 $dueDate = \Carbon\Carbon::parse($installment->due_date);
-                                return (int) $installment->status === 0 && $dueDate->isFuture() && now()->diffInDays($dueDate) <= 3;
+                                return $installment->isPending() && $dueDate->isFuture() && now()->diffInDays($dueDate) <= 3;
                             });
 
                             $nextPendingInstallment = $sale->installments
-                                ->where('status', 0)
+                                ->filter->isPending()
                                 ->sortBy('due_date')
                                 ->first();
                         @endphp
@@ -294,7 +294,7 @@
                                 </span>
                                 @if(($sale->installments_count ?? 0) > 0)
                                 <span class="sale-meta">
-                                    Cuotas: <strong>{{ $sale->installments()->where('status', 1)->count() }}</strong> / <strong>{{ $sale->installments_count }}</strong>
+                                    Cuotas: <strong>{{ $sale->installments()->paid()->count() }}</strong> / <strong>{{ $sale->installments_count }}</strong>
                                 </span>
                                 @endif
                                 @if($nextPendingInstallment)
@@ -557,7 +557,7 @@
                             <span class="sale-meta">
                                 Pago: <strong>{{ ucfirst($matchedSale->payment_type ?? 'credito') }}</strong>
                                 @if(($matchedSale->installments_count ?? 0) > 0)
-                                | Cuotas: <strong>{{ $matchedSale->installments()->where('status', 1)->count() }}</strong> / <strong>{{ $matchedSale->installments_count }}</strong>
+                                | Cuotas: <strong>{{ $matchedSale->installments()->paid()->count() }}</strong> / <strong>{{ $matchedSale->installments_count }}</strong>
                                 @endif
                             </span>
                             @if($matchedSale->details->isNotEmpty())

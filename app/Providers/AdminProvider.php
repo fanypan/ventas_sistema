@@ -37,11 +37,11 @@ class AdminProvider extends ServiceProvider
             foreach ($modules as $module) {
                 $moduleDetails = $this->getModuleDetails($module);
 
-                if (!empty($moduleDetails['menus'])) {
+                if (! empty($moduleDetails['menus'])) {
                     $modulemenus[] = [
-                        'module'        => $module->getLowerName(),
-                        'menu_count'    => count($moduleDetails['menus']),
-                        'menus'         => $moduleDetails['menus'],
+                        'module' => $module->getLowerName(),
+                        'menu_count' => count($moduleDetails['menus']),
+                        'menus' => $moduleDetails['menus'],
                     ];
                 }
             }
@@ -52,7 +52,8 @@ class AdminProvider extends ServiceProvider
 
     private function getModuleDetails($module)
     {
-        $moduleJson = $module->getPath() . '/module.json';
+        $moduleJson = $module->getPath().'/module.json';
+
         return json_decode(file_get_contents($moduleJson), true);
     }
 }

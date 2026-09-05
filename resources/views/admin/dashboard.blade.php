@@ -73,6 +73,7 @@
                         </div>
                     </a>
                 </div>
+                @if (plan_has('credits'))
                 <div class="col-md-6 mb-3">
                     <a href="{{ route('credits.receivables') }}" class="card dashboard-card shadow-sm h-100">
                         <div class="card-body d-flex align-items-center p-4">
@@ -84,6 +85,7 @@
                         </div>
                     </a>
                 </div>
+                @endif
             </div>
 
             <div class="row">

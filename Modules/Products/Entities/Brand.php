@@ -2,11 +2,13 @@
 
 namespace Modules\Products\Entities;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasActiveStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Brand extends Model
 {
+    use HasActiveStatus;
     use HasFactory;
 
     protected $table = 'brands';

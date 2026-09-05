@@ -2,11 +2,18 @@
 
 namespace Modules\Products\Entities;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasActiveStatus;
+use App\Models\User;
+use App\Services\Media\MediaUrl;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Products\Database\factories\ProductFactory;
 
 class Product extends Model
 {
+    use HasActiveStatus;
     use HasFactory;
 
     public const DEFAULT_IMAGE = 'products/default.png';
@@ -38,23 +45,43 @@ class Product extends Model
 
     public function creator()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function imageUrl(): string
     {
-        $path = $this->image ?: self::DEFAULT_IMAGE;
+        if ($this->usesDefaultImage()) {
+            return asset(config('media.placeholder'));
+        }
 
-        return asset('storage/' . $path);
+        return app(MediaUrl::class)->publicUrl($this->image);
     }
 
     public function usesDefaultImage(): bool
     {
         return ! $this->image || $this->image === self::DEFAULT_IMAGE;
     }
-    
+
+    #[Scope]
+    protected function lowStock(Builder $query, int $threshold = 5): void
+    {
+        $query->where('stock', '<=', $threshold);
+    }
+
+    #[Scope]
+    protected function zeroStock(Builder $query): void
+    {
+        $query->where('stock', '<=', 0);
+    }
+
+    #[Scope]
+    protected function inStock(Builder $query): void
+    {
+        $query->where('stock', '>', 0);
+    }
+
     protected static function newFactory()
     {
-        return \Modules\Products\Database\factories\ProductFactory::new();
+        return ProductFactory::new();
     }
 }

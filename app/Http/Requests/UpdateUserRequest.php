@@ -19,7 +19,7 @@ class UpdateUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->input('id'))],
             'password' => array_merge(['nullable'], StoreUserRequest::PASSWORD_RULES),
-            'role' => ['required', 'string', Rule::in(StoreUserRequest::ASSIGNABLE_ROLES)],
+            'role' => StoreUserRequest::roleRules(),
         ];
     }
 }

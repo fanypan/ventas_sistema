@@ -483,6 +483,16 @@ body {
     color: var(--text-muted) !important;
 }
 
+.password-toggle-btn {
+    cursor: pointer;
+    color: var(--text-muted) !important;
+}
+
+.password-toggle-btn:hover,
+.password-toggle-btn:focus-visible {
+    color: var(--primary) !important;
+}
+
 .form-control:focus,
 .custom-select:focus {
     border-color: var(--primary) !important;
@@ -1032,4 +1042,84 @@ body.dark-mode .theme-option.active .theme-option-check {
     color: #fff;
     outline: 2px solid #fff;
     outline-offset: 2px;
+}
+
+.pos-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.6rem;
+    padding: 0.12rem 0.4rem;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    box-shadow: none;
+}
+
+.pos-kbd-row {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    justify-content: flex-end;
+}
+
+.pos-kbd--on-btn {
+    margin-left: 0.35rem;
+}
+
+.pos-screen-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.pos-shortcut-list .list-group-item {
+    border-color: var(--border);
+    color: var(--text);
+    background: var(--surface);
+}
+
+.help-page .nav-pills .nav-link {
+    font-weight: 600;
+}
+
+.help-steps li {
+    margin-bottom: 0.65rem;
+}
+
+.help-steps kbd,
+.help-page kbd {
+    margin: 0 0.1rem;
+}
+
+.help-shortcut-table td,
+.help-shortcut-table th {
+    vertical-align: middle;
+}
+
+.cart-checkout-actions kbd,
+.checkout-confirm-kbd {
+    display: inline-block;
+    margin-left: 0.4rem;
+    padding: 0.05rem 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.18);
+    border: 0;
+    border-radius: 4px;
+    box-shadow: none;
+}
+
+.cart-checkout-actions .btn-warning kbd {
+    color: #0f172a;
+    background: rgba(15, 23, 42, 0.14);
 }

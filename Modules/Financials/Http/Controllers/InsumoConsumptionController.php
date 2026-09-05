@@ -43,7 +43,7 @@ class InsumoConsumptionController extends Controller
         if ($request->quantity > $insumo->stock) {
             return back()
                 ->withInput()
-                ->with('error', 'Stock insuficiente. Disponible: ' . $insumo->stock);
+                ->with('error', 'Stock insuficiente. Disponible: '.$insumo->stock);
         }
 
         DB::transaction(function () use ($request, $insumo) {

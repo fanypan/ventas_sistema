@@ -31,9 +31,11 @@ class PlanController extends Controller
             'sifen_documents_monthly' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
+            'is_public' => ['nullable', 'boolean'],
         ]);
 
         $data['is_active'] = $request->boolean('is_active');
+        $data['is_public'] = $request->boolean('is_public');
         $plan->update($data);
 
         return redirect()->route('platform.plans.index')->with('success', 'Plan actualizado.');

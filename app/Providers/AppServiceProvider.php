@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Services\Sifen\NullSifenGateway;
+use App\Services\Sifen\PartnerSifenGateway;
+use App\Services\Sifen\SifenGateway;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -16,10 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(\App\Services\Sifen\SifenGateway::class, function () {
+        $this->app->bind(SifenGateway::class, function () {
             return config('saas.sifen_driver') === 'partner'
-                ? new \App\Services\Sifen\PartnerSifenGateway()
-                : new \App\Services\Sifen\NullSifenGateway();
+                ? new PartnerSifenGateway
+                : new NullSifenGateway;
         });
     }
 

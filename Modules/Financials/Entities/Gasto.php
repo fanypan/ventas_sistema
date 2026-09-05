@@ -2,8 +2,10 @@
 
 namespace Modules\Financials\Entities;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Financials\Database\factories\GastoFactory;
 
 class Gasto extends Model
 {
@@ -22,9 +24,9 @@ class Gasto extends Model
 
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(User::class);
     }
-    
+
     public function insumo()
     {
         return $this->belongsTo(Insumo::class, 'insumo_id');
@@ -32,6 +34,6 @@ class Gasto extends Model
 
     protected static function newFactory()
     {
-        return \Modules\Financials\Database\factories\GastoFactory::new();
+        return GastoFactory::new();
     }
 }

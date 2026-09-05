@@ -3,6 +3,7 @@
 namespace Modules\Sales\Actions;
 
 use App\Exceptions\BusinessRuleException;
+use App\Services\Billing\PlanLimitService;
 use App\Services\Sifen\SifenIssuer;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -22,14 +23,18 @@ class ProcessSale
             throw new BusinessRuleException('El carrito está vacío');
         }
 
-        $caja = Caja::where('status', 1)->first();
+        $caja = Caja::openForUser($userId);
         if (! $caja) {
-            throw new BusinessRuleException('No hay una caja abierta. Debe abrir la caja para realizar ventas.');
+            throw new BusinessRuleException('Abrí tu caja para vender. Finanzas → Cajas.');
+        }
+
+        $paymentType = $data['payment_type'] ?? 'efectivo';
+        if ($paymentType === 'credito' && ! app(PlanLimitService::class)->hasFeature('credits')) {
+            throw new BusinessRuleException(app(PlanLimitService::class)->featureDeniedMessage('credits'));
         }
 
         try {
-            [$sale, $change] = DB::transaction(function () use ($details, $caja, $data, $token, $userId) {
-                $paymentType = $data['payment_type'] ?? 'efectivo';
+            [$sale, $change] = DB::transaction(function () use ($details, $caja, $data, $token, $userId, $paymentType) {
                 $paymentWith = parse_currency($data['payment_with'] ?? 0);
                 $discountPercent = parse_currency($data['discount'] ?? 0);
 

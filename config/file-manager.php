@@ -13,8 +13,9 @@ return [
     'routePrefix' => 'file-manager',
 
     /*
-    | Disco dedicado (storage/app/file-manager, sufijado por tenant).
+    | Disco dedicado (storage/app/file-manager o bucket privado, sufijado por tenant).
     | Nunca 'local': ahí están payment-receipts y backups centrales.
+    | Nunca 'minio_private' suelto: ese disco no se prefija (comprobantes de plataforma).
     */
     'diskList' => ['filemanager'],
 

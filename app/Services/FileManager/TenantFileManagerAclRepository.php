@@ -20,8 +20,9 @@ class TenantFileManagerAclRepository implements ACLRepository
             return [];
         }
 
-        $root = Storage::disk('filemanager')->path('');
-        File::ensureDirectoryExists($root);
+        if (config('filesystems.disks.filemanager.driver', 'local') === 'local') {
+            File::ensureDirectoryExists(Storage::disk('filemanager')->path(''));
+        }
 
         return [
             [

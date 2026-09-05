@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\PreventRequestForgery;
 use Modules\Customers\Entities\Customer;
 use Modules\Products\Entities\Category;
 use Modules\Products\Entities\Product;
@@ -15,7 +16,7 @@ class TenantSmokeTest extends TenantTestCase
         $this->tenantGet('/')->assertOk();
         $this->tenantGet('/login')->assertRedirect('/');
 
-        $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+        $this->withoutMiddleware(PreventRequestForgery::class)
             ->post('http://demo.localhost/', [
                 'email' => 'admin@demo.test',
                 'password' => 'password',

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\PreventRequestForgery;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -23,12 +24,12 @@ class SuperadminProtectionTest extends TenantTestCase
         });
 
         $this->actingAs($this->tenantUser)
-            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+            ->withoutMiddleware(PreventRequestForgery::class)
             ->delete('http://demo.localhost/admin/user', ['id' => $superId])
             ->assertForbidden();
 
         $this->actingAs($this->tenantUser)
-            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+            ->withoutMiddleware(PreventRequestForgery::class)
             ->put('http://demo.localhost/admin/user', [
                 'id' => $superId,
                 'name' => 'Hackeado',
@@ -52,12 +53,12 @@ class SuperadminProtectionTest extends TenantTestCase
         });
 
         $this->actingAs($this->tenantUser)
-            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+            ->withoutMiddleware(PreventRequestForgery::class)
             ->delete('http://demo.localhost/admin/role', ['id' => $roleId])
             ->assertForbidden();
 
         $this->actingAs($this->tenantUser)
-            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+            ->withoutMiddleware(PreventRequestForgery::class)
             ->put('http://demo.localhost/admin/role', [
                 'id' => $roleId,
                 'name' => 'no-super',
@@ -67,13 +68,15 @@ class SuperadminProtectionTest extends TenantTestCase
             ->assertForbidden();
 
         $this->actingAs($this->tenantUser)
-            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+            ->withoutMiddleware(PreventRequestForgery::class)
+            ->from('http://demo.localhost/admin/role')
             ->post('http://demo.localhost/admin/role', [
                 'name' => 'superadmin',
                 'guard_name' => 'web',
                 'permissions' => ['read sale'],
             ])
-            ->assertForbidden();
+            ->assertRedirect('http://demo.localhost/admin/role')
+            ->assertSessionHasErrors('name');
 
         $this->tenant->run(function () {
             $this->assertTrue(Role::where('name', 'superadmin')->exists());

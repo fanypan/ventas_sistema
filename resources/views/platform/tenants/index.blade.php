@@ -6,7 +6,9 @@
         <h1>Clientes</h1>
         <p class="platform-lead">Comercios, plan y vencimiento de la suscripción.</p>
     </div>
-    <a class="btn btn-primary" href="{{ route('platform.tenants.create') }}">Nuevo cliente</a>
+    @if (platform_can('tenants.create'))
+        <a class="btn btn-primary" href="{{ route('platform.tenants.create') }}">Nuevo cliente</a>
+    @endif
 </div>
 
 <div class="card">
@@ -14,8 +16,8 @@
         @include('platform.partials.empty', [
             'title' => 'Todavía no hay clientes',
             'body' => 'Después del pago, completá el alta. El sistema crea la base y manda las credenciales.',
-            'actionUrl' => route('platform.tenants.create'),
-            'actionLabel' => 'Nuevo cliente',
+            'actionUrl' => platform_can('tenants.create') ? route('platform.tenants.create') : null,
+            'actionLabel' => platform_can('tenants.create') ? 'Nuevo cliente' : null,
         ])
     @else
         <div class="table-responsive">
@@ -36,7 +38,7 @@
                         <td>{{ $tenant->primaryDomain() }}</td>
                         <td>{{ $tenant->plan?->name ?: '—' }}</td>
                         <td>@include('platform.partials.status-badge', ['tenant' => $tenant])</td>
-                        <td>{{ optional($tenant->subscription?->ends_at)->format('d/m/Y') ?: '—' }}</td>
+                        <td>{{ $tenant->subscription?->endsLabel() ?: '—' }}</td>
                     </tr>
                 @endforeach
                 </tbody>

@@ -2,10 +2,12 @@
 
 namespace App\Jobs;
 
-use App\Mail\TenantCredentialsMail;
+use App\Actions\Platform\CloneCatalog;
+use App\Actions\Platform\SendAdminInvite;
 use App\Models\Setting;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\Media\TenantLogoService;
 use App\Services\Tenancy\TenantProvisioningRollback;
 use Database\Seeders\TenantDatabaseSeeder;
 use Illuminate\Bus\Queueable;
@@ -14,7 +16,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Modules\Customers\Entities\Customer;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -28,9 +31,7 @@ class SetupTenantJob implements ShouldQueue
 
     public int $tries = 3;
 
-    public function __construct(public Tenant $tenant, public string $plainPassword)
-    {
-    }
+    public function __construct(public Tenant $tenant) {}
 
     public function handle(): void
     {
@@ -41,6 +42,9 @@ class SetupTenantJob implements ShouldQueue
 
             throw $e;
         }
+
+        $this->applyPendingLogo();
+        $this->cloneCatalogIfRequested();
     }
 
     public function failed(\Throwable $exception): void
@@ -55,13 +59,12 @@ class SetupTenantJob implements ShouldQueue
 
             app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-            $user = User::updateOrCreate(
-                ['email' => $this->tenant->admin_email],
-                [
-                    'name' => $this->tenant->admin_name ?: $this->tenant->name,
-                    'password' => $this->tenant->admin_password_hash,
-                ]
-            );
+            $user = User::firstOrNew(['email' => $this->tenant->admin_email]);
+            $user->forceFill([
+                'name' => $this->tenant->admin_name ?: $this->tenant->name,
+                'password' => Hash::make(Str::password(32)),
+                'must_change_password' => true,
+            ])->save();
 
             Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
             $user->syncRoles(['admin']);
@@ -114,10 +117,58 @@ class SetupTenantJob implements ShouldQueue
             'provisioned_at' => now(),
             'admin_password_hash' => null,
             'setup_password' => null,
+            'admin_password_set_at' => null,
         ]);
 
-        if ($this->tenant->admin_email) {
-            Mail::to($this->tenant->admin_email)->send(new TenantCredentialsMail($this->tenant, $this->plainPassword));
+        try {
+            app(SendAdminInvite::class)->execute($this->tenant->fresh());
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    private function applyPendingLogo(): void
+    {
+        if (! $this->tenant->pending_logo_path) {
+            return;
+        }
+
+        try {
+            $this->tenant->refresh();
+            app(TenantLogoService::class)->applyPending($this->tenant);
+        } catch (\Throwable $e) {
+            if (app()->runningUnitTests()) {
+                throw $e;
+            }
+
+            report($e);
+        }
+    }
+
+    private function cloneCatalogIfRequested(): void
+    {
+        $this->tenant->refresh();
+        $sourceId = $this->tenant->catalog_source_id;
+        if (! $sourceId) {
+            return;
+        }
+
+        $this->tenant->catalog_source_id = null;
+        $this->tenant->save();
+
+        $source = Tenant::find($sourceId);
+        if (! $source) {
+            return;
+        }
+
+        try {
+            app(CloneCatalog::class)->execute($source, $this->tenant->fresh());
+        } catch (\Throwable $e) {
+            if (app()->runningUnitTests()) {
+                throw $e;
+            }
+
+            report($e);
         }
     }
 }

@@ -39,7 +39,7 @@ class PlanLimitService
             return true;
         }
 
-        return Caja::where('status', 1)->count() < $plan->max_cajas;
+        return Caja::open()->count() < $plan->max_cajas;
     }
 
     public function canEmitSifenDocument(): bool
@@ -61,13 +61,26 @@ class PlanLimitService
         return SifenDocument::query()
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
-            ->whereIn('status', [SifenDocument::STATUS_SENT, SifenDocument::STATUS_APPROVED, SifenDocument::STATUS_PENDING])
+            ->countsTowardQuota()
             ->count();
     }
 
     public function hasFeature(string $feature): bool
     {
         return (bool) $this->plan()?->hasFeature($feature);
+    }
+
+    public function featureDeniedMessage(string $feature): string
+    {
+        $labels = [
+            'purchases' => 'compras y proveedores',
+            'credits' => 'créditos y ventas a crédito',
+            'sifen' => 'facturación electrónica',
+        ];
+
+        $label = $labels[$feature] ?? $feature;
+
+        return 'Tu plan no incluye '.$label.'. Contactá a AranduTech para ampliar.';
     }
 
     public function userLimitMessage(): string
@@ -81,7 +94,12 @@ class PlanLimitService
     {
         $plan = $this->plan();
 
-        return 'El plan '.$plan?->name.' permite hasta '.$plan?->max_cajas.' cajas abiertas. Contactá a AranduTech para ampliar.';
+        return 'El plan '.$plan?->name.' permite hasta '.$plan?->max_cajas.' cajas abiertas a la vez. Contactá a AranduTech para ampliar.';
+    }
+
+    public function cajaAlreadyOpenMessage(): string
+    {
+        return 'Ya tenés una caja abierta. Cerrala antes de abrir otra, o andá a vender.';
     }
 
     public function sifenLimitMessage(): string

@@ -2,10 +2,18 @@
 
 namespace Modules\Sales\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesCrud;
+use App\Models\Setting;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use App\Http\Controllers\Concerns\AuthorizesCrud;
+use Modules\Customers\Entities\Customer;
+use Modules\Financials\Entities\Caja;
+use Modules\Products\Entities\Category;
+use Modules\Products\Entities\Product;
+use Modules\Sales\Actions\VoidSale;
+use Modules\Sales\Entities\Sale;
 
 class SaleController extends Controller
 {
@@ -19,11 +27,12 @@ class SaleController extends Controller
 
     /**
      * Display a listing of the resource.
+     *
      * @return Renderable
      */
     public function index(Request $request)
     {
-        $query = \Modules\Sales\Entities\Sale::with('customer', 'creator', 'installments')->latest();
+        $query = Sale::with('customer', 'creator', 'installments')->latest();
 
         if ($request->filled('from')) {
             $query->whereDate('created_at', '>=', $request->from);
@@ -39,20 +48,22 @@ class SaleController extends Controller
         }
 
         $sales = $query->paginate(15);
+
         return view('sales::index', compact('sales'));
     }
 
     public function pos()
     {
-        $products = \Modules\Products\Entities\Product::with('brand')->where('status', 1)->get();
-        $categories = \Modules\Products\Entities\Category::all();
-        $cashOpen = \Modules\Financials\Entities\Caja::where('status', 1)->first();
-        
+        $products = Product::with('brand')->active()->get();
+        $categories = Category::all();
+        $cashOpen = Caja::openForUser();
+
         return view('sales::pos', compact('products', 'categories', 'cashOpen'));
     }
 
     /**
      * Show the form for creating a new resource.
+     *
      * @return Renderable
      */
     public function create()
@@ -62,7 +73,7 @@ class SaleController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param Request $request
+     *
      * @return Renderable
      */
     public function store(Request $request)
@@ -72,45 +83,48 @@ class SaleController extends Controller
 
     /**
      * Show the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function show($id)
     {
-        $sale = \Modules\Sales\Entities\Sale::with('customer', 'details.product', 'installments', 'abonos.user')->findOrFail($id);
+        $sale = Sale::with('customer', 'details.product', 'installments', 'abonos.user')->findOrFail($id);
+
         return view('sales::show', compact('sale'));
     }
 
     /**
      * Show the form for editing the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function edit($id)
     {
-        $sale = \Modules\Sales\Entities\Sale::with('customer')->findOrFail($id);
+        $sale = Sale::with('customer')->findOrFail($id);
 
-        if ($sale->status == 0) {
+        if ($sale->isVoided()) {
             return redirect()->route('sales.show', $sale->id)
                 ->with('error', 'No se puede editar una venta anulada.');
         }
 
-        $customers = \Modules\Customers\Entities\Customer::where('status', 1)->orderBy('name')->get();
+        $customers = Customer::active()->orderBy('name')->get();
 
         return view('sales::edit', compact('sale', 'customers'));
     }
 
     /**
      * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function update(Request $request, $id)
     {
-        $sale = \Modules\Sales\Entities\Sale::findOrFail($id);
+        $sale = Sale::findOrFail($id);
 
-        if ($sale->status == 0) {
+        if ($sale->isVoided()) {
             return back()->with('error', 'No se puede editar una venta anulada.');
         }
 
@@ -132,66 +146,37 @@ class SaleController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function printTicket($id)
     {
-        $sale = \Modules\Sales\Entities\Sale::with('customer', 'details.product', 'creator')->findOrFail($id);
-        $settings = \App\Models\Setting::all()->pluck('value', 'key');
-        
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('sales::pdf.ticket', compact('sale', 'settings'))
+        $sale = Sale::with('customer', 'details.product', 'creator')->findOrFail($id);
+        $settings = Setting::all()->pluck('value', 'key');
+
+        $pdf = Pdf::loadView('sales::pdf.ticket', compact('sale', 'settings'))
             ->setPaper([0, 0, 226.77, 800], 'portrait'); // 80mm width roughly
-            
+
         return $pdf->stream('ticket_'.$sale->id.'.pdf');
     }
 
     public function printInvoice($id)
     {
-        $sale = \Modules\Sales\Entities\Sale::with('customer', 'details.product', 'creator')->findOrFail($id);
-        $settings = \App\Models\Setting::all()->pluck('value', 'key');
-        
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('sales::pdf.invoice', compact('sale', 'settings'))
+        $sale = Sale::with('customer', 'details.product', 'creator')->findOrFail($id);
+        $settings = Setting::all()->pluck('value', 'key');
+
+        $pdf = Pdf::loadView('sales::pdf.invoice', compact('sale', 'settings'))
             ->setPaper('a4', 'portrait');
-            
+
         return $pdf->stream('factura_'.$sale->id.'.pdf');
     }
 
-    public function void($id)
+    public function void($id, VoidSale $voidSale)
     {
-        $sale = \Modules\Sales\Entities\Sale::with('details.product')->findOrFail($id);
+        $sale = Sale::findOrFail($id);
+        $voidSale->execute($sale);
 
-        if ($sale->status == 0) {
-            return back()->with('error', 'Esta venta ya ha sido anulada.');
-        }
-
-        \Illuminate\Support\Facades\DB::beginTransaction();
-        try {
-            // 1. Devolver Stock (Replicando stored procedure anular_venta)
-            foreach ($sale->details as $detail) {
-                if ($detail->product) {
-                    $detail->product->increment('stock', $detail->quantity);
-                }
-                // Marcar detalle como anulado si existe campo status en sale_details
-                // $detail->update(['status' => 0]); 
-            }
-
-            // 2. Anular Cuotas si es crédito
-            if ($sale->payment_type === 'credito') {
-                $sale->installments()->update(['status' => 2]); // 2 = Anulada en nuestro sistema
-            }
-
-            // 3. Cambiar estado de la venta
-            $sale->status = 0; // 0 = Anulada
-            $sale->save();
-
-            \Illuminate\Support\Facades\DB::commit();
-            return back()->with('success', 'Venta anulada correctamente. Stock restablecido.');
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
-            report($e);
-
-            return back()->with('error', 'No se pudo anular la venta. Intentá de nuevo.');
-        }
+        return back()->with('success', 'Venta anulada. Se devolvió el stock.');
     }
 }

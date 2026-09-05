@@ -116,8 +116,8 @@
                 </div>
                 
                 @php
-                    $inversion = \Modules\Products\Entities\Product::where('status', 1)->get()->sum(function($p) { return $p->stock * $p->cost; });
-                    $proyeccion = \Modules\Products\Entities\Product::where('status', 1)->get()->sum(function($p) { return $p->stock * $p->price; });
+                    $inversion = \Modules\Products\Entities\Product::active()->get()->sum(function($p) { return $p->stock * $p->cost; });
+                    $proyeccion = \Modules\Products\Entities\Product::active()->get()->sum(function($p) { return $p->stock * $p->price; });
                     $ganancia = $proyeccion - $inversion;
                     $utilidad = ($inversion > 0) ? ($ganancia / $inversion) * 100 : 0;
                 @endphp

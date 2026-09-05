@@ -31,7 +31,7 @@
     <div class="container-fluid">
         <!-- Brand -->
         <a href="{{ route('dashboard') }}" class="navbar-brand">
-            <img src="{{ asset(Setting::getValue('app_logo')) }}" alt="{{ Setting::getName('app_name') }}" class="brand-image img-circle elevation-3 brand-glow" style="opacity: .8">
+            <img src="{{ setting_file_url(Setting::getValue('app_logo')) }}" alt="{{ Setting::getName('app_name') }}" class="brand-image img-circle elevation-3 brand-glow" style="opacity: .8">
             <span class="brand-text font-weight-bold ml-2">{{ Setting::getValue('app_name') }}</span>
         </a>
 
@@ -106,6 +106,7 @@
                 </li>
                 @endcanany
 
+                @if (plan_has('purchases'))
                 <!-- Compras Dropdown -->
                 @canany(['read purchase', 'create purchase', 'read supplier'])
                 <li class="nav-item dropdown">
@@ -126,6 +127,7 @@
                     </ul>
                 </li>
                 @endcanany
+                @endif
 
                 <!-- Finanzas Dropdown -->
                 @canany(['read cash', 'read expense', 'consume insumo'])
@@ -147,6 +149,7 @@
                 </li>
                 @endcanany
 
+                @if (plan_has('credits'))
                 <!-- Créditos Dropdown -->
                 @canany(['read credit', 'read supplier'])
                 <li class="nav-item dropdown">
@@ -163,6 +166,7 @@
                     </ul>
                 </li>
                 @endcanany
+                @endif
 
                 <!-- Reportes Dropdown -->
                 @can('read report')
@@ -236,6 +240,12 @@
 
         <!-- Right navbar links (Profile, Theme, etc) -->
         <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('help.index') ? 'active' : '' }}" href="{{ route('help.index') }}" title="Ayuda del POS" aria-label="Ayuda del POS">
+                    <i class="fas fa-question-circle"></i>
+                    <span class="d-none d-xl-inline ml-1">Ayuda</span>
+                </a>
+            </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="btntheme" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Tema del sistema" aria-label="Elegir tema">
                     <i id="icontheme" class="fas fa-desktop"></i>

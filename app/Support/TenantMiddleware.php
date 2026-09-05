@@ -14,6 +14,7 @@ class TenantMiddleware
             InitializeTenancyByDomain::class,
             PreventAccessFromCentralDomains::class,
             'tenant.subscription',
+            'tenant.password',
         ];
     }
 }

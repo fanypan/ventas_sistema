@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class HealthController extends Controller
@@ -27,6 +28,12 @@ class HealthController extends Controller
             $checks['redis'] = 'skipped';
         }
 
+        if ($this->shouldCheckMinio()) {
+            $checks['minio'] = $this->minio();
+        } else {
+            $checks['minio'] = 'skipped';
+        }
+
         $ok = collect($checks)->every(fn (string $status) => in_array($status, ['ok', 'skipped'], true));
 
         return response()->json([
@@ -37,7 +44,7 @@ class HealthController extends Controller
 
     private function shouldCheckRedis(): bool
     {
-        if (app()->environment('testing')) {
+        if (app()->runningUnitTests()) {
             return false;
         }
 
@@ -48,6 +55,21 @@ class HealthController extends Controller
         return in_array(config('cache.default'), ['redis'], true)
             || in_array(config('queue.default'), ['redis'], true)
             || in_array(config('session.driver'), ['redis'], true);
+    }
+
+    private function shouldCheckMinio(): bool
+    {
+        if (app()->runningUnitTests()) {
+            return false;
+        }
+
+        if (! config('observability.health_check_minio')) {
+            return false;
+        }
+
+        $disk = (string) config('media.public_disk', 'public');
+
+        return (config("filesystems.disks.{$disk}.driver") ?? '') === 's3';
     }
 
     private function database(): string
@@ -77,5 +99,17 @@ class HealthController extends Controller
         $path = storage_path();
 
         return is_dir($path) && is_writable($path) ? 'ok' : 'error';
+    }
+
+    private function minio(): string
+    {
+        try {
+            $disk = (string) config('media.public_disk');
+            Storage::disk($disk)->exists('_health');
+
+            return 'ok';
+        } catch (Throwable) {
+            return 'error';
+        }
     }
 }

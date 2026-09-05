@@ -8,7 +8,7 @@ class StoreManualPaymentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user('platform')?->can('payments.create') ?? false;
     }
 
     public function rules(): array

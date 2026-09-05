@@ -6,6 +6,8 @@ use App\Actions\CreateRole;
 use App\Actions\UpdateRole;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Support\TenantAssignableRole;
+use App\Support\TenantPermissionLabel;
 use Illuminate\Http\Request;
 use RealRashid\SweetAlert\Facades\Alert;
 use Spatie\Permission\Models\Permission;
@@ -14,20 +16,26 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleController extends Controller
 {
-    private const PROTECTED_ROLE = 'superadmin';
-
     public function index()
     {
-        $x['title'] = 'Role';
-        $x['data'] = Role::with('permissions')->get();
-        $x['permission'] = Permission::orderBy('id', 'desc')->get();
+        $permissions = Permission::query()
+            ->where('guard_name', 'web')
+            ->orderBy('name')
+            ->get();
+
+        $x['title'] = 'Roles';
+        $x['data'] = Role::with('permissions')->orderBy('name')->get();
+        $x['permission'] = $permissions;
+        $x['permissionGroups'] = $permissions->groupBy(
+            fn (Permission $permission) => TenantPermissionLabel::groupKey($permission->name)
+        );
 
         return view('admin.role', $x);
     }
 
     public function store(StoreRoleRequest $request, CreateRole $createRole)
     {
-        if ($this->isProtectedRoleName($request->validated('name'))) {
+        if (TenantAssignableRole::isProtected($request->validated('name'))) {
             abort(403, 'No se puede crear el rol superadmin.');
         }
 
@@ -57,7 +65,7 @@ class RoleController extends Controller
     {
         $role = Role::find($request->validated('id'));
         $this->denyProtectedRole($role);
-        if ($this->isProtectedRoleName($request->validated('name'))) {
+        if (TenantAssignableRole::isProtected($request->validated('name'))) {
             abort(403, 'No se puede renombrar un rol a superadmin.');
         }
 
@@ -89,18 +97,13 @@ class RoleController extends Controller
         return back();
     }
 
-    private function isProtectedRoleName(?string $name): bool
-    {
-        return strtolower(trim((string) $name)) === self::PROTECTED_ROLE;
-    }
-
     private function denyProtectedRole(?Role $role): void
     {
         if (! $role) {
             abort(404);
         }
 
-        if ($this->isProtectedRoleName($role->name)) {
+        if (TenantAssignableRole::isProtected($role->name)) {
             abort(403, 'No se puede modificar el rol superadmin.');
         }
     }

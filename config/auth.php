@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\PlatformUser;
+use App\Models\User;
+
 return [
 
     /*
@@ -66,11 +69,11 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => User::class,
         ],
         'platform_users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\PlatformUser::class,
+            'model' => PlatformUser::class,
         ],
     ],
 

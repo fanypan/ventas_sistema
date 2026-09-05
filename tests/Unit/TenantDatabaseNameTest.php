@@ -46,7 +46,7 @@ class TenantDatabaseNameTest extends TestCase
 
     public function test_falls_back_to_tenant_key_without_slug(): void
     {
-        $tenant = new Tenant();
+        $tenant = new Tenant;
         $tenant->setAttribute('id', 'abc-123');
 
         $this->assertSame('tenantabc-123', TenantDatabaseName::for($tenant));

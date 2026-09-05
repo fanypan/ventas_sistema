@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\Support\TenantDatabaseName;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -18,10 +21,15 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     use HasDomains;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_GRACE = 'grace';
+
     public const STATUS_READONLY = 'readonly';
+
     public const STATUS_SUSPENDED = 'suspended';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public static function getCustomColumns(): array
@@ -38,11 +46,13 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'admin_password_hash',
             'brand_color',
             'provisioned_at',
+            'admin_password_set_at',
         ];
     }
 
     protected $casts = [
         'provisioned_at' => 'datetime',
+        'admin_password_set_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -76,10 +86,22 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         return $this->hasMany(ManualPayment::class);
     }
 
+    /**
+     * @return Collection<int, $this>
+     */
+    public static function catalogSources(?self $except = null)
+    {
+        return static::query()
+            ->when($except, fn ($query) => $query->whereKeyNot($except->getTenantKey()))
+            ->whereNotNull('provisioned_at')
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
+    }
+
     public function primaryDomain(): string
     {
         return $this->domains->first()?->domain
-            ?? $this->slug . '.' . config('saas.tenant_base_domain');
+            ?? $this->slug.'.'.config('saas.tenant_base_domain');
     }
 
     public function url(): string
@@ -88,7 +110,12 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         $port = parse_url(config('app.url'), PHP_URL_PORT);
         $host = $this->primaryDomain();
 
-        return $scheme . '://' . $host . ($port ? ':' . $port : '');
+        return $scheme.'://'.$host.($port ? ':'.$port : '');
+    }
+
+    public function adminNeedsPassword(): bool
+    {
+        return $this->provisioned_at !== null && $this->admin_password_set_at === null;
     }
 
     public function isOperational(): bool
@@ -128,5 +155,29 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             self::STATUS_SUSPENDED => 'bad',
             self::STATUS_CANCELLED => 'neutral',
         ][$this->status] ?? 'neutral';
+    }
+
+    #[Scope]
+    protected function active(Builder $query): void
+    {
+        $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    #[Scope]
+    protected function grace(Builder $query): void
+    {
+        $query->where('status', self::STATUS_GRACE);
+    }
+
+    #[Scope]
+    protected function restricted(Builder $query): void
+    {
+        $query->whereIn('status', [self::STATUS_SUSPENDED, self::STATUS_READONLY]);
+    }
+
+    #[Scope]
+    protected function billable(Builder $query): void
+    {
+        $query->whereNotIn('status', [self::STATUS_CANCELLED, self::STATUS_PENDING]);
     }
 }

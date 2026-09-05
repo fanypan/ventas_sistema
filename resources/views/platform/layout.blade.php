@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('template/admin/plugins/fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('template/admin/dist/css/adminlte.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/platform.css') }}?v=20260824c">
+    <link rel="stylesheet" href="{{ asset('css/platform.css') }}?v=20260901a">
 </head>
 <body class="hold-transition layout-top-nav platform-app @auth('platform') layout-navbar-fixed @else platform-auth @endauth">
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -29,15 +29,26 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('platform.dashboard') ? 'active' : '' }}" href="{{ route('platform.dashboard') }}">Inicio</a>
                         </li>
+                        @if (platform_can('tenants.view'))
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('platform.tenants.*') && ! request()->routeIs('platform.tenants.create') ? 'active' : '' }}" href="{{ route('platform.tenants.index') }}">Clientes</a>
                         </li>
+                        @endif
+                        @if (platform_can('tenants.create'))
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('platform.tenants.create') ? 'active' : '' }}" href="{{ route('platform.tenants.create') }}">Alta</a>
                         </li>
+                        @endif
+                        @if (platform_can('plans.view'))
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('platform.plans.*') ? 'active' : '' }}" href="{{ route('platform.plans.index') }}">Planes</a>
                         </li>
+                        @endif
+                        @if (platform_can('users.view') || platform_can('roles.view'))
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('platform.users.*') || request()->routeIs('platform.roles.*') ? 'active' : '' }}" href="{{ platform_can('users.view') ? route('platform.users.index') : route('platform.roles.index') }}">Equipo</a>
+                        </li>
+                        @endif
                         @if (config('observability.horizon_enabled') && auth('platform')->user()->isAdmin())
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url(config('horizon.path')) }}">Colas</a>

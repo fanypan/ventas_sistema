@@ -1,6 +1,22 @@
 # Desarrollo local únicamente.
 # El servicio `app` ejecuta `php artisan serve` (PHP CLI). No incluye nginx ni php-fpm.
 # Producción: docker compose -f docker-compose.prod.yml up -d --build
+
+x-minio-client: &minio-client
+  AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+  AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_BUCKET: ${MINIO_BUCKET_PUBLIC:-ventas-public}
+  AWS_PRIVATE_BUCKET: ${MINIO_BUCKET_PRIVATE:-ventas-private}
+  AWS_ENDPOINT: http://minio:9000
+  AWS_URL: http://localhost:${MINIO_API_PORT:-9000}/${MINIO_BUCKET_PUBLIC:-ventas-public}
+  AWS_PUBLIC_ENDPOINT: http://localhost:${MINIO_API_PORT:-9000}
+  AWS_USE_PATH_STYLE_ENDPOINT: "true"
+  MEDIA_PUBLIC_DISK: minio
+  MEDIA_PRIVATE_DISK: filemanager
+  MEDIA_PAYMENT_DISK: minio_private
+  FILEMANAGER_DRIVER: s3
+
 services:
   app:
     build:
@@ -40,6 +56,7 @@ services:
       COMPOSER_HOME: /tmp/composer
       COMPOSER_CACHE_DIR: /tmp/composer/cache
       npm_config_cache: /tmp/npm-cache
+      <<: *minio-client
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -47,6 +64,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
     networks:
       - ventas
 
@@ -74,11 +93,14 @@ services:
       WWWUSER: ${WWWUSER:-1000}
       WWWGROUP: ${WWWGROUP:-1000}
       HORIZON_ENABLED: ${HORIZON_ENABLED:-false}
+      <<: *minio-client
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
     networks:
       - ventas
     command: ["sh", "/var/www/html/docker/php/queue-start.sh"]
@@ -124,6 +146,42 @@ services:
     networks:
       - ventas
 
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - ventas
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+    depends_on:
+      minio:
+        condition: service_started
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_BUCKET_PUBLIC: ${MINIO_BUCKET_PUBLIC:-ventas-public}
+      MINIO_BUCKET_PRIVATE: ${MINIO_BUCKET_PRIVATE:-ventas-private}
+    volumes:
+      - ./docker/minio/init.sh:/init.sh:ro
+    networks:
+      - ventas
+    entrypoint: ["/bin/sh", "/init.sh"]
+
   dozzle:
     image: amir20/dozzle:latest
     profiles: ["obs"]
@@ -151,3 +209,4 @@ networks:
 volumes:
   postgres_data:
   kuma_data:
+  minio_data:

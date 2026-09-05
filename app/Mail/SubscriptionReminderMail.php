@@ -13,9 +13,7 @@ class SubscriptionReminderMail extends Mailable
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public Tenant $tenant, public Subscription $subscription)
-    {
-    }
+    public function __construct(public Tenant $tenant, public Subscription $subscription) {}
 
     public function build()
     {

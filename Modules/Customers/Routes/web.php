@@ -11,6 +11,6 @@
 |
 */
 
-Route::prefix('admin')->middleware(['auth'])->group(function() {
+Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::resource('customers', 'CustomerController');
 });

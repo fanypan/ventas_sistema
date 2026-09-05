@@ -28,6 +28,7 @@ return [
     'grace_days' => (int) env('SAAS_GRACE_DAYS', 7),
     'readonly_days' => (int) env('SAAS_READONLY_DAYS', 3),
     'reminder_days_before' => (int) env('SAAS_REMINDER_DAYS', 3),
+    'admin_invite_hours' => (int) env('SAAS_ADMIN_INVITE_HOURS', 48),
     'sifen_driver' => env('SIFEN_DRIVER', 'null'),
     'sifen_partner_url' => env('SIFEN_PARTNER_URL'),
     'sifen_partner_token' => env('SIFEN_PARTNER_TOKEN'),

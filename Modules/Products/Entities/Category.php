@@ -2,11 +2,14 @@
 
 namespace Modules\Products\Entities;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasActiveStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Products\Database\factories\CategoryFactory;
 
 class Category extends Model
 {
+    use HasActiveStatus;
     use HasFactory;
 
     protected $fillable = [
@@ -19,9 +22,9 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
-    
+
     protected static function newFactory()
     {
-        return \Modules\Products\Database\factories\CategoryFactory::new();
+        return CategoryFactory::new();
     }
 }

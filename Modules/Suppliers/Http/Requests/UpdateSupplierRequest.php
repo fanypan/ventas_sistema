@@ -2,6 +2,4 @@
 
 namespace Modules\Suppliers\Http\Requests;
 
-class UpdateSupplierRequest extends StoreSupplierRequest
-{
-}
+class UpdateSupplierRequest extends StoreSupplierRequest {}

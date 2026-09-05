@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\PreventRequestForgery;
+use App\Models\Plan;
 use App\Models\PlatformUser;
+use Database\Seeders\PlanSeeder;
+use Database\Seeders\PlatformUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,8 +18,8 @@ class LandingAndPlatformTest extends TestCase
     {
         parent::setUp();
         config(['tenancy.central_domains' => ['localhost', '127.0.0.1']]);
-        $this->seed(\Database\Seeders\PlanSeeder::class);
-        $this->seed(\Database\Seeders\PlatformUserSeeder::class);
+        $this->seed(PlanSeeder::class);
+        $this->seed(PlatformUserSeeder::class);
     }
 
     public function test_landing_returns_ok_without_staff_link(): void
@@ -32,7 +36,7 @@ class LandingAndPlatformTest extends TestCase
 
         $this->get("/{$path}/login")->assertOk();
 
-        $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+        $this->withoutMiddleware(PreventRequestForgery::class)
             ->post("/{$path}/login", [
                 'email' => 'plataforma@arandutech.com',
                 'password' => 'plataforma',
@@ -63,7 +67,7 @@ class LandingAndPlatformTest extends TestCase
         $path = config('saas.platform_path');
 
         $this->from("/{$path}/login")
-            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+            ->withoutMiddleware(PreventRequestForgery::class)
             ->followingRedirects()
             ->post("/{$path}/login", [
                 'email' => 'nadie@arandutech.com',
@@ -87,7 +91,7 @@ class LandingAndPlatformTest extends TestCase
     public function test_platform_rejects_tenant_slug_with_hyphen_or_underscore(): void
     {
         $path = config('saas.platform_path');
-        $plan = \App\Models\Plan::first();
+        $plan = Plan::first();
         $payload = [
             'name' => 'Mi negocio',
             'plan_id' => $plan->id,
@@ -98,13 +102,13 @@ class LandingAndPlatformTest extends TestCase
 
         $this->actingAs(PlatformUser::first(), 'platform')
             ->from("/{$path}/clientes/nuevo")
-            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+            ->withoutMiddleware(PreventRequestForgery::class)
             ->post("/{$path}/clientes", $payload + ['slug' => 'mi-negocio'])
             ->assertSessionHasErrors('slug');
 
         $this->actingAs(PlatformUser::first(), 'platform')
             ->from("/{$path}/clientes/nuevo")
-            ->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+            ->withoutMiddleware(PreventRequestForgery::class)
             ->post("/{$path}/clientes", $payload + ['slug' => 'mi_negocio'])
             ->assertSessionHasErrors('slug');
     }

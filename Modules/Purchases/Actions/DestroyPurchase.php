@@ -12,7 +12,7 @@ class DestroyPurchase
 {
     public function execute(Purchase $purchase): void
     {
-        if ($purchase->status == 0) {
+        if ((int) $purchase->status === Purchase::STATUS_VOIDED) {
             throw new BusinessRuleException('Esta compra ya ha sido anulada.');
         }
 
@@ -30,7 +30,7 @@ class DestroyPurchase
                     $this->restoreLastPurchaseCost($product, $purchase->id);
                 }
 
-                $purchase->status = 0;
+                $purchase->status = Purchase::STATUS_VOIDED;
                 $purchase->save();
             });
         } catch (BusinessRuleException $e) {
@@ -46,7 +46,7 @@ class DestroyPurchase
     {
         $last = PurchaseDetail::where('product_id', $product->id)
             ->whereHas('purchase', function ($query) use ($exceptPurchaseId) {
-                $query->where('status', 1)->where('id', '!=', $exceptPurchaseId);
+                $query->paid()->where('id', '!=', $exceptPurchaseId);
             })
             ->latest('id')
             ->first();

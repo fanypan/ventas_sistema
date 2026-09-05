@@ -174,7 +174,7 @@
         <div class="logo-container floating">
             @php $logo = Setting::getValue('app_logo'); @endphp
             @if($logo)
-                <img src="{{ asset($logo) }}" alt="Logo" class="logo-img">
+                <img src="{{ setting_file_url($logo) }}" alt="Logo" class="logo-img">
             @else
                 <div class="logo-img" style="display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #4f46e5; font-weight: bold;">
                     {{ substr(Setting::getValue('app_name') ?? 'SV', 0, 2) }}

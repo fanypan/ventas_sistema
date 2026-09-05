@@ -2,12 +2,18 @@
 
 namespace Modules\Financials\Http\Controllers;
 
-use App\Services\Billing\PlanLimitService;
-use Illuminate\Http\Request;
-use Modules\Financials\Http\Requests\OpenCajaRequest;
-use Illuminate\Routing\Controller;
-use Modules\Financials\Entities\Caja;
+use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Modules\Credits\Entities\Abono;
+use Modules\Financials\Actions\OpenCaja;
+use Modules\Financials\Entities\Caja;
+use Modules\Financials\Entities\Gasto;
+use Modules\Financials\Http\Requests\OpenCajaRequest;
+use Modules\Sales\Entities\Sale;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class CashierController extends Controller
 {
@@ -20,63 +26,70 @@ class CashierController extends Controller
 
     public function index()
     {
-        $cajas = Caja::latest()->paginate(10);
+        $cajas = Caja::with(['user', 'sales', 'abonos'])->latest()->paginate(10);
+
         return view('financials::cajas.index', compact('cajas'));
     }
 
     public function create()
     {
+        if (Caja::openForUser()) {
+            return redirect()->route('sales.pos');
+        }
+
         return view('financials::cajas.create');
     }
 
-    public function store(OpenCajaRequest $request)
+    public function store(OpenCajaRequest $request, OpenCaja $openCaja)
     {
-        if (! app(PlanLimitService::class)->canOpenCaja()) {
-            return back()->with('error', app(PlanLimitService::class)->cajaLimitMessage());
+        try {
+            $openCaja->execute((int) auth()->id(), (float) $request->validated('monto_inicial'));
+        } catch (BusinessRuleException $e) {
+            Alert::error('Caja', $e->getMessage())->toToast();
+
+            return back()->withInput();
         }
 
-        Caja::create([
-            'user_id' => auth()->id(),
-            'opening_amount' => $request->validated('monto_inicial'),
-            'closing_amount' => 0,
-            'opened_at' => now(),
-            'status' => 1,
-        ]);
+        Alert::success('Caja abierta', 'Ya podés vender. Esta caja es tuya hasta que la cierres.')->toToast();
 
-        return redirect()->route('financials.cajas.index')->with('success', 'Caja abierta con éxito');
+        if (auth()->user()?->can('create sale')) {
+            return redirect()->route('sales.pos');
+        }
+
+        return redirect()->route('financials.cajas.index');
     }
 
     public function arqueo($id)
     {
         $caja = Caja::findOrFail($id);
-        
+
         // Ventas desglosadas por tipo de pago
-        $sales = \Modules\Sales\Entities\Sale::where('cash_id', $caja->id)->where('status', 1)->get();
-        
+        $sales = Sale::where('cash_id', $caja->id)->paid()->get();
+
         $salesCash = $sales->where('payment_type', 'efectivo')->sum('total');
         $salesQR = $sales->where('payment_type', 'qr')->sum('total');
         $salesCard = $sales->where('payment_type', 'tarjeta')->sum('total');
         $salesTransf = $sales->where('payment_type', 'transferencia')->sum('total');
-        
+
         $totalSales = $sales->sum('total');
 
         // Otros movimientos
-        $expenses = \Modules\Financials\Entities\Gasto::where('cash_id', $caja->id)->get();
-        $abonos = \Modules\Credits\Entities\Abono::where('cash_id', $caja->id)->get();
+        $expenses = Gasto::where('cash_id', $caja->id)->get();
+        $abonos = Abono::where('cash_id', $caja->id)->get();
 
         $totalExpenses = $expenses->sum('amount');
         $totalAbonos = $abonos->sum('amount');
 
         // Total esperado solo en EFECTIVO (para comparar con el conteo físico)
         $expectedCash = $caja->opening_amount + $salesCash + $totalAbonos - $totalExpenses;
-        
+
         // Total general en sistema (todas las formas de pago)
         $expectedTotal = $caja->opening_amount + $totalSales + $totalAbonos - $totalExpenses;
 
         return view('financials::cajas.arqueo', compact(
-            'caja', 
+            'caja',
             'salesCash', 'salesQR', 'salesCard', 'salesTransf',
-            'totalSales', 'totalExpenses', 'totalAbonos', 
+            'totalSales', 'totalExpenses', 'totalAbonos',
             'expectedCash', 'expectedTotal'
         ));
     }
@@ -89,14 +102,14 @@ class CashierController extends Controller
             'monto_final' => 'required|numeric|min:0',
         ]);
 
-        \Log::info("Intentando cerrar caja ID: " . $id . " con monto: " . $request->monto_final);
+        \Log::info('Intentando cerrar caja ID: '.$id.' con monto: '.$request->monto_final);
         $caja = Caja::findOrFail($id);
         $caja->update([
             'closing_amount' => $request->monto_final,
             'closed_at' => now(),
             'status' => 0, // Closed
         ]);
-        \Log::info("Caja ID: " . $id . " cerrada correctamente.");
+        \Log::info('Caja ID: '.$id.' cerrada correctamente.');
 
         return redirect()->route('financials.cajas.index')->with('success', 'Caja cerrada con éxito');
     }
@@ -107,8 +120,8 @@ class CashierController extends Controller
         $to = $request->input('to', now()->toDateString());
 
         if ($request->filled('month')) {
-            $from = $request->month . '-01';
-            $to = \Carbon\Carbon::parse($from)->endOfMonth()->toDateString();
+            $from = $request->month.'-01';
+            $to = Carbon::parse($from)->endOfMonth()->toDateString();
         }
 
         $cajas = Caja::with(['user', 'sales', 'abonos', 'expenses'])
@@ -129,7 +142,7 @@ class CashierController extends Controller
         ];
 
         foreach ($cajas as $caja) {
-            $sales = $caja->sales->where('status', '!=', 0);
+            $sales = $caja->sales->where('status', '!=', Sale::STATUS_VOIDED);
             $resumen['efectivo'] += $sales->where('payment_type', 'efectivo')->sum('total');
             $resumen['transferencia'] += $sales->where('payment_type', 'transferencia')->sum('total');
             $resumen['qr'] += $sales->where('payment_type', 'qr')->sum('total');

@@ -4,6 +4,8 @@ namespace Modules\Credits\Http\Controllers;
 
 use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
+use App\Models\Setting;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -52,7 +54,7 @@ class CreditController extends Controller
 
         if ($term !== '') {
             $matchingSales = Sale::with(['customer', 'installments', 'abonos', 'details.product'])
-                ->where('status', 2)
+                ->credit()
                 ->where(function ($subQuery) use ($term) {
                     $subQuery->whereHas('customer', function ($customerQuery) use ($term) {
                         $customerQuery->where('name', 'like', "%{$term}%")
@@ -93,7 +95,7 @@ class CreditController extends Controller
             }
         } elseif ($showAll) {
             $sales = Sale::with(['customer', 'installments', 'abonos', 'details.product'])
-                ->where('status', 2)
+                ->credit()
                 ->latest()
                 ->paginate(10)
                 ->appends($request->only('customer', 'show_all'));
@@ -113,7 +115,7 @@ class CreditController extends Controller
     public function payables()
     {
         $purchases = Purchase::with('supplier')
-            ->where('status', 2)
+            ->credit()
             ->latest()
             ->paginate(10);
 
@@ -138,9 +140,9 @@ class CreditController extends Controller
         $to = $request->input('to');
         $movements = $this->kardex->customerMovements($customer->id, $from, $to);
         $saldo = $movements->last()['saldo'] ?? 0;
-        $settings = \App\Models\Setting::all()->pluck('value', 'key');
+        $settings = Setting::all()->pluck('value', 'key');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+        $pdf = Pdf::loadView(
             'credits::pdf.kardex_customer',
             compact('customer', 'movements', 'from', 'to', 'saldo', 'settings')
         )->setPaper('a4', 'portrait');
@@ -166,9 +168,9 @@ class CreditController extends Controller
         $to = $request->input('to');
         $movements = $this->kardex->supplierMovements($supplier->id, $from, $to);
         $saldo = $movements->last()['saldo'] ?? 0;
-        $settings = \App\Models\Setting::all()->pluck('value', 'key');
+        $settings = Setting::all()->pluck('value', 'key');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+        $pdf = Pdf::loadView(
             'credits::pdf.kardex_supplier',
             compact('supplier', 'movements', 'from', 'to', 'saldo', 'settings')
         )->setPaper('a4', 'portrait');
@@ -237,9 +239,9 @@ class CreditController extends Controller
     public function printReceipt($id)
     {
         $abono = Abono::with('user', 'abonable')->findOrFail($id);
-        $settings = \App\Models\Setting::all()->pluck('value', 'key');
+        $settings = Setting::all()->pluck('value', 'key');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('credits::pdf.receipt', compact('abono', 'settings'))
+        $pdf = Pdf::loadView('credits::pdf.receipt', compact('abono', 'settings'))
             ->setPaper('a5', 'landscape');
 
         return $pdf->stream('recibo_'.$abono->id.'.pdf');

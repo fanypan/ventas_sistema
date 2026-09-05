@@ -9,7 +9,11 @@ class FileManagerController extends Controller
 {
     public function index()
     {
-        File::ensureDirectoryExists(Storage::disk('filemanager')->path(''));
+        $disk = Storage::disk('filemanager');
+
+        if (config('filesystems.disks.filemanager.driver', 'local') === 'local') {
+            File::ensureDirectoryExists($disk->path(''));
+        }
 
         $x['title'] = 'Gestor de archivos';
 

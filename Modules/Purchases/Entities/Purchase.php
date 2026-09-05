@@ -2,14 +2,23 @@
 
 namespace Modules\Purchases\Entities;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Credits\Entities\Abono;
 use Modules\Suppliers\Entities\Supplier;
 
 class Purchase extends Model
 {
     use HasFactory;
+
+    public const STATUS_VOIDED = 0;
+
+    public const STATUS_PAID = 1;
+
+    public const STATUS_CREDIT = 2;
 
     protected $fillable = [
         'supplier_id',
@@ -17,7 +26,7 @@ class Purchase extends Model
         'total',
         'status',
     ];
-    
+
     public function details()
     {
         return $this->hasMany(PurchaseDetail::class);
@@ -25,7 +34,7 @@ class Purchase extends Model
 
     public function abonos()
     {
-        return $this->morphMany(\Modules\Credits\Entities\Abono::class, 'abonable');
+        return $this->morphMany(Abono::class, 'abonable');
     }
 
     public function total_paid()
@@ -46,5 +55,25 @@ class Purchase extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    #[Scope]
+    protected function paid(Builder $query): void
+    {
+        $query->where('status', self::STATUS_PAID);
+    }
+
+    #[Scope]
+    protected function credit(Builder $query): void
+    {
+        $query->where('status', self::STATUS_CREDIT);
+    }
+
+    #[Scope]
+    protected function payable(Builder $query): void
+    {
+        $query->where(function (Builder $inner) {
+            $inner->credit()->orWhereHas('abonos');
+        });
     }
 }

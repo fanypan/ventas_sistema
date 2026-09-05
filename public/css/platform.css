@@ -420,8 +420,69 @@ body.platform-app {
     grid-column: 1 / -1;
 }
 
+.platform-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.platform-check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.55rem 1rem;
+    margin-top: 0.35rem;
+}
+
+.platform-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0;
+    font-weight: 500;
+    color: var(--platform-ink);
+    cursor: pointer;
+}
+
+.platform-check input {
+    margin-top: 0.28rem;
+}
+
 .platform-form-grid .form-group.col-start {
     grid-column: 1;
+}
+
+.platform-logo-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+}
+
+.platform-logo-preview {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border: 1px solid var(--platform-line);
+    border-radius: 12px;
+    background: #fff;
+    padding: 6px;
+}
+
+.platform-logo-preview--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--platform-info-bg);
+    color: var(--platform-primary);
+    font-weight: 700;
+    font-size: 1.5rem;
+    padding: 0;
+}
+
+.platform-app .form-control-file {
+    display: block;
+    width: 100%;
 }
 
 .platform-app .alert {
@@ -479,6 +540,16 @@ body.platform-app {
     margin-bottom: 0.35rem;
 }
 
+.platform-app .password-toggle-btn {
+    cursor: pointer;
+    color: #64748b;
+}
+
+.platform-app .password-toggle-btn:hover,
+.platform-app .password-toggle-btn:focus-visible {
+    color: var(--platform-accent, #4f46e5);
+}
+
 .platform-password {
     font-variant-numeric: tabular-nums;
     word-break: break-all;
@@ -506,6 +577,10 @@ body.platform-app {
 
     .platform-page-head .btn {
         width: 100%;
+    }
+
+    .platform-logo-row {
+        flex-direction: column;
     }
 }
 

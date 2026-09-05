@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Auth;
 use Tests\TenantTestCase;
 
@@ -12,7 +13,7 @@ class TenantLoginSecurityTest extends TenantTestCase
         $this->tenantGet('/');
         $before = $this->app['session']->getId();
 
-        $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+        $this->withoutMiddleware(PreventRequestForgery::class)
             ->post('http://demo.localhost/', [
                 'email' => 'admin@demo.test',
                 'password' => 'password',
@@ -27,7 +28,7 @@ class TenantLoginSecurityTest extends TenantTestCase
     {
         $recaller = Auth::guard('web')->getRecallerName();
 
-        $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+        $this->withoutMiddleware(PreventRequestForgery::class)
             ->post('http://demo.localhost/', [
                 'email' => 'admin@demo.test',
                 'password' => 'password',
@@ -40,7 +41,7 @@ class TenantLoginSecurityTest extends TenantTestCase
     {
         $recaller = Auth::guard('web')->getRecallerName();
 
-        $this->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+        $this->withoutMiddleware(PreventRequestForgery::class)
             ->post('http://demo.localhost/', [
                 'email' => 'admin@demo.test',
                 'password' => 'password',

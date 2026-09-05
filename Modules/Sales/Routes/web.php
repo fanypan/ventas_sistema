@@ -11,7 +11,7 @@
 |
 */
 
-Route::prefix('admin')->middleware(['auth'])->group(function() {
+Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::resource('sales', 'SaleController');
     Route::get('pos', 'SaleController@pos')->name('sales.pos');
     Route::get('sales/{id}/print-ticket', 'SaleController@printTicket')->name('sales.print_ticket');

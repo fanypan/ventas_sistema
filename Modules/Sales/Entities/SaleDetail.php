@@ -2,8 +2,10 @@
 
 namespace Modules\Sales\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Products\Entities\Product;
+use Modules\Sales\Database\factories\SaleDetailFactory;
 
 class SaleDetail extends Model
 {
@@ -21,16 +23,16 @@ class SaleDetail extends Model
 
     public function product()
     {
-        return $this->belongsTo(\Modules\Products\Entities\Product::class);
+        return $this->belongsTo(Product::class);
     }
 
     public function sale()
     {
         return $this->belongsTo(Sale::class);
     }
-    
+
     protected static function newFactory()
     {
-        return \Modules\Sales\Database\factories\SaleDetailFactory::new();
+        return SaleDetailFactory::new();
     }
 }

@@ -12,11 +12,7 @@ class KardexService
     {
         $sales = Sale::with(['abonos.user', 'creator'])
             ->where('customer_id', $customerId)
-            ->where(function ($q) {
-                $q->where('payment_type', 'credito')
-                    ->orWhereIn('status', [2, 3])
-                    ->orWhereHas('abonos');
-            })
+            ->receivable()
             ->orderBy('created_at')
             ->get();
 
@@ -53,9 +49,7 @@ class KardexService
     {
         $purchases = Purchase::with(['abonos.user', 'creator'])
             ->where('supplier_id', $supplierId)
-            ->where(function ($q) {
-                $q->where('status', 2)->orWhereHas('abonos');
-            })
+            ->payable()
             ->orderBy('created_at')
             ->get();
 

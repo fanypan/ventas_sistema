@@ -16,12 +16,12 @@ class RoleSeeder extends Seeder
     public function run()
     {
         Role::firstOrCreate([
-            'name'          => 'admin',
-            'guard_name'    => 'web'
+            'name' => 'admin',
+            'guard_name' => 'web',
         ]);
         Role::firstOrCreate([
-            'name'          => 'operator',
-            'guard_name'    => 'web',
+            'name' => 'operator',
+            'guard_name' => 'web',
         ]);
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();

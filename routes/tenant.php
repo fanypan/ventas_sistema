@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\SetupPasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileManagerController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ReportController;
@@ -16,10 +18,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(TenantMiddleware::web())->group(function () {
     Auth::routes([
-        'register'  => false,
-        'reset'     => false,
-        'confirm'   => false,
-        'login'     => false,
+        'register' => false,
+        'reset' => false,
+        'confirm' => false,
+        'login' => false,
     ]);
 
     Route::middleware('guest')->group(function () {
@@ -32,11 +34,19 @@ Route::middleware(TenantMiddleware::web())->group(function () {
     Route::redirect('/login', '/');
     Route::redirect('/inicio', '/')->name('index');
 
+    Route::middleware(['signed'])->group(function () {
+        Route::get('/activar', [SetupPasswordController::class, 'show'])->name('password.setup.show');
+        Route::post('/activar', [SetupPasswordController::class, 'store'])
+            ->middleware('throttle:6,1')
+            ->name('password.setup.store');
+    });
+
     Route::middleware(['auth'])->get('/home', [DashboardController::class, 'index'])->name('home');
 
     Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('admin');
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('ayuda', [HelpController::class, 'index'])->name('help.index');
         Route::get('mi-plan', [SubscriptionController::class, 'show'])->name('tenant.plan');
 
         Route::controller(UserController::class)->group(function () {
@@ -81,7 +91,7 @@ Route::middleware(TenantMiddleware::web())->group(function () {
             Route::get('products/pdf', [ReportController::class, 'productsPdf'])->name('reports.products.pdf');
             Route::get('products/excel', [ReportController::class, 'productsExcel'])->name('reports.products.excel');
             Route::get('sales', [ReportController::class, 'salesPdf'])->name('reports.sales.pdf');
-            Route::get('purchases', [ReportController::class, 'purchasesPdf'])->name('reports.purchases.pdf');
+            Route::get('purchases', [ReportController::class, 'purchasesPdf'])->middleware('plan.feature:purchases')->name('reports.purchases.pdf');
             Route::get('cash', [ReportController::class, 'cashPdf'])->name('reports.cash.pdf');
             Route::get('financial_status', [ReportController::class, 'financialStatusPdf'])->name('reports.financial_status.pdf');
             Route::get('expenses', [ReportController::class, 'expensesPdf'])->name('reports.expenses.pdf');

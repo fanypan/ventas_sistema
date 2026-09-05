@@ -77,6 +77,13 @@
         text-align: right;
         word-break: break-word;
     }
+    .pos-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        flex-wrap: wrap;
+    }
     .cart-checkout-actions .btn {
         min-height: 48px;
         display: inline-flex;
@@ -172,7 +179,10 @@
 <div class="content-wrapper">
     <div class="content-header pb-1">
         <div class="container-fluid">
-            <h1 class="m-0 text-premium"><i class="fas fa-truck-loading mr-2"></i>Nueva Compra</h1>
+            <div class="pos-page-header">
+                <h1 class="m-0 text-premium"><i class="fas fa-truck-loading mr-2"></i>Nueva Compra</h1>
+                @include('admin.partials.pos-screen-actions', ['context' => 'purchase'])
+            </div>
         </div>
     </div>
 
@@ -276,8 +286,8 @@
                                 <strong id="purchase_total_label">Gs. 0</strong>
                             </div>
                             <div class="cart-checkout-actions">
-                                <button type="button" class="btn btn-success font-weight-bold text-uppercase shadow-sm" id="btn_finalize_purchase" disabled>
-                                    <i class="fas fa-save mr-2"></i> Registrar compra
+                                <button type="button" class="btn btn-success font-weight-bold text-uppercase shadow-sm" id="btn_finalize_purchase" disabled aria-keyshortcuts="F8 Enter">
+                                    <i class="fas fa-save mr-2"></i> Registrar compra <kbd>F8</kbd>
                                 </button>
                             </div>
                         </div>
@@ -387,8 +397,8 @@
             </div>
             <div class="modal-footer bg-light p-3 d-flex justify-content-between">
                 <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Volver a la lista</button>
-                <button type="button" id="btn_confirm_purchase" class="btn btn-success font-weight-bold">
-                    <i class="fas fa-check-circle mr-2"></i> Registrar compra
+                <button type="button" id="btn_confirm_purchase" class="btn btn-success font-weight-bold" aria-keyshortcuts="F8 Enter">
+                    <i class="fas fa-check-circle mr-2"></i> Registrar compra <kbd class="checkout-confirm-kbd">Enter</kbd>
                 </button>
             </div>
         </div>
@@ -417,6 +427,8 @@
         </div>
     </div>
 </div>
+
+@include('admin.partials.pos-shortcuts-modal', ['context' => 'purchase'])
 @endsection
 
 @push('script')
@@ -785,7 +797,7 @@ $(document).ready(function() {
             $('#modalPurchaseSuccess').modal('show');
         }).fail(function(xhr) {
             isProcessing = false;
-            $btn.prop('disabled', false).html('<i class="fas fa-check-circle mr-2"></i> Registrar compra');
+            $btn.prop('disabled', false).html('<i class="fas fa-check-circle mr-2"></i> Registrar compra <kbd class="checkout-confirm-kbd">Enter</kbd>');
             updateFinalizeState();
             $('#modalConfirmPurchase').modal('hide');
             const payload = xhr.responseJSON || {};
@@ -812,6 +824,50 @@ $(document).ready(function() {
         if ($('#modalConfirmPurchase').hasClass('show')) {
             e.preventDefault();
             $('#btn_confirm_purchase').trigger('click');
+        }
+    });
+
+    function toggleShortcutHelp() {
+        $('#modalPosShortcuts').modal('toggle');
+    }
+
+    function focusProductSearch() {
+        $('#filter_search').trigger('focus').trigger('select');
+    }
+
+    initPosShortcuts({
+        allowWhenTyping: ['F2', 'F4', 'F8', 'Shift+F4', 'Alt+Shift+H'],
+        actions: {
+            F2: focusProductSearch,
+            '/': focusProductSearch,
+            F4: function () {
+                $('#supplier_search').trigger('focus').trigger('select');
+            },
+            'Shift+F4': function () {
+                $('#btn_list_suppliers').trigger('click');
+            },
+            F8: function () {
+                if ($('#modalPurchaseSuccess').hasClass('show')) {
+                    finishPurchaseAndReset();
+                    return;
+                }
+                if ($('#modalConfirmPurchase').hasClass('show')) {
+                    $('#btn_confirm_purchase').trigger('click');
+                    return;
+                }
+                if ($('#itemDetailsModal').hasClass('show')) {
+                    $('#btn_add_to_purchase_list').trigger('click');
+                    return;
+                }
+                if ($('.modal.show').length) {
+                    return;
+                }
+                if (!$('#btn_finalize_purchase').prop('disabled')) {
+                    $('#btn_finalize_purchase').trigger('click');
+                }
+            },
+            '?': toggleShortcutHelp,
+            'Alt+Shift+H': toggleShortcutHelp
         }
     });
 });

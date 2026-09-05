@@ -11,7 +11,7 @@
 |
 */
 
-Route::prefix('admin')->middleware(['auth'])->group(function() {
+Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('cajas/history', 'CashierController@history')->name('financials.cajas.history');
     Route::resource('cajas', 'CashierController')->names('financials.cajas');
     Route::post('cajas/{id}/close', 'CashierController@close')->name('financials.cajas.close');

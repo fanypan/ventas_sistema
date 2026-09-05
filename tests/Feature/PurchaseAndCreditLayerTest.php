@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Modules\Customers\Entities\Customer;
 use Modules\Financials\Entities\Caja;
 use Modules\Products\Entities\Category;
 use Modules\Products\Entities\Product;
@@ -149,7 +150,7 @@ class PurchaseAndCreditLayerTest extends TenantTestCase
         return $this->tenant->run(function () use ($total) {
             return Sale::create([
                 'user_id' => $this->tenantUser->id,
-                'customer_id' => \Modules\Customers\Entities\Customer::first()->id,
+                'customer_id' => Customer::first()->id,
                 'total' => $total,
                 'discount' => 0,
                 'payment_with' => 0,

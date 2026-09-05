@@ -2,18 +2,18 @@
 
 namespace App\Exports;
 
-use Modules\Products\Entities\Product;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Modules\Products\Entities\Product;
 
 class ZeroStockExport implements FromCollection, WithHeadings, WithMapping
 {
     public function collection()
     {
         return Product::with('category', 'brand')
-            ->where('status', 1)
-            ->where('stock', '<=', 0)
+            ->active()
+            ->zeroStock()
             ->orderBy('description')
             ->get();
     }

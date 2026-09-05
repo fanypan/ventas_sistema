@@ -5,7 +5,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ ($title ?? 'Admin') . " - " . Setting::getValue('app_name') }}</title>
-        <link rel="icon" href="{{ asset(Setting::getValue('app_favicon')) }}" type="image/png" />
+        <link rel="icon" href="{{ setting_file_url(Setting::getValue('app_favicon')) }}" type="image/png" />
         <!-- Google Font: Outfit -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +23,7 @@
         <!-- DataTables -->
         <link rel="stylesheet" href="{{ asset('template/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
         <!-- Premium UI CSS -->
-        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260824a">
+        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260830a">
         <script>
             (function () {
                 var pref = 'system';
@@ -54,7 +54,7 @@
         <div class="wrapper">
             <!-- Preloader -->
             <div class="preloader flex-column justify-content-center align-items-center">
-                <img class="animation__shake" src="{{ asset(Setting::getValue('app_logo')) }}" alt="{{ Setting::getName('app_name') }}" height="60" width="60">
+                <img class="animation__shake" src="{{ setting_file_url(Setting::getValue('app_logo')) }}" alt="{{ Setting::getName('app_name') }}" height="60" width="60">
             </div>
 
             <!-- Navbar -->
@@ -81,6 +81,7 @@
         <script src="{{ asset('js/theme.js') }}"></script>
         <script src="{{ asset('template/admin/plugins/jquery/jquery.min.js') }}"></script>
         <script src="{{ asset('js/product-grid-filter.js') }}"></script>
+        <script src="{{ asset('js/pos-shortcuts.js') }}"></script>
         @yield('js')
         @include('admin.layouts.script')
         <!-- jQuery UI 1.11.4 -->

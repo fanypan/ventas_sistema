@@ -3,6 +3,7 @@
 namespace App\Services\Tenancy;
 
 use App\Models\Tenant;
+use App\Services\Media\TenantObjectStorage;
 use App\Support\TenantSetupPassword;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -26,6 +27,7 @@ class TenantProvisioningRollback
         }
 
         $tenantId = $tenant->getTenantKey();
+        $pendingLogo = $tenant->pending_logo_path;
         TenantSetupPassword::forget((string) $tenantId);
 
         $this->dropDatabase($tenant);
@@ -47,6 +49,7 @@ class TenantProvisioningRollback
             }
 
             $this->deleteFilesystem((string) $tenantId);
+            $this->deletePendingLogo($pendingLogo);
         }
     }
 
@@ -54,19 +57,28 @@ class TenantProvisioningRollback
     {
         $dir = base_path('storage/tenant'.$tenantId);
 
-        if (! is_dir($dir)) {
+        if (is_dir($dir)) {
+            try {
+                File::deleteDirectory($dir);
+            } catch (\Throwable $e) {
+                Log::error('Tenant provisioning rollback: no se pudo borrar el storage del tenant', [
+                    'tenant_id' => $tenantId,
+                    'path' => $dir,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        app(TenantObjectStorage::class)->deleteTenant($tenantId);
+    }
+
+    public function deletePendingLogo(mixed $relative): void
+    {
+        if (! is_string($relative) || ! preg_match('/^pending-logos\/[a-z0-9-]+\.png$/', $relative)) {
             return;
         }
 
-        try {
-            File::deleteDirectory($dir);
-        } catch (\Throwable $e) {
-            Log::error('Tenant provisioning rollback: no se pudo borrar el storage del tenant', [
-                'tenant_id' => $tenantId,
-                'path' => $dir,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        File::delete(base_path('storage/app/'.$relative));
     }
 
     public function dropDatabase(TenantWithDatabase $tenant): void

@@ -16,7 +16,11 @@ class SubscriptionService
     public function start(Tenant $tenant, Plan $plan, string $interval = Subscription::INTERVAL_MONTHLY, ?Carbon $from = null): Subscription
     {
         $from ??= now();
-        $ends = $interval === Subscription::INTERVAL_YEARLY ? $from->copy()->addYear() : $from->copy()->addMonth();
+        $interval = $plan->subscriptionInterval($interval);
+        $lifetime = $interval === Subscription::INTERVAL_LIFETIME;
+        $ends = $lifetime
+            ? null
+            : ($interval === Subscription::INTERVAL_YEARLY ? $from->copy()->addYear() : $from->copy()->addMonth());
 
         $subscription = Subscription::create([
             'tenant_id' => $tenant->id,
@@ -25,8 +29,8 @@ class SubscriptionService
             'status' => Tenant::STATUS_ACTIVE,
             'starts_at' => $from,
             'ends_at' => $ends,
-            'grace_ends_at' => $ends->copy()->addDays(config('saas.grace_days')),
-            'readonly_ends_at' => $ends->copy()->addDays(config('saas.grace_days') + config('saas.readonly_days')),
+            'grace_ends_at' => $lifetime ? null : $ends->copy()->addDays(config('saas.grace_days')),
+            'readonly_ends_at' => $lifetime ? null : $ends->copy()->addDays(config('saas.grace_days') + config('saas.readonly_days')),
         ]);
 
         $tenant->update([
@@ -77,7 +81,7 @@ class SubscriptionService
     {
         $now ??= now();
 
-        Tenant::with(['subscription', 'plan'])->whereNotIn('status', [Tenant::STATUS_CANCELLED, Tenant::STATUS_PENDING])->each(function (Tenant $tenant) use ($now) {
+        Tenant::with(['subscription', 'plan'])->billable()->each(function (Tenant $tenant) use ($now) {
             $this->tickTenant($tenant, $now);
         });
     }
@@ -85,7 +89,7 @@ class SubscriptionService
     public function tickTenant(Tenant $tenant, Carbon $now): void
     {
         $subscription = $tenant->subscription;
-        if (! $subscription || ! $subscription->ends_at) {
+        if (! $subscription || $subscription->isLifetime() || ! $subscription->ends_at) {
             return;
         }
 

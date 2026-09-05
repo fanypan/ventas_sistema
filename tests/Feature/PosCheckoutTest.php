@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\PreventRequestForgery;
 use Modules\Financials\Entities\Caja;
 use Modules\Products\Entities\Category;
 use Modules\Products\Entities\Product;
@@ -17,7 +18,7 @@ class PosCheckoutTest extends TenantTestCase
         return $this->withHeaders([
             'Accept' => 'application/json',
             'X-Requested-With' => 'XMLHttpRequest',
-        ])->withoutMiddleware(\App\Http\Middleware\PreventRequestForgery::class)
+        ])->withoutMiddleware(PreventRequestForgery::class)
             ->post('http://demo.localhost'.$uri, $data);
     }
 
@@ -92,7 +93,7 @@ class PosCheckoutTest extends TenantTestCase
                 'payment_with' => 10000,
             ])
             ->assertStatus(422)
-            ->assertJson(['error' => 'No hay una caja abierta. Debe abrir la caja para realizar ventas.']);
+            ->assertJson(['error' => 'Abrí tu caja para vender. Finanzas → Cajas.']);
     }
 
     public function test_process_sale_rejects_cash_shortfall(): void

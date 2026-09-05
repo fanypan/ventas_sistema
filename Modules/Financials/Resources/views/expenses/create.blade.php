@@ -101,7 +101,7 @@
                 @if(!$openCash)
                     <div class="alert alert-warning">
                         <h5><i class="icon fas fa-exclamation-triangle"></i> ¡Advertencia!</h5>
-                        No hay una caja abierta actualmente. Debe abrir caja para registrar egresos.
+                        No hay una caja tuya abierta. Abrí tu caja para registrar egresos.
                     </div>
                 @endif
             </div>

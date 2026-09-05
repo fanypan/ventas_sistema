@@ -18,9 +18,9 @@ class StoreAbono
 
     public function execute(array $data, int $userId): Abono
     {
-        $caja = Caja::where('status', 1)->first();
+        $caja = Caja::openForUser($userId);
         if (! $caja) {
-            throw new BusinessRuleException('No hay ninguna caja abierta. Debe abrir la caja para registrar cobros.');
+            throw new BusinessRuleException('Abrí tu caja para registrar cobros. Finanzas → Cajas.');
         }
 
         $modelClass = $data['abonable_type'];
@@ -72,7 +72,7 @@ class StoreAbono
     private function applyToInstallments(Sale $sale, float $remainingToApply): void
     {
         $installments = $sale->installments()
-            ->where('status', 0)
+            ->pending()
             ->orderBy('installment_number')
             ->get();
 

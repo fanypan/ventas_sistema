@@ -47,8 +47,8 @@ class EnsureTenantSubscription
 
     private function isAuthRoute(Request $request): bool
     {
-        return $request->routeIs('login', 'logout', 'index')
-            || $request->is('login', 'logout');
+        return $request->routeIs('login', 'logout', 'index', 'password.setup.show', 'password.setup.store')
+            || $request->is('login', 'logout', 'activar');
     }
 
     private function isMutating(Request $request): bool
@@ -61,6 +61,10 @@ class EnsureTenantSubscription
     {
         $subscription = $tenant->subscription;
         $ends = $subscription?->ends_at;
+
+        if ($subscription?->isLifetime()) {
+            return null;
+        }
 
         if ($tenant->status === Tenant::STATUS_GRACE) {
             return [
