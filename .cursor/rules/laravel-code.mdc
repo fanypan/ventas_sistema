@@ -1,5 +1,5 @@
 ---
-description: Capas Laravel pragmáticas — controllers delgados, FormRequests, Actions/Services
+description: Capas Laravel pragmáticas — controllers delgados, FormRequests, Actions/Services, scopes Eloquent en modelos
 globs: app/**/*.php,Modules/**/*.php
 alwaysApply: false
 ---
@@ -17,7 +17,7 @@ Controller delgado + FormRequest + Action/Service. Eloquent vive en la Action/Se
   - Tenant (app): `app/Http/Requests/`
 - **Action**: un caso de uso de escritura con transacción o efectos (`execute(...)`). Ej. `Modules/Sales/Actions/ProcessSale.php`.
 - **Service**: varios métodos que comparten invariantes. Ej. `CartService`, `SubscriptionService`.
-- **Eloquent**: persistencia en Action/Service. Listados simples (`::paginate`) pueden quedar en el controller.
+- **Eloquent**: persistencia en Action/Service. Listados simples (`::paginate`) pueden quedar en el controller. Filtros que se repiten van en **scopes** del modelo (ver abajo).
 - **Support**: funciones puras sin I/O (`app/Support`, `parse_currency`). No un cajón `Utils`.
 
 CRUD chico (alta de cliente/proveedor): FormRequest + `Model::create($request->validated())` en el controller. No inventar un Service de 10 líneas.
@@ -29,6 +29,31 @@ CRUD chico (alta de cliente/proveedor): FormRequest + `Model::create($request->v
 - God-service que absorba todo un controller
 - Cambiar contratos JSON del POS (`sales/ajax/*`) ni rearmar menús
 - Mezclar este refactor con upgrade de Laravel
+
+## Modelos: scopes Eloquent
+
+Desde ahora, no repetir `where('status', 1)` / caja abierta / plan activo en controllers. El filtro vive en el modelo.
+
+Atributo `#[Scope]` de Laravel 13. El método **no** se llama `scopeActive`: se llama `active`. El prefijo `scope` solo hace falta en el estilo viejo (`public function scopeActive()`).
+
+```php
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+
+#[Scope]
+protected function active(Builder $query): void
+{
+    $query->where('status', 1);
+}
+
+// Product::active()->orderBy('description')->get()
+// Caja::open()->where('user_id', $id)->first()
+```
+
+- Método `protected`, mutá `$query`. Parámetros después de `$query` si hace falta.
+- Encadená: `Plan::active()->listedOnLanding()`.
+- No uses global scopes para catálogo activo / caja abierta.
+- Catálogo (`Product`, `Customer`, …): `active()`. Caja: `open()`. Venta: `paid()` / `credit()`. Tenant: `active()` / `billable()`.
 
 ## Estilo
 

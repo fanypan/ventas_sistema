@@ -11,8 +11,10 @@ Cobro **manual** (transferencia/efectivo). El staff registra el pago; no hay che
 Estados: `active` → `grace` (7d) → `readonly` (3d, POS POST bloqueado) → `suspended`. Job `subscriptions:tick` (Redis, no `sync`).
 
 - `SubscriptionService` cambia fechas y estado; no pise `pending` mientras se aprovisiona.
-- Límites: `PlanLimitService` en alta de usuarios y apertura de caja.
-- Features del plan van en JSON `plans.features` (`sifen`, `credits`, …); no reescribir módulos para ocultar menús si alcanza un flag.
+- Límites: `PlanLimitService` en alta de usuarios y apertura de caja (tope del plan + **una caja abierta por usuario**). Ventas, abonos y gastos van a la caja abierta del usuario logueado.
+- Features (`purchases`, `credits`, `sifen`): middleware `plan.feature:*` en las rutas + chequeo en Actions (crédito en el POS). El menú se oculta si el plan no incluye el flag.
 - Precios en Gs. enteros (sin decimales). IVA no incluido en el seed.
 
 Al registrar un pago se **renueva** el período (mensual/anual) desde `ends_at` si aún no venció.
+
+On-premise: plan `onprem` (`is_public=false`, precio 0, sin `sifen`). `SubscriptionService::start` deja `ends_at` null (`interval=lifetime`). El tick no los toca. No listar ese plan en la landing.

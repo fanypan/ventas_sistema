@@ -20,7 +20,7 @@ description: >-
 
 ## Alta de tenant
 
-`Tenant::create([...])` ya dispara CreateDatabase + MigrateDatabase. El **slug** es `[a-z0-9]+` (sin `-` ni `_`): la base queda `tenant_{slug}` y el host `{slug}.{TENANT_BASE_DOMAIN}`. La clave de alta **no** va en `data`: `TenantSetupPassword` la guarda cifrada en cache hasta `SetupTenantJob`. El panel la muestra una vez en el flash `plain_password`. El job siembra roles `admin`/`operator`, crea el usuario y manda el mail.
+`Tenant::create([...])` ya dispara CreateDatabase + MigrateDatabase. El **slug** es `[a-z0-9]+` (sin `-` ni `_`): la base queda `tenant_{slug}` y el host `{slug}.{TENANT_BASE_DOMAIN}`. El job siembra roles `admin`/`operator`, crea el usuario admin **sin clave usable** (`must_change_password`) y manda un enlace firmado a `/activar` (48 h). El staff reenvía desde la ficha; no hay flash de contraseña.
 
 Si falla create/migrate/setup, `TenantProvisioningRollback` borra la base y el registro central. Bases huérfanas: `php artisan tenants:cleanup-orphans`.
 
@@ -34,6 +34,7 @@ El usuario Postgres necesita `CREATEDB`. Ver [docs/SAAS.md](../../docs/SAAS.md).
 | Landing 404 | Otra ruta `GET /` de tenant pisa la central |
 | Tablas de ventas en DB `ventas_central` | Migración central o `loadMigrationsFrom` |
 | Permisos cruzados entre clientes | Cache Spatie con la misma clave; tiene que ir namespaced por tenant id |
+| Staff ve de más / de menos en `/plataforma` | Roles Spatie del guard `platform` (DB central), no los del POS. Se asignan en Equipo |
 | Job ve datos del tenant anterior | Falta `$tenant->run()` / Queue bootstrapper |
 
 Tests: extender `Tests\TenantTestCase`, HTTP a `http://demo.localhost/...`.

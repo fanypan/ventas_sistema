@@ -18,7 +18,8 @@ Route::middleware(TenantMiddleware::web())
 - **No** `loadMigrationsFrom` en providers de módulos (rompe la DB central).
 - Paths tenant: `config/tenancy.php` → `database/migrations/tenant` + `Modules/*/Database/Migrations`.
 - Alta de cliente: `Tenant::create` dispara CreateDatabase + MigrateDatabase + `SetupTenantJob`.
-- Tras `TenancyInitialized`, olvidar cache de Spatie Permission.
+- Tras `TenancyInitialized`, namespaced cache de Spatie Permission (`TenantPermissionCache`).
+- Permisos del panel staff (guard `platform`) van en migraciones centrales. Permisos del POS (guard `web`) van en `database/migrations/tenant/`. No mezclar.
 - Jobs de negocio: inicializar tenancy (`$tenant->run(...)`) o el Queue bootstrapper.
 - Tests HTTP al comercio: URL absoluta `http://demo.localhost/...`, no `localhost`.
 

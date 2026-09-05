@@ -11,3 +11,11 @@ Tipos: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`.
 Alcances: `saas`, `platform`, `tenancy`, `billing`, `fe`, `modules`, `docker`, `agent`, `archive`, `db`.
 
 Un commit = un cambio lógico. No mezclar feature + refactor + docs en el mismo commit salvo que el usuario pida un solo commit.
+
+## Tags (git)
+
+Desde ahora, los releases van con tag anotado `vMAJOR.MINOR.PATCH` (SemVer). No cada commit.
+
+- `feat` → MINOR, `fix` → PATCH, breaking → MAJOR.
+- Crear tag solo si el usuario pide tag/release: `git tag -a vX.Y.Z -m "…"`.
+- No mover ni pisar un tag publicado.

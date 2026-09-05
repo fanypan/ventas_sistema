@@ -27,4 +27,4 @@ POS/ERP Laravel 13 + AdminLTE para comercios en Paraguay. **Sales-assisted**, **
 - Framework: [docs/LARAVEL_UPGRADE.md](docs/LARAVEL_UPGRADE.md)
 - FE: panel del comercio configura URL + API key; HTTP a `/api/v1`, nunca a SIFEN
 
-Staff y comercio son guards distintos (`platform` vs `web`). El `Gate` de `superadmin` es del tenant, no de la plataforma.
+Staff y comercio son guards distintos (`platform` vs `web`). Spatie de plataforma vive en la DB **central**; Spatie del POS vive en la DB del **comercio**. El `Gate` de `superadmin` es del tenant, no de la plataforma.

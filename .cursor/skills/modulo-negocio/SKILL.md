@@ -32,6 +32,7 @@ Si usás `module:make` (nwidart), los stubs están en `stubs/nwidart-stubs` (`co
 - Varios métodos con las mismas invariantes: `Modules/{Name}/Services/`.
 - CRUD chico: FormRequest + `Model::create($request->validated())`. No `FooRepository`.
 - Stubs de alta: controller delgado + `Store{Model}Request` / `Update{Model}Request`.
+- Modelos: filtros repetidos (`status = 1`, caja abierta) en scopes con `#[Scope]` (método `active`, no `scopeActive`). No `where(...)` suelto en el controller. Ver `.cursor/rules/laravel-code.mdc`.
 
 ## POS
 
