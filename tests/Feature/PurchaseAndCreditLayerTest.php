@@ -29,8 +29,8 @@ class PurchaseAndCreditLayerTest extends TenantTestCase
                     ],
                 ],
             ])
-            ->assertOk()
-            ->assertJson(['success' => true]);
+            ->assertCreated()
+            ->assertJsonPath('data.type', 'purchases');
 
         $this->tenant->run(function () use ($productId) {
             $product = Product::find($productId);
@@ -56,7 +56,7 @@ class PurchaseAndCreditLayerTest extends TenantTestCase
                     ],
                 ],
             ])
-            ->assertOk();
+            ->assertCreated();
 
         $purchaseId = $this->tenant->run(fn () => Purchase::value('id'));
 

@@ -4,11 +4,15 @@ namespace Modules\Credits\Http\Controllers;
 
 use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
+use App\Http\Responses\JsonEnvelope;
 use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
 use Modules\Credits\Actions\StoreAbono;
 use Modules\Credits\Entities\Abono;
 use Modules\Credits\Http\Requests\PayInstallmentRequest;
@@ -42,7 +46,7 @@ class CreditController extends Controller
         $this->middleware('permission:create credit')->only(['payInstallment']);
     }
 
-    public function receivables(Request $request)
+    public function receivables(Request $request): View
     {
         $term = trim((string) $request->get('customer'));
         $showAll = $request->boolean('show_all');
@@ -112,7 +116,7 @@ class CreditController extends Controller
         ));
     }
 
-    public function payables()
+    public function payables(): View
     {
         $purchases = Purchase::with('supplier')
             ->credit()
@@ -122,7 +126,7 @@ class CreditController extends Controller
         return view('credits::payables', compact('purchases'));
     }
 
-    public function customerKardex(Request $request, $id)
+    public function customerKardex(Request $request, $id): View
     {
         $customer = Customer::findOrFail($id);
         $from = $request->input('from');
@@ -133,7 +137,7 @@ class CreditController extends Controller
         return view('credits::kardex_customer', compact('customer', 'movements', 'from', 'to', 'saldo'));
     }
 
-    public function customerKardexPdf(Request $request, $id)
+    public function customerKardexPdf(Request $request, $id): Response
     {
         $customer = Customer::findOrFail($id);
         $from = $request->input('from');
@@ -150,7 +154,7 @@ class CreditController extends Controller
         return $pdf->stream('estado_cuenta_cliente_'.$customer->id.'.pdf');
     }
 
-    public function supplierKardex(Request $request, $id)
+    public function supplierKardex(Request $request, $id): View
     {
         $supplier = Supplier::findOrFail($id);
         $from = $request->input('from');
@@ -161,7 +165,7 @@ class CreditController extends Controller
         return view('credits::kardex_supplier', compact('supplier', 'movements', 'from', 'to', 'saldo'));
     }
 
-    public function supplierKardexPdf(Request $request, $id)
+    public function supplierKardexPdf(Request $request, $id): Response
     {
         $supplier = Supplier::findOrFail($id);
         $from = $request->input('from');
@@ -178,7 +182,7 @@ class CreditController extends Controller
         return $pdf->stream('estado_cuenta_proveedor_'.$supplier->id.'.pdf');
     }
 
-    public function storeAbono(StoreAbonoRequest $request, StoreAbono $storeAbono)
+    public function storeAbono(StoreAbonoRequest $request, StoreAbono $storeAbono): JsonResponse|RedirectResponse
     {
         try {
             $abono = $storeAbono->execute($request->validated(), (int) auth()->id());
@@ -189,7 +193,7 @@ class CreditController extends Controller
         return $this->abonoSuccess($request, $abono);
     }
 
-    public function payInstallment(PayInstallmentRequest $request, StoreAbono $storeAbono)
+    public function payInstallment(PayInstallmentRequest $request, StoreAbono $storeAbono): JsonResponse|RedirectResponse
     {
         $installment = SaleInstallment::find($request->validated('installment_id'));
 
@@ -218,25 +222,22 @@ class CreditController extends Controller
         return $this->abonoSuccess($request, $abono);
     }
 
-    public function create()
+    public function create(): View
     {
         return view('credits::create');
     }
 
-    /**
-     * @return Renderable
-     */
-    public function show($id)
+    public function show($id): View
     {
         return view('credits::show');
     }
 
-    public function edit($id)
+    public function edit($id): View
     {
         return view('credits::edit');
     }
 
-    public function printReceipt($id)
+    public function printReceipt($id): Response
     {
         $abono = Abono::with('user', 'abonable')->findOrFail($id);
         $settings = Setting::all()->pluck('value', 'key');
@@ -247,26 +248,19 @@ class CreditController extends Controller
         return $pdf->stream('recibo_'.$abono->id.'.pdf');
     }
 
-    private function abonoSuccess(Request $request, Abono $abono)
+    private function abonoSuccess(Request $request, Abono $abono): JsonResponse|RedirectResponse
     {
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => '¡Pago registrado con éxito!',
-                'abono_id' => $abono->id,
-            ]);
+            return JsonEnvelope::success('¡Pago registrado con éxito!', ['abono_id' => $abono->id]);
         }
 
         return back()->with('success', '¡Pago registrado con éxito!');
     }
 
-    private function abonoFailure(Request $request, string $message)
+    private function abonoFailure(Request $request, string $message): JsonResponse|RedirectResponse
     {
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => false,
-                'message' => $message,
-            ], 422);
+            return JsonEnvelope::error($message, null, 422);
         }
 
         return back()->with('error', $message);

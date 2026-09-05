@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Responses\JsonEnvelope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -36,10 +37,9 @@ class HealthController extends Controller
 
         $ok = collect($checks)->every(fn (string $status) => in_array($status, ['ok', 'skipped'], true));
 
-        return response()->json([
-            'status' => $ok ? 'ok' : 'error',
-            'checks' => $checks,
-        ], $ok ? 200 : 503);
+        return $ok
+            ? JsonEnvelope::success('Servicio disponible.', ['checks' => $checks])
+            : JsonEnvelope::error('Chequeo fallido.', ['checks' => $checks], 503);
     }
 
     private function shouldCheckRedis(): bool

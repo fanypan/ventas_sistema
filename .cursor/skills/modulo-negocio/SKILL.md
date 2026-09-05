@@ -33,6 +33,7 @@ Si usás `module:make` (nwidart), los stubs están en `stubs/nwidart-stubs` (`co
 - CRUD chico: FormRequest + `Model::create($request->validated())`. No `FooRepository`.
 - Stubs de alta: controller delgado + `Store{Model}Request` / `Update{Model}Request`.
 - Modelos: filtros repetidos (`status = 1`, caja abierta) en scopes con `#[Scope]` (método `active`, no `scopeActive`). No `where(...)` suelto en el controller. Ver `.cursor/rules/laravel-code.mdc`.
+- Respuestas: JSON:API (`JsonApiResource`) para modelos, envelope `{status, message, data}` (`JsonEnvelope`) para mensajes y para errores JSON del framework (401/403/404/422). `view`/`redirect` en Blade. Ver `.cursor/rules/http-responses.mdc`. Si cambiás un payload JSON, actualizá el JS y los tests en el mismo cambio.
 
 ## POS
 

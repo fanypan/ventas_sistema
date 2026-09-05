@@ -62,6 +62,47 @@ class ImageOptimizer
     }
 
     /**
+     * @param  array{0: int, 1: int, 2: int}  $fill
+     */
+    public function squarePng(?string $sourceBinary, int $size, array $fill = [79, 70, 229]): string
+    {
+        $size = max(1, $size);
+        $canvas = imagecreatetruecolor($size, $size);
+        imagealphablending($canvas, true);
+        imagesavealpha($canvas, false);
+        $background = imagecolorallocate($canvas, $fill[0], $fill[1], $fill[2]);
+        imagefilledrectangle($canvas, 0, 0, $size, $size, $background);
+
+        if (is_string($sourceBinary) && $sourceBinary !== '') {
+            $source = @imagecreatefromstring($sourceBinary);
+            if ($source !== false) {
+                if (! imageistruecolor($source)) {
+                    imagepalettetotruecolor($source);
+                }
+
+                $width = imagesx($source);
+                $height = imagesy($source);
+                $pad = (int) round($size * 0.14);
+                $inner = max(1, $size - ($pad * 2));
+                $scale = min($inner / max(1, $width), $inner / max(1, $height));
+                $targetWidth = max(1, (int) round($width * $scale));
+                $targetHeight = max(1, (int) round($height * $scale));
+                $dx = (int) (($size - $targetWidth) / 2);
+                $dy = (int) (($size - $targetHeight) / 2);
+                imagecopyresampled($canvas, $source, $dx, $dy, 0, 0, $targetWidth, $targetHeight, $width, $height);
+                imagedestroy($source);
+            }
+        }
+
+        ob_start();
+        imagepng($canvas, null, 6);
+        $binary = (string) ob_get_clean();
+        imagedestroy($canvas);
+
+        return $binary;
+    }
+
+    /**
      * @param  array{0: int, 1: int, 2: int}|null  $fill
      */
     private function fit(\GdImage $source, int $maxEdge, ?array $fill): \GdImage

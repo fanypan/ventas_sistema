@@ -1,48 +1,56 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Arqueo de Caja</title>
-    <style>
-        body { font-family: sans-serif; font-size: 12px; }
-        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .table th, .table td { border: 1px solid #ddd; padding: 5px; text-align: left; }
-        .table th { background-color: #f4f4f4; width: 50%; }
-        .text-right { text-align: right; }
-        .header { margin-bottom: 30px; text-align: center; }
-        .summary { font-weight: bold; font-size: 14px; text-align: right; margin-top: 10px; border-top: 2px solid #000; padding-top: 5px; }
-        .positive { color: green; }
-        .negative { color: red; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h2>Arqueo Diario y Flujo de Caja</h2>
-        <p>Fecha de Operación: {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</p>
-    </div>
+@extends('admin.reports.layouts.pdf')
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>(+) Ingresos por Ventas</th>
-                <td class="text-right">{{ money($salesTotal) }}</td>
-            </tr>
-            <tr>
-                <th>(-) Egresos por Compras (Inventario)</th>
-                <td class="text-right text-danger">{{ money($purchasesTotal) }}</td>
-            </tr>
-            <tr>
-                <th>(-) Gastos Generales</th>
-                <td class="text-right text-danger">{{ money($expensesTotal) }}</td>
-            </tr>
-        </tbody>
-    </table>
+@section('title', 'Arqueo de caja')
 
-    <div class="summary">
-        Balance del Día (Neto): 
-        <span class="{{ $net >= 0 ? 'positive' : 'negative' }}">
-            {{ money($net) }}
-        </span>
-    </div>
-</body>
-</html>
+@section('content')
+@php
+    $outflow = $purchasesTotal + $expensesTotal;
+    $chartItems = collect([
+        ['label' => 'Ventas', 'value' => $salesTotal, 'display' => money($salesTotal), 'color' => '#059669'],
+        ['label' => 'Compras', 'value' => $purchasesTotal, 'display' => money($purchasesTotal), 'color' => '#dc2626'],
+        ['label' => 'Gastos', 'value' => $expensesTotal, 'display' => money($expensesTotal), 'color' => '#d97706'],
+    ])->filter(fn ($item) => $item['value'] > 0)->values();
+@endphp
+
+@include('admin.reports.partials.report-header', [
+    'title' => 'Arqueo diario y flujo de caja',
+    'subtitle' => 'Fecha de operación: ' . \Carbon\Carbon::parse($date)->format('d/m/Y'),
+])
+
+@include('admin.reports.partials.metrics', [
+    'metrics' => [
+        ['label' => 'Ingresos', 'value' => money($salesTotal)],
+        ['label' => 'Egresos', 'value' => money($outflow)],
+        ['label' => 'Balance neto', 'value' => money($net)],
+    ],
+])
+
+@include('admin.reports.partials.bar-chart', [
+    'title' => 'Movimiento del día',
+    'items' => $chartItems,
+])
+
+<div class="section-title">Detalle del arqueo</div>
+<table class="data-table">
+    <tbody>
+        <tr>
+            <td><strong>(+) Ingresos por ventas</strong></td>
+            <td class="text-right text-success">{{ money($salesTotal) }}</td>
+        </tr>
+        <tr>
+            <td><strong>(-) Compras de inventario</strong></td>
+            <td class="text-right text-danger">{{ money($purchasesTotal) }}</td>
+        </tr>
+        <tr>
+            <td><strong>(-) Gastos generales</strong></td>
+            <td class="text-right text-danger">{{ money($expensesTotal) }}</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td>Balance del día</td>
+            <td class="text-right {{ $net >= 0 ? 'text-success' : 'text-danger' }}">{{ money($net) }}</td>
+        </tr>
+    </tfoot>
+</table>
+@endsection

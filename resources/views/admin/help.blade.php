@@ -36,8 +36,11 @@
                                 <li>Cuando el carrito está listo, <strong>Cobrar</strong> (<kbd class="pos-kbd">F8</kbd>). Elegí el método: efectivo pide el monto y muestra el vuelto; QR, tarjeta o transferencia piden una referencia.</li>
                                 <li><kbd class="pos-kbd">Enter</kbd> registra la venta. Se abre el ticket o la factura. Stock ya se descontó al armar el carrito.</li>
                             </ol>
-                            <div class="alert alert-light border mb-0">
+                            <div class="alert alert-light border mb-3">
                                 <strong>Crédito.</strong> <kbd class="pos-kbd">F9</kbd> abre cuotas y recargo. Hace falta un cliente (no Público General). El ticket también se imprime al confirmar.
+                            </div>
+                            <div class="alert alert-light border mb-0">
+                                <strong>Instalar.</strong> En Chrome aparece <em>Instalar</em> en el menú o en la barra de arriba. En el iPhone: Compartir → Agregar a inicio. Queda como una app, a pantalla completa.
                             </div>
                         </div>
 

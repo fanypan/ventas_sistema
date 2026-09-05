@@ -761,6 +761,50 @@ function escapeHtml(str) {
     return $('<div>').text(str == null ? '' : String(str)).html().replace(/"/g, '&quot;');
 }
 
+$.ajaxSetup({ dataType: 'json' });
+
+function apiError(xhr, fallback) {
+    var payload = xhr.responseJSON || {};
+    return payload.message || fallback;
+}
+
+function jsonApiAttributes(payload) {
+    var record = payload && payload.data ? payload.data : payload;
+    if (!record) {
+        return {};
+    }
+
+    return Object.assign({ id: record.id }, record.attributes || {});
+}
+
+function jsonApiIncluded(payload, type, id) {
+    return (payload.included || []).find(function (item) {
+        return item.type === type && String(item.id) === String(id);
+    }) || null;
+}
+
+function jsonApiCollection(payload) {
+    return (payload.data || []).map(function (item) {
+        return Object.assign({ id: item.id }, item.attributes || {});
+    });
+}
+
+function cartLines(res) {
+    return (res.data || []).map(function (item) {
+        var rel = item.relationships && item.relationships.product && item.relationships.product.data;
+        var included = rel ? jsonApiIncluded(res, rel.type, rel.id) : null;
+
+        return {
+            id: item.id,
+            quantity: item.attributes.quantity,
+            price: item.attributes.price,
+            discount: item.attributes.discount,
+            interest_amount: item.attributes.interest_amount,
+            product: included ? { description: included.attributes.description } : null
+        };
+    });
+}
+
 // Validaciones y Lógica AJAX heredada de functions.js del sistema Venta original
 $(document).ready(function() {
     let isProcessingSale = false;
@@ -779,7 +823,8 @@ $(document).ready(function() {
             _token: "{{ csrf_token() }}",
             term: term
         }, function(product) {
-            addToCartFast(product.id, product.stock, product.description);
+            var attrs = jsonApiAttributes(product);
+            addToCartFast(attrs.id, attrs.stock, attrs.description);
             $('#filter_search').val('');
             filterProducts($('.filter-btn.active').attr('data-filter') || 'all', '');
         }).fail(function() {
@@ -927,7 +972,7 @@ $(document).ready(function() {
             _token: "{{ csrf_token() }}",
             term: term
         }).done(function(res) {
-            setSelectedCustomer(res);
+            setSelectedCustomer(jsonApiAttributes(res));
         }).fail(function() {
             resetCustomerToDefault();
             showCustomerNotFound();
@@ -1178,8 +1223,8 @@ $(document).ready(function() {
             frequency: frequency,
             voucher_type: $('#tipo_comprobante').val()
         }, function(res) {
-            if(res.success) {
-                let printUrl = "{{ route('sales.print_ticket', ':id') }}".replace(':id', res.sale_id);
+            if(res.data && res.data.id) {
+                let printUrl = "{{ route('sales.print_ticket', ':id') }}".replace(':id', res.data.id);
                 window.open(printUrl, '_blank');
                 $('#creditModal').modal('hide');
                 showSaleSuccess({
@@ -1188,7 +1233,7 @@ $(document).ready(function() {
                 });
             }
         }).fail(function(r) {
-            alert(r.responseJSON ? r.responseJSON.error : 'Error al procesar el crédito');
+            alert(apiError(r, 'Error al procesar el crédito'));
             isProcessingSale = false;
             $btn.html(originalHtml).prop('disabled', false);
         });
@@ -1255,16 +1300,16 @@ $(document).ready(function() {
             discount: parseFloat($('#txt_discount').val()) || 0,
             voucher_type: $('#tipo_comprobante').val()
         }, function(res) {
-            if(res.success) {
+            if(res.data && res.data.id) {
                 $('#modalPayment').modal('hide');
-                let printUrl = "{{ route('sales.print_ticket', ':id') }}".replace(':id', res.sale_id);
+                let printUrl = "{{ route('sales.print_ticket', ':id') }}".replace(':id', res.data.id);
                 window.open(printUrl, '_blank');
                 showSaleSuccess({
-                    change: payMethod === 'efectivo' ? (res.change || 0) : 0
+                    change: payMethod === 'efectivo' ? ((res.data.meta && res.data.meta.change) || 0) : 0
                 });
             }
         }).fail(function(r) {
-            alert(r.responseJSON ? r.responseJSON.error : 'Error al procesar la venta');
+            alert(apiError(r, 'Error al procesar la venta'));
             isProcessingSale = false;
             $btn.html('<i class="fas fa-check-circle mr-2"></i> Registrar venta <kbd class="checkout-confirm-kbd">Enter</kbd>').prop('disabled', false);
         });
@@ -1279,7 +1324,7 @@ $(document).ready(function() {
             $.post("{{ route('sales.ajax.clear_cart') }}", {
                 _token: "{{ csrf_token() }}"
             }, function(res) {
-                if(res.success) {
+                if(res.status === 'success') {
                     loadCart();
                     clearSelectedCustomer();
                     $btn.prop('disabled', false).html('<i class="fas fa-trash-alt"></i>');
@@ -1313,7 +1358,7 @@ $(document).ready(function() {
         $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...');
         
         $.post("{{ route('sales.ajax.store_customer') }}", $(this).serialize() + "&_token={{ csrf_token() }}", function(res) {
-            setSelectedCustomer(res);
+            setSelectedCustomer(jsonApiAttributes(res));
             
             $('#modalNewCustomer').modal('hide');
             $('#form_new_customer')[0].reset();
@@ -1341,8 +1386,9 @@ $(document).ready(function() {
         
         $.get("{{ route('sales.ajax.list_customers') }}", { term: term }, function(res) {
             let html = '';
-            if(res.length > 0) {
-                res.forEach(c => {
+            const customers = jsonApiCollection(res);
+            if(customers.length > 0) {
+                customers.forEach(c => {
                     html += `<tr>
                         <td class="align-middle">${escapeHtml(c.nit || '-')}</td>
                         <td class="align-middle font-weight-bold text-dark">${escapeHtml(c.name)}</td>
@@ -1416,15 +1462,11 @@ $(document).ready(function() {
             discount: discount,
             interest: interest
         }, function(res) {
-            if(res.error) {
-                alert(res.error);
-            } else {
-                updateCartTable(res);
-                $('#modalEditItem').modal('hide');
-            }
+            updateCartTable(res);
+            $('#modalEditItem').modal('hide');
             $btn.prop('disabled', false).text('Actualizar Ítem');
         }).fail(function(r) {
-            alert(r.responseJSON ? r.responseJSON.error : 'Error al actualizar');
+            alert(apiError(r, 'Error al actualizar'));
             $btn.prop('disabled', false).text('Actualizar Ítem');
         });
     });
@@ -1489,13 +1531,9 @@ function addToCartFast(id, currentStock, name) {
         product_id: id,
         quantity: 1
     }, function(res) {
-        if(res.error) {
-            alert('⚠️ ' + res.error);
-        } else {
-            updateCartTable(res);
-        }
+        updateCartTable(res);
     }).fail(function(r) {
-        alert('⚠️ ' + (r.responseJSON ? r.responseJSON.error : 'Error de stock o conexión'));
+        alert('⚠️ ' + apiError(r, 'Error de stock o conexión'));
     });
 }
 
@@ -1527,8 +1565,9 @@ function recalcTotals() {
 function updateCartTable(res) {
     let html = '';
     let adjustedSubtotal = 0;
+    const details = cartLines(res);
 
-    res.details.forEach(function(d) {
+    details.forEach(function(d) {
         let baseTotal = (d.quantity * d.price);
         let discount = parseFloat(d.discount) || 0;
         let interest = parseFloat(d.interest_amount) || 0;
@@ -1565,15 +1604,15 @@ function updateCartTable(res) {
         </tr>`;
     });
     
-    if(res.details.length === 0) {
+    if(details.length === 0) {
         html = '<tr><td colspan="4" class="text-center text-muted py-5"><i class="fas fa-shopping-basket fa-3x mb-2 opacity-50"></i><br>Agregue productos al carrito</td></tr>';
     }
 
     $('#cart_tbody').html(html);
-    $('#item_count').text(res.details.length);
+    $('#item_count').text(details.length);
     $('#txt_raw_subtotal').val(Math.round(adjustedSubtotal));
     recalcTotals();
-    let hasItems = res.details.length > 0;
+    let hasItems = details.length > 0;
     $('#btn_process_sale, #btn_credit_sale').prop('disabled', !hasItems);
 }
 
@@ -1581,7 +1620,7 @@ function loadCustomerListTable() {
     $('#table_customers_list tbody').html('<tr><td colspan="3" class="text-center"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando...</td></tr>');
     $.get("{{ route('sales.ajax.list_customers') }}", function(data) {
         let html = '';
-        data.forEach(c => {
+        jsonApiCollection(data).forEach(c => {
             html += `<tr>
                 <td class="align-middle font-weight-bold">${escapeHtml(c.nit)}</td>
                 <td class="align-middle">${escapeHtml(c.name)}</td>

@@ -5,15 +5,18 @@ namespace Modules\Sales\Http\Controllers;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
 use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
 use Modules\Customers\Entities\Customer;
 use Modules\Financials\Entities\Caja;
 use Modules\Products\Entities\Category;
 use Modules\Products\Entities\Product;
 use Modules\Sales\Actions\VoidSale;
 use Modules\Sales\Entities\Sale;
+use Modules\Sales\Http\Requests\UpdateSaleRequest;
 
 class SaleController extends Controller
 {
@@ -25,12 +28,7 @@ class SaleController extends Controller
         $this->middleware('permission:void sale')->only(['void']);
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Renderable
-     */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $query = Sale::with('customer', 'creator', 'installments')->latest();
 
@@ -52,7 +50,7 @@ class SaleController extends Controller
         return view('sales::index', compact('sales'));
     }
 
-    public function pos()
+    public function pos(): View
     {
         $products = Product::with('brand')->active()->get();
         $categories = Category::all();
@@ -61,46 +59,24 @@ class SaleController extends Controller
         return view('sales::pos', compact('products', 'categories', 'cashOpen'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Renderable
-     */
-    public function create()
+    public function create(): View
     {
         return view('sales::create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return Renderable
-     */
-    public function store(Request $request)
+    public function store(Request $request): void
     {
         //
     }
 
-    /**
-     * Show the specified resource.
-     *
-     * @param  int  $id
-     * @return Renderable
-     */
-    public function show($id)
+    public function show($id): View
     {
         $sale = Sale::with('customer', 'details.product', 'installments', 'abonos.user')->findOrFail($id);
 
         return view('sales::show', compact('sale'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return Renderable
-     */
-    public function edit($id)
+    public function edit($id): View|RedirectResponse
     {
         $sale = Sale::with('customer')->findOrFail($id);
 
@@ -114,13 +90,7 @@ class SaleController extends Controller
         return view('sales::edit', compact('sale', 'customers'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  int  $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
+    public function update(UpdateSaleRequest $request, $id): RedirectResponse
     {
         $sale = Sale::findOrFail($id);
 
@@ -128,29 +98,18 @@ class SaleController extends Controller
             return back()->with('error', 'No se puede editar una venta anulada.');
         }
 
-        $request->validate([
-            'fecha' => 'required|date',
-            'customer_id' => 'required|exists:customers,id',
-            'payment_type' => 'required|in:efectivo,qr,tarjeta,transferencia,credito',
-            'status' => 'required|in:1,2,3',
-        ]);
+        $data = $request->validated();
 
-        $sale->created_at = $request->fecha;
-        $sale->customer_id = $request->customer_id;
-        $sale->payment_type = $request->payment_type;
-        $sale->status = (int) $request->status;
+        $sale->created_at = $data['fecha'];
+        $sale->customer_id = $data['customer_id'];
+        $sale->payment_type = $data['payment_type'];
+        $sale->status = (int) $data['status'];
         $sale->save();
 
         return redirect()->route('sales.index')->with('success', 'Venta actualizada correctamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return Renderable
-     */
-    public function printTicket($id)
+    public function printTicket($id): Response
     {
         $sale = Sale::with('customer', 'details.product', 'creator')->findOrFail($id);
         $settings = Setting::all()->pluck('value', 'key');
@@ -161,7 +120,7 @@ class SaleController extends Controller
         return $pdf->stream('ticket_'.$sale->id.'.pdf');
     }
 
-    public function printInvoice($id)
+    public function printInvoice($id): Response
     {
         $sale = Sale::with('customer', 'details.product', 'creator')->findOrFail($id);
         $settings = Setting::all()->pluck('value', 'key');
@@ -172,7 +131,7 @@ class SaleController extends Controller
         return $pdf->stream('factura_'.$sale->id.'.pdf');
     }
 
-    public function void($id, VoidSale $voidSale)
+    public function void($id, VoidSale $voidSale): RedirectResponse
     {
         $sale = Sale::findOrFail($id);
         $voidSale->execute($sale);

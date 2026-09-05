@@ -1,68 +1,78 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Reporte de Productos</title>
-    <style>
-        body { font-family: sans-serif; font-size: 12px; }
-        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .table th, .table td { border: 1px solid #ddd; padding: 5px; text-align: left; }
-        .table th { background-color: #f4f4f4; }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .header { margin-bottom: 30px; }
-        .summary-table { width: 50%; border-collapse: collapse; margin-top: 20px; float: right; }
-        .summary-table th, .summary-table td { border: 1px solid #ddd; padding: 5px; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h2>Catálogo de Productos</h2>
-        <p>Fecha de Reporte: {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}</p>
-    </div>
+@extends('admin.reports.layouts.pdf')
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Código</th>
-                <th>Descripción</th>
-                <th>Marca/Modelo</th>
-                <th>Categoría</th>
-                <th class="text-right">Stock</th>
-                <th class="text-right">Costo</th>
-                <th class="text-right">Precio</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($products as $product)
+@section('title', 'Catálogo de productos')
+
+@section('content')
+@php
+    $totalStock = $products->sum('stock');
+    $categoryChart = $products->groupBy(fn ($product) => $product->category->name ?? 'Sin categoría')
+        ->map(fn ($group) => $group->sum(fn ($product) => $product->stock * $product->price))
+        ->sortDesc()
+        ->take(8)
+        ->map(fn ($value, $label) => [
+            'label' => $label,
+            'value' => $value,
+            'display' => money($value),
+            'color' => '#0284c7',
+        ])
+        ->values();
+@endphp
+
+@include('admin.reports.partials.report-header', [
+    'title' => 'Catálogo de productos',
+    'subtitle' => 'Productos activos al ' . now()->format('d/m/Y H:i'),
+])
+
+@include('admin.reports.partials.metrics', [
+    'metrics' => [
+        ['label' => 'Productos', 'value' => number_format($products->count(), 0, ',', '.')],
+        ['label' => 'Inversión', 'value' => money($inversion)],
+        ['label' => 'Proyección', 'value' => money($proyeccion)],
+        ['label' => 'Utilidad est.', 'value' => number_format($utilidad, 1) . '%'],
+    ],
+])
+
+@include('admin.reports.partials.bar-chart', [
+    'title' => 'Valor de stock por categoría',
+    'items' => $categoryChart,
+])
+
+<div class="section-title">Listado de productos</div>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Categoría</th>
+            <th class="text-right">Stock</th>
+            <th class="text-right">Costo</th>
+            <th class="text-right">Precio</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($products as $product)
             <tr>
                 <td>{{ $product->code }}</td>
-                <td>{{ $product->description }}</td>
-                <td>{{ $product->brand }} {{ $product->model_name }}</td>
+                <td>
+                    <strong>{{ $product->description }}</strong>
+                    @if ($product->brand || $product->model_name)
+                        <br><span class="text-muted">{{ trim($product->brand . ' ' . $product->model_name) }}</span>
+                    @endif
+                </td>
                 <td>{{ $product->category->name ?? 'N/A' }}</td>
-                <td class="text-right">{{ $product->stock }}</td>
+                <td class="text-right">{{ number_format($product->stock, 0, ',', '.') }}</td>
                 <td class="text-right">{{ money($product->cost, false) }}</td>
                 <td class="text-right">{{ money($product->price, false) }}</td>
             </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <div style="clear:both;"></div>
-
-    <table class="summary-table">
+        @endforeach
+    </tbody>
+    <tfoot>
         <tr>
-            <th>Inversión Total</th>
-            <td class="text-right">${{ number_format($inversion, 2) }}</td>
+            <td colspan="3">Totales</td>
+            <td class="text-right">{{ number_format($totalStock, 0, ',', '.') }}</td>
+            <td class="text-right">{{ money($inversion, false) }}</td>
+            <td class="text-right">{{ money($proyeccion, false) }}</td>
         </tr>
-        <tr>
-            <th>Proyección de Ventas</th>
-            <td class="text-right">${{ number_format($proyeccion, 2) }}</td>
-        </tr>
-        <tr>
-            <th>Utilidad Estimada</th>
-            <td class="text-right">{{ number_format($utilidad, 2) }}%</td>
-        </tr>
-    </table>
-</body>
-</html>
+    </tfoot>
+</table>
+@endsection

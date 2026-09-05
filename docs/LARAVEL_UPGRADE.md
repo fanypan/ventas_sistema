@@ -28,7 +28,8 @@ Guías oficiales: [10](https://laravel.com/docs/10.x/upgrade), [11](https://lara
 
 ## Convenciones que hay que conservar
 
-- `GET /up` es el health custom (DB central + Redis + disco, `HEALTH_ENABLED`). No usar el health default de L11+.
+- `GET /up` es el health custom (DB central + Redis + disco, `HEALTH_ENABLED`). Responde envelope `{status: success|error, message, data.checks}`. No usar el health default de L11+.
+- Errores JSON del framework (401, `abort`, 404 de tenant, validación 422) salen envelope `{status, message, data}` (`App\Http\Responses\JsonEnvelope`). HTML no cambia. El JSON del file-manager (alexusmai) no se envuelve.
 - CSRF: middleware de app [`PreventRequestForgery`](../app/Http/Middleware/PreventRequestForgery.php). Tests: `withoutMiddleware(PreventRequestForgery::class)`.
 - Prefijos de cache/sesión en config siguen el estilo L12 (`*_cache_`, `*_session`) para no invalidar Redis ni cookies.
 - Session `serialization` se deja en `php` (default histórico) para no echar sesiones activas.

@@ -792,8 +792,8 @@ $(document).ready(function() {
             items: purchaseItems
         }, function(res) {
             $('#modalConfirmPurchase').modal('hide');
-            $('#purchase_success_message').text('Compra #' + res.purchase_id + ' registrada. Stock actualizado.');
-            $('#purchase_success_total').text(formatGs(res.total));
+            $('#purchase_success_message').text('Compra #' + res.data.id + ' registrada. Stock actualizado.');
+            $('#purchase_success_total').text(formatGs(res.data.attributes.total));
             $('#modalPurchaseSuccess').modal('show');
         }).fail(function(xhr) {
             isProcessing = false;
@@ -801,7 +801,7 @@ $(document).ready(function() {
             updateFinalizeState();
             $('#modalConfirmPurchase').modal('hide');
             const payload = xhr.responseJSON || {};
-            const msg = payload.error || payload.message || 'No se pudo registrar la compra.';
+            const msg = payload.message || 'No se pudo registrar la compra.';
             showInlineError(msg);
         });
     });

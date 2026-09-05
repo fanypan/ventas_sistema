@@ -4,8 +4,9 @@ namespace Modules\Products\Http\Controllers;
 
 use App\Exports\ZeroStockExport;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
-use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Products\Entities\Brand;
 use Modules\Products\Entities\Category;
@@ -14,6 +15,7 @@ use Modules\Products\Http\Requests\StoreProductRequest;
 use Modules\Products\Http\Requests\UpdateProductRequest;
 use Modules\Products\Services\ProductImageService;
 use Modules\Purchases\Entities\PurchaseDetail;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProductController extends Controller
 {
@@ -29,14 +31,14 @@ class ProductController extends Controller
         ]);
     }
 
-    public function index()
+    public function index(): View
     {
         $products = Product::with('category')->latest()->paginate(10);
 
         return view('products::index', compact('products'));
     }
 
-    public function expiringProducts()
+    public function expiringProducts(): View
     {
         $expiringBatches = PurchaseDetail::with(['product', 'purchase.supplier'])
             ->whereNotNull('expiration_date')
@@ -48,7 +50,7 @@ class ProductController extends Controller
         return view('products::expiring', compact('expiringBatches'));
     }
 
-    public function zeroStock()
+    public function zeroStock(): View
     {
         $products = Product::with('category', 'brand')
             ->active()
@@ -59,7 +61,7 @@ class ProductController extends Controller
         return view('products::zero', compact('products'));
     }
 
-    public function zeroStockExcel()
+    public function zeroStockExcel(): BinaryFileResponse
     {
         return Excel::download(
             new ZeroStockExport,
@@ -67,7 +69,7 @@ class ProductController extends Controller
         );
     }
 
-    public function printBarcode($id)
+    public function printBarcode($id): View|RedirectResponse
     {
         $product = Product::findOrFail($id);
 
@@ -78,7 +80,7 @@ class ProductController extends Controller
         return view('products::barcode', compact('product'));
     }
 
-    public function create()
+    public function create(): View
     {
         $categories = Category::active()->get();
         $brands = Brand::active()->get();
@@ -86,7 +88,7 @@ class ProductController extends Controller
         return view('products::create', compact('categories', 'brands'));
     }
 
-    public function store(StoreProductRequest $request)
+    public function store(StoreProductRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
@@ -108,15 +110,12 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Producto creado con éxito.');
     }
 
-    /**
-     * @return Renderable
-     */
-    public function show($id)
+    public function show($id): View
     {
         return view('products::show');
     }
 
-    public function edit($id)
+    public function edit($id): View
     {
         $product = Product::findOrFail($id);
         $categories = Category::active()->get();
@@ -125,7 +124,7 @@ class ProductController extends Controller
         return view('products::edit', compact('product', 'categories', 'brands'));
     }
 
-    public function update(UpdateProductRequest $request, $id)
+    public function update(UpdateProductRequest $request, $id): RedirectResponse
     {
         $product = Product::findOrFail($id);
         $data = $request->validated();
@@ -152,7 +151,7 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Producto actualizado con éxito.');
     }
 
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         $product = Product::findOrFail($id);
         $this->images->deleteCustom($product);

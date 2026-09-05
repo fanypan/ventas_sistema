@@ -3,11 +3,13 @@
 namespace Modules\Financials\Http\Controllers;
 
 use App\Http\Controllers\Concerns\AuthorizesCrud;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
 use Modules\Financials\Entities\Caja;
 use Modules\Financials\Entities\Gasto;
 use Modules\Financials\Entities\Insumo;
+use Modules\Financials\Http\Requests\StoreExpenseRequest;
 
 class ExpenseController extends Controller
 {
@@ -15,17 +17,17 @@ class ExpenseController extends Controller
 
     public function __construct()
     {
-        $this->authorizeCrud('expense', extraCreate: ['searchInsumo']);
+        $this->authorizeCrud('expense');
     }
 
-    public function index()
+    public function index(): View
     {
         $expenses = Gasto::with(['user', 'insumo'])->latest()->paginate(10);
 
         return view('financials::expenses.index', compact('expenses'));
     }
 
-    public function create()
+    public function create(): View
     {
         $insumos = Insumo::orderBy('name', 'asc')->get();
         $openCash = Caja::openForUser();
@@ -33,61 +35,42 @@ class ExpenseController extends Controller
         return view('financials::expenses.create', compact('insumos', 'openCash'));
     }
 
-    public function store(Request $request)
+    public function store(StoreExpenseRequest $request): RedirectResponse
     {
-        merge_currency_fields($request, ['amount']);
-
-        $request->validate([
-            'description' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0.01',
-            'type' => 'required|in:gasto,insumo',
-            'insumo_id' => 'required_if:type,insumo|nullable|exists:insumos,id',
-            'quantity' => 'required_if:type,insumo|nullable|numeric|min:0.01',
-            'new_insumo' => 'nullable|boolean',
-        ]);
+        $data = $request->validated();
 
         $cash = Caja::openForUser();
         if (! $cash) {
             return back()->with('error', 'Abrí tu caja para registrar egresos.')->withInput();
         }
 
-        $insumo_id = $request->insumo_id;
+        $insumoId = $data['insumo_id'] ?? null;
 
-        // If it's an insumo and user wants to create a new one on the fly (or if provided a name instead of ID)
-        if ($request->type == 'insumo' && $request->new_insumo) {
+        if (($data['type'] ?? null) === 'insumo' && ($data['new_insumo'] ?? false)) {
             $insumo = Insumo::create([
-                'name' => $request->description,
-                'price' => $request->amount / ($request->quantity ?: 1),
+                'name' => $data['description'],
+                'price' => $data['amount'] / ($data['quantity'] ?? 1),
                 'user_id' => auth()->id(),
             ]);
-            $insumo_id = $insumo->id;
+            $insumoId = $insumo->id;
         }
 
         Gasto::create([
             'user_id' => auth()->id(),
-            'description' => $request->description,
-            'amount' => $request->amount,
+            'description' => $data['description'],
+            'amount' => $data['amount'],
             'date' => now(),
             'cash_id' => $cash->id,
-            'type' => $request->type,
-            'insumo_id' => $insumo_id,
-            'quantity' => $request->quantity,
+            'type' => $data['type'],
+            'insumo_id' => $insumoId,
+            'quantity' => $data['quantity'] ?? null,
         ]);
 
-        // Update stock of insumo if applicable
-        if ($request->type == 'insumo' && $insumo_id) {
-            $ins = Insumo::find($insumo_id);
-            $ins->increment('stock', $request->quantity ?: 0);
+        if (($data['type'] ?? null) === 'insumo' && $insumoId) {
+            $ins = Insumo::find($insumoId);
+            $ins->increment('stock', $data['quantity'] ?? 0);
         }
 
         return redirect()->route('financials.expenses.index')->with('success', 'Egreso registrado con éxito');
-    }
-
-    public function searchInsumo(Request $request)
-    {
-        $term = $request->term;
-        $insumos = Insumo::where('name', 'LIKE', "%$term%")->get();
-
-        return response()->json($insumos);
     }
 }

@@ -5,12 +5,16 @@ namespace Modules\Financials\Http\Controllers;
 use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Concerns\AuthorizesCrud;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 use Modules\Credits\Entities\Abono;
 use Modules\Financials\Actions\OpenCaja;
 use Modules\Financials\Entities\Caja;
 use Modules\Financials\Entities\Gasto;
+use Modules\Financials\Http\Requests\CloseCajaRequest;
 use Modules\Financials\Http\Requests\OpenCajaRequest;
 use Modules\Sales\Entities\Sale;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -24,14 +28,14 @@ class CashierController extends Controller
         $this->authorizeCrud('cash', ['history', 'arqueo'], extraUpdate: ['close']);
     }
 
-    public function index()
+    public function index(): View
     {
         $cajas = Caja::with(['user', 'sales', 'abonos'])->latest()->paginate(10);
 
         return view('financials::cajas.index', compact('cajas'));
     }
 
-    public function create()
+    public function create(): View|RedirectResponse
     {
         if (Caja::openForUser()) {
             return redirect()->route('sales.pos');
@@ -40,7 +44,7 @@ class CashierController extends Controller
         return view('financials::cajas.create');
     }
 
-    public function store(OpenCajaRequest $request, OpenCaja $openCaja)
+    public function store(OpenCajaRequest $request, OpenCaja $openCaja): RedirectResponse
     {
         try {
             $openCaja->execute((int) auth()->id(), (float) $request->validated('monto_inicial'));
@@ -59,11 +63,10 @@ class CashierController extends Controller
         return redirect()->route('financials.cajas.index');
     }
 
-    public function arqueo($id)
+    public function arqueo($id): View
     {
         $caja = Caja::findOrFail($id);
 
-        // Ventas desglosadas por tipo de pago
         $sales = Sale::where('cash_id', $caja->id)->paid()->get();
 
         $salesCash = $sales->where('payment_type', 'efectivo')->sum('total');
@@ -73,17 +76,14 @@ class CashierController extends Controller
 
         $totalSales = $sales->sum('total');
 
-        // Otros movimientos
         $expenses = Gasto::where('cash_id', $caja->id)->get();
         $abonos = Abono::where('cash_id', $caja->id)->get();
 
         $totalExpenses = $expenses->sum('amount');
         $totalAbonos = $abonos->sum('amount');
 
-        // Total esperado solo en EFECTIVO (para comparar con el conteo físico)
         $expectedCash = $caja->opening_amount + $salesCash + $totalAbonos - $totalExpenses;
 
-        // Total general en sistema (todas las formas de pago)
         $expectedTotal = $caja->opening_amount + $totalSales + $totalAbonos - $totalExpenses;
 
         return view('financials::cajas.arqueo', compact(
@@ -94,27 +94,21 @@ class CashierController extends Controller
         ));
     }
 
-    public function close(Request $request, $id)
+    public function close(CloseCajaRequest $request, $id): RedirectResponse
     {
-        merge_currency_fields($request, ['monto_final']);
-
-        $request->validate([
-            'monto_final' => 'required|numeric|min:0',
-        ]);
-
-        \Log::info('Intentando cerrar caja ID: '.$id.' con monto: '.$request->monto_final);
+        Log::info('Intentando cerrar caja ID: '.$id.' con monto: '.$request->validated('monto_final'));
         $caja = Caja::findOrFail($id);
         $caja->update([
-            'closing_amount' => $request->monto_final,
+            'closing_amount' => $request->validated('monto_final'),
             'closed_at' => now(),
-            'status' => 0, // Closed
+            'status' => 0,
         ]);
-        \Log::info('Caja ID: '.$id.' cerrada correctamente.');
+        Log::info('Caja ID: '.$id.' cerrada correctamente.');
 
         return redirect()->route('financials.cajas.index')->with('success', 'Caja cerrada con éxito');
     }
 
-    public function history(Request $request)
+    public function history(Request $request): View
     {
         $from = $request->input('from', now()->toDateString());
         $to = $request->input('to', now()->toDateString());

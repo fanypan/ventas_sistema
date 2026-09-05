@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Http\Responses\JsonEnvelope;
 use RuntimeException;
 
 class BusinessRuleException extends RuntimeException
@@ -9,7 +10,6 @@ class BusinessRuleException extends RuntimeException
     public function __construct(
         string $message,
         private readonly int $status = 422,
-        private readonly string $key = 'error',
     ) {
         parent::__construct($message, $status);
     }
@@ -21,6 +21,6 @@ class BusinessRuleException extends RuntimeException
 
     public function payload(): array
     {
-        return [$this->key => $this->getMessage()];
+        return JsonEnvelope::payload('error', $this->getMessage());
     }
 }

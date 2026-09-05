@@ -10,12 +10,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Platform\StorePlatformRoleRequest;
 use App\Http\Requests\Platform\UpdatePlatformRoleRequest;
 use App\Support\PlatformAccess;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use RealRashid\SweetAlert\Facades\Alert;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $roles = Role::where('guard_name', PlatformAccess::GUARD)
             ->withCount('users')
@@ -26,7 +28,7 @@ class RoleController extends Controller
         return view('platform.roles.index', compact('roles'));
     }
 
-    public function create()
+    public function create(): View
     {
         return view('platform.roles.form', [
             'role' => null,
@@ -35,7 +37,7 @@ class RoleController extends Controller
         ]);
     }
 
-    public function store(StorePlatformRoleRequest $request, CreatePlatformRole $createRole)
+    public function store(StorePlatformRoleRequest $request, CreatePlatformRole $createRole): RedirectResponse
     {
         try {
             $createRole->execute($request->validated());
@@ -50,7 +52,7 @@ class RoleController extends Controller
         return redirect()->route('platform.roles.index');
     }
 
-    public function edit(Role $role)
+    public function edit(Role $role): View
     {
         abort_unless($role->guard_name === PlatformAccess::GUARD, 404);
 
@@ -61,7 +63,7 @@ class RoleController extends Controller
         ]);
     }
 
-    public function update(UpdatePlatformRoleRequest $request, Role $role, UpdatePlatformRole $updateRole)
+    public function update(UpdatePlatformRoleRequest $request, Role $role, UpdatePlatformRole $updateRole): RedirectResponse
     {
         abort_unless($role->guard_name === PlatformAccess::GUARD, 404);
 
@@ -78,7 +80,7 @@ class RoleController extends Controller
         return redirect()->route('platform.roles.index');
     }
 
-    public function destroy(Role $role, DeletePlatformRole $deleteRole)
+    public function destroy(Role $role, DeletePlatformRole $deleteRole): RedirectResponse
     {
         abort_unless($role->guard_name === PlatformAccess::GUARD, 404);
 

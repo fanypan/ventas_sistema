@@ -103,15 +103,17 @@
                         id: id,
                         _token: "{{ csrf_token() }}"
                     },
-                    success: function(data) {
-                        var data = data.data;
-                        var permissions = data.permissions;
+                    success: function(response) {
+                        var data = response.data;
+                        var permissions = (response.included || []).filter(function (item) {
+                            return item.type === 'permissions';
+                        });
                         $('#modal-edit input.permission').prop('checked', false).prop('disabled', false);
                         $("#checkAllu").prop('checked', false).prop('disabled', false);
                         if (permissions.length == {{ count($permission) }}) {
                             $("#checkAllu").prop('checked', true);
                         }
-                        if (data.name == 'superadmin') {
+                        if (data.attributes.name == 'superadmin') {
                             $('#modal-edit input.permission').prop('checked', true).prop('disabled', true);
                             $("#checkAllu").prop('checked', true).prop('disabled', true);
                         } else {
@@ -119,7 +121,7 @@
                                 $(`#${permissions[i].id}u`).prop('checked', true);
                             }
                         }
-                        $("#name").val(data.name);
+                        $("#name").val(data.attributes.name);
                         $("#id").val(data.id);
                         $('#modal-loading').modal('hide');
                         $('#modal-edit').modal({backdrop: 'static', keyboard: false, show: true});

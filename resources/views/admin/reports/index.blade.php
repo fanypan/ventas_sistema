@@ -8,7 +8,8 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="font-weight-bold text-premium"><i class="fas fa-file-invoice mr-2"></i>Centro de Reportes</h1>
+                    <h1 class="font-weight-bold text-premium"><i class="fas fa-file-invoice mr-2"></i>Centro de reportes</h1>
+                    <p class="text-muted mb-0">PDFs con resumen visual, gráficos y detalle del período.</p>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -210,15 +211,24 @@
 
 <style>
     .nav-tabs .nav-link.active {
-        border-top: 3px solid #007bff !important;
-        color: #007bff !important;
+        border-top: 3px solid #4f46e5 !important;
+        color: #4f46e5 !important;
     }
     .text-premium {
-        color: #2c3e50;
+        color: #4f46e5;
         letter-spacing: -0.5px;
+    }
+    html.dark-mode .text-premium,
+    body.dark-mode .text-premium {
+        color: #c7d2fe;
     }
     .shadow-xs {
         box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+    }
+    html.dark-mode .shadow-xs,
+    body.dark-mode .shadow-xs {
+        background-color: var(--surface) !important;
+        border-color: var(--border) !important;
     }
 </style>
 @endsection

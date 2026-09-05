@@ -2,27 +2,29 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 
-class UserResource extends JsonResource
+class UserResource extends JsonApiResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  Request  $request
-     * @return array|Arrayable|\JsonSerializable
-     */
-    public function toArray($request)
+    public array $attributes = [
+        'name',
+        'email',
+        'role',
+        'created_at',
+        'updated_at',
+    ];
+
+    public array $relationships = [];
+
+    public function toAttributes(Request $request): array
     {
         return [
-            'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
             'role' => implode(',', $this->getRoleNames()->toArray()),
-            'created_at' => date('d-m-Y H:i:s', strtotime($this->created_at)),
-            'updated_at' => date('d-m-Y H:i:s', strtotime($this->updated_at)),
+            'created_at' => date('d-m-Y H:i:s', strtotime((string) $this->created_at)),
+            'updated_at' => date('d-m-Y H:i:s', strtotime((string) $this->updated_at)),
         ];
     }
 }

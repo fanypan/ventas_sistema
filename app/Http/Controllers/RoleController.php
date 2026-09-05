@@ -6,17 +6,19 @@ use App\Actions\CreateRole;
 use App\Actions\UpdateRole;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Http\Resources\RoleResource;
 use App\Support\TenantAssignableRole;
 use App\Support\TenantPermissionLabel;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use RealRashid\SweetAlert\Facades\Alert;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\HttpFoundation\Response;
 
 class RoleController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $permissions = Permission::query()
             ->where('guard_name', 'web')
@@ -33,7 +35,7 @@ class RoleController extends Controller
         return view('admin.role', $x);
     }
 
-    public function store(StoreRoleRequest $request, CreateRole $createRole)
+    public function store(StoreRoleRequest $request, CreateRole $createRole): RedirectResponse
     {
         if (TenantAssignableRole::isProtected($request->validated('name'))) {
             abort(403, 'No se puede crear el rol superadmin.');
@@ -50,18 +52,14 @@ class RoleController extends Controller
         return back();
     }
 
-    public function show(Request $request)
+    public function show(Request $request): RoleResource
     {
-        $role = Role::with('permissions')->find($request->id);
+        $role = Role::with('permissions')->findOrFail($request->id);
 
-        return response()->json([
-            'status' => Response::HTTP_OK,
-            'message' => 'Data role by id',
-            'data' => $role,
-        ], Response::HTTP_OK);
+        return (new RoleResource($role))->includePreviouslyLoadedRelationships();
     }
 
-    public function update(UpdateRoleRequest $request, UpdateRole $updateRole)
+    public function update(UpdateRoleRequest $request, UpdateRole $updateRole): RedirectResponse
     {
         $role = Role::find($request->validated('id'));
         $this->denyProtectedRole($role);
@@ -80,7 +78,7 @@ class RoleController extends Controller
         return back();
     }
 
-    public function destroy(Request $request)
+    public function destroy(Request $request): RedirectResponse
     {
         $role = Role::find($request->id);
         $this->denyProtectedRole($role);

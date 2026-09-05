@@ -15,6 +15,9 @@ use Modules\Sales\Entities\TemporaryDetail;
 
 class ProcessSale
 {
+    /**
+     * @return array{sale: Sale, change: float|int}
+     */
     public function execute(string $token, array $data, int $userId): array
     {
         $details = TemporaryDetail::where('user_token', $token)->get();
@@ -120,8 +123,7 @@ class ProcessSale
         }
 
         return [
-            'success' => true,
-            'sale_id' => $sale->id,
+            'sale' => $sale,
             'change' => $change,
         ];
     }

@@ -4,6 +4,10 @@
 @section('content')
 <style>
     .dashboard-minimal { background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); }
+    html.dark-mode .dashboard-minimal,
+    body.dark-mode .dashboard-minimal {
+        background: linear-gradient(135deg, var(--page-bg) 0%, #1e1b4b 100%);
+    }
     .dashboard-card { border: 0; border-radius: 24px; text-decoration: none !important; transition: transform .2s ease; }
     .dashboard-card:hover { transform: translateY(-4px); }
     .dashboard-icon { width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; }
@@ -30,6 +34,7 @@
                             <p>Ventas de hoy ({{ $sales_count }})</p>
                         </div>
                         <div class="icon"><i class="fas fa-cash-register"></i></div>
+                        <a href="{{ route('reports.sales.pdf', ['start_date' => now()->toDateString(), 'end_date' => now()->toDateString()]) }}" target="_blank" class="small-box-footer">Ver reporte</a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-6">
@@ -39,6 +44,7 @@
                             <p>Ventas del mes</p>
                         </div>
                         <div class="icon"><i class="fas fa-chart-line"></i></div>
+                        <a href="{{ route('reports.sales.pdf', ['start_date' => now()->startOfMonth()->toDateString(), 'end_date' => now()->toDateString()]) }}" target="_blank" class="small-box-footer">Ver reporte</a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-6">

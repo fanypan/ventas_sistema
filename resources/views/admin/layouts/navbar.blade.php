@@ -240,6 +240,12 @@
 
         <!-- Right navbar links (Profile, Theme, etc) -->
         <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+            <li class="nav-item d-none" data-pwa-install>
+                <button type="button" class="nav-link bg-transparent border-0" title="Instalar en este dispositivo" aria-label="Instalar en este dispositivo">
+                    <i class="fas fa-download"></i>
+                    <span class="d-none d-xl-inline ml-1">Instalar</span>
+                </button>
+            </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('help.index') ? 'active' : '' }}" href="{{ route('help.index') }}" title="Ayuda del POS" aria-label="Ayuda del POS">
                     <i class="fas fa-question-circle"></i>

@@ -16,6 +16,7 @@ class UpdateSettingsRequest extends FormRequest
         return [
             'key' => ['required', 'array'],
             'value' => ['required', 'array'],
+            'tab' => ['nullable', 'string', 'max:50', 'regex:/^[a-z_]+$/'],
         ];
     }
 }

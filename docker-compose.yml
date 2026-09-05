@@ -1,6 +1,10 @@
 # Desarrollo local únicamente.
 # El servicio `app` ejecuta `php artisan serve` (PHP CLI). No incluye nginx ni php-fpm.
 # Producción: docker compose -f docker-compose.prod.yml up -d --build
+#
+# Perfiles (extras; el POS arranca sin ellos):
+#   docker compose --profile mail up -d   # Mailpit
+#   docker compose --profile obs up -d    # Dozzle + Uptime Kuma
 
 x-minio-client: &minio-client
   AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
@@ -43,9 +47,9 @@ services:
       CACHE_DRIVER: redis
       SESSION_DRIVER: file
       QUEUE_CONNECTION: ${QUEUE_CONNECTION:-sync}
-      MAIL_MAILER: smtp
-      MAIL_HOST: mailhog
-      MAIL_PORT: 1025
+      MAIL_MAILER: ${MAIL_MAILER:-log}
+      MAIL_HOST: ${MAIL_HOST:-mailhog}
+      MAIL_PORT: ${MAIL_PORT:-1025}
       MAIL_USERNAME: ""
       MAIL_PASSWORD: ""
       MAIL_ENCRYPTION: ""
@@ -140,6 +144,7 @@ services:
 
   mailhog:
     image: axllent/mailpit
+    profiles: ["mail"]
     ports:
       - "${MAILHOG_UI_PORT:-8025}:8025"
       - "${MAILHOG_SMTP_PORT:-1026}:1025"

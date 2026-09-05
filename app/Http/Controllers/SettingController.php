@@ -4,22 +4,31 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSettingRequest;
 use App\Http\Requests\UpdateSettingsRequest;
+use App\Http\Resources\SettingResource;
 use App\Models\Setting;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use RealRashid\SweetAlert\Facades\Alert;
-use Symfony\Component\HttpFoundation\Response;
 
 class SettingController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        $x['title'] = 'Setting';
-        $x['category'] = Setting::select('category')->groupBy('category')->get();
+        $settings = Setting::query()->orderBy('id')->get();
+        $grouped = $settings->groupBy(fn (Setting $setting) => $setting->category ?: 'information');
+        $known = collect(Setting::CATEGORY_ORDER)->filter(fn (string $category) => $grouped->has($category));
+        $categories = $known->concat($grouped->keys()->diff($known))->values();
 
-        return view('admin.setting', $x);
+        return view('admin.setting', [
+            'title' => 'Configuración',
+            'categories' => $categories,
+            'grouped' => $grouped,
+            'canUpdate' => auth()->user()?->can('update setting') ?? false,
+        ]);
     }
 
-    public function store(StoreSettingRequest $request)
+    public function store(StoreSettingRequest $request): RedirectResponse
     {
         try {
             Setting::create($request->validated());
@@ -32,19 +41,17 @@ class SettingController extends Controller
         return back();
     }
 
-    public function show(Request $request)
+    public function show(Request $request): SettingResource
     {
-        $setting = Setting::find($request->id);
+        $setting = Setting::findOrFail($request->id);
 
-        return response()->json([
-            'status' => Response::HTTP_OK,
-            'message' => 'Datos del ajuste',
-            'data' => $setting,
-        ], Response::HTTP_OK);
+        return new SettingResource($setting);
     }
 
-    public function update(UpdateSettingsRequest $request)
+    public function update(UpdateSettingsRequest $request): RedirectResponse
     {
+        $tab = (string) $request->validated('tab', '');
+
         try {
             $keys = $request->validated('key');
             $values = $request->validated('value');
@@ -57,10 +64,12 @@ class SettingController extends Controller
             Alert::error('No se pudieron guardar los ajustes', 'Intentá de nuevo.')->toToast();
         }
 
-        return back();
+        $fragment = $tab !== '' ? 'settings-'.$tab : '';
+
+        return redirect()->route('setting.index')->withFragment($fragment);
     }
 
-    public function destroy(Request $request)
+    public function destroy(Request $request): RedirectResponse
     {
         try {
             $setting = Setting::find($request->id);

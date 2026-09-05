@@ -101,11 +101,10 @@
                         id: id,
                         _token: "{{ csrf_token() }}"
                     },
-                    success: function(data) {
-                        // console.log(data);
-                        var data = data.data;
-                        $("#name").val(data.name);
-                        $("#guard_name").val(data.guard_name);
+                    success: function(response) {
+                        var data = response.data;
+                        $("#name").val(data.attributes.name);
+                        $("#guard_name").val(data.attributes.guard_name);
                         $("#id").val(data.id);
                         $('#modal-loading').modal('hide');
                         $('#modal-edit').modal({backdrop: 'static', keyboard: false, show: true});

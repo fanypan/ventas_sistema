@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Responses\JsonEnvelope;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
@@ -49,5 +50,42 @@ class ErrorPagesTest extends TestCase
         $this->get('http://localhost/__test-error-500')
             ->assertStatus(500)
             ->assertSee('Error interno');
+    }
+
+    public function test_json_404_uses_envelope(): void
+    {
+        $this->getJson('http://localhost/ruta-inexistente')
+            ->assertNotFound()
+            ->assertJson([
+                'status' => 'error',
+                'message' => JsonEnvelope::messageForStatus(404),
+                'data' => null,
+            ]);
+    }
+
+    public function test_unknown_tenant_json_uses_envelope(): void
+    {
+        $this->getJson('http://demo.localhost/')
+            ->assertNotFound()
+            ->assertJson([
+                'status' => 'error',
+                'message' => JsonEnvelope::messageForStatus(404),
+                'data' => null,
+            ]);
+    }
+
+    public function test_json_http_exceptions_use_envelope(): void
+    {
+        Route::middleware('web')->group(function () {
+            Route::get('/__test-error-403', fn () => abort(403));
+        });
+
+        $this->getJson('http://localhost/__test-error-403')
+            ->assertForbidden()
+            ->assertJson([
+                'status' => 'error',
+                'message' => JsonEnvelope::messageForStatus(403),
+                'data' => null,
+            ]);
     }
 }

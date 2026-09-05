@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Responses\JsonEnvelope;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
@@ -27,8 +28,8 @@ class EnsureAdminPasswordIsSet
 
         $message = 'Definí tu contraseña con el enlace que te mandamos por mail.';
 
-        if ($request->expectsJson()) {
-            return response()->json(['error' => $message], 403);
+        if (JsonEnvelope::wantsJson($request)) {
+            return JsonEnvelope::error($message, null, 403);
         }
 
         return redirect()->route('login')->withErrors(['email' => $message]);

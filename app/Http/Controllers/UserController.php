@@ -10,14 +10,15 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Support\TenantAssignableRole;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use RealRashid\SweetAlert\Facades\Alert;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $x['title'] = 'User';
         $x['data'] = User::get();
@@ -30,7 +31,7 @@ class UserController extends Controller
         return view('admin.user', $x);
     }
 
-    public function store(StoreUserRequest $request, CreateUser $createUser)
+    public function store(StoreUserRequest $request, CreateUser $createUser): RedirectResponse
     {
         try {
             $user = $createUser->execute($request->validated());
@@ -47,18 +48,14 @@ class UserController extends Controller
         return back();
     }
 
-    public function show(Request $request)
+    public function show(Request $request): UserResource
     {
-        $user = UserResource::collection(User::where(['id' => $request->id])->get());
+        $user = User::findOrFail($request->id);
 
-        return response()->json([
-            'status' => Response::HTTP_OK,
-            'message' => 'Data user by id',
-            'data' => $user[0],
-        ], Response::HTTP_OK);
+        return new UserResource($user);
     }
 
-    public function update(UpdateUserRequest $request, UpdateUser $updateUser)
+    public function update(UpdateUserRequest $request, UpdateUser $updateUser): RedirectResponse
     {
         $user = User::find($request->validated('id'));
         $this->denyProtectedUser($user);
@@ -74,7 +71,7 @@ class UserController extends Controller
         return back();
     }
 
-    public function destroy(Request $request)
+    public function destroy(Request $request): RedirectResponse
     {
         $user = User::find($request->id);
         $this->denyProtectedUser($user);

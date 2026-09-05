@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\BusinessRuleException;
+use App\Exceptions\RenderJsonEnvelope;
 use App\Http\Controllers\HealthController;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\AuthenticateSession;
@@ -17,6 +18,7 @@ use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustHosts;
 use App\Http\Middleware\TrustProxies;
+use App\Http\Responses\JsonEnvelope;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
@@ -95,9 +97,15 @@ return Application::configure(basePath: dirname(__DIR__))
             BusinessRuleException::class,
         ]);
 
+        $exceptions->shouldRenderJsonWhen(
+            fn (Request $request): bool => JsonEnvelope::wantsJson($request)
+        );
+
+        $exceptions->respond(new RenderJsonEnvelope);
+
         $exceptions->render(function (TenantCouldNotBeIdentifiedException $e, Request $request) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Not Found.'], 404);
+            if (JsonEnvelope::wantsJson($request)) {
+                return JsonEnvelope::error(JsonEnvelope::messageForStatus(404), null, 404);
             }
 
             return response()->view('errors.404', ['exception' => $e], 404);
@@ -110,7 +118,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (BusinessRuleException $e, Request $request) {
-            if ($request->expectsJson() || $request->ajax()) {
+            if (JsonEnvelope::wantsJson($request)) {
                 return response()->json($e->payload(), $e->status());
             }
 

@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class FileManagerController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $disk = Storage::disk('filemanager');
 

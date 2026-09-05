@@ -30,7 +30,7 @@ class PlanLimitsTest extends TenantTestCase
             ->withHeaders(['Accept' => 'application/json', 'X-Requested-With' => 'XMLHttpRequest'])
             ->tenantPost('/admin/purchases', ['supplier_id' => 1, 'items' => []])
             ->assertForbidden()
-            ->assertJsonFragment(['error' => 'Tu plan no incluye compras y proveedores. Contactá a AranduTech para ampliar.']);
+            ->assertJsonFragment(['message' => 'Tu plan no incluye compras y proveedores. Contactá a AranduTech para ampliar.']);
     }
 
     public function test_starter_cannot_open_credits(): void
@@ -63,7 +63,7 @@ class PlanLimitsTest extends TenantTestCase
                 'installments' => 2,
             ])
             ->assertStatus(422)
-            ->assertJsonFragment(['error' => 'Tu plan no incluye créditos y ventas a crédito. Contactá a AranduTech para ampliar.']);
+            ->assertJsonFragment(['message' => 'Tu plan no incluye créditos y ventas a crédito. Contactá a AranduTech para ampliar.']);
     }
 
     public function test_starter_can_sell_cash(): void
@@ -86,8 +86,8 @@ class PlanLimitsTest extends TenantTestCase
                 'payment_type' => 'efectivo',
                 'payment_with' => 10000,
             ])
-            ->assertOk()
-            ->assertJson(['success' => true]);
+            ->assertCreated()
+            ->assertJsonPath('data.type', 'sales');
     }
 
     public function test_user_cannot_open_a_second_caja(): void
@@ -128,7 +128,7 @@ class PlanLimitsTest extends TenantTestCase
                 'payment_type' => 'efectivo',
                 'payment_with' => 5000,
             ])
-            ->assertOk();
+            ->assertCreated();
 
         $this->tenant->run(function () use ($adminCajaId, $operatorCajaId) {
             $sale = Sale::first();

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Responses\JsonEnvelope;
 use App\Services\Billing\PlanLimitService;
 use Closure;
 use Illuminate\Http\Request;
@@ -18,8 +19,8 @@ class EnsurePlanFeature
 
         $message = $limits->featureDeniedMessage($feature);
 
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json(['error' => $message], 403);
+        if (JsonEnvelope::wantsJson($request)) {
+            return JsonEnvelope::error($message, null, 403);
         }
 
         Alert::error('Plan', $message)->toToast();

@@ -3,9 +3,10 @@
 <html lang="es">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>{{ ($title ?? 'Admin') . " - " . Setting::getValue('app_name') }}</title>
-        <link rel="icon" href="{{ setting_file_url(Setting::getValue('app_favicon')) }}" type="image/png" />
+        @include('pwa.favicon')
+        @include('pwa.meta')
         <!-- Google Font: Outfit -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +24,7 @@
         <!-- DataTables -->
         <link rel="stylesheet" href="{{ asset('template/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
         <!-- Premium UI CSS -->
-        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260830a">
+        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260905a">
         <script>
             (function () {
                 var pref = 'system';
@@ -79,6 +80,7 @@
         <!-- ./wrapper -->
         <!-- jQuery -->
         <script src="{{ asset('js/theme.js') }}"></script>
+        <script src="{{ asset('js/pwa.js') }}"></script>
         <script src="{{ asset('template/admin/plugins/jquery/jquery.min.js') }}"></script>
         <script src="{{ asset('js/product-grid-filter.js') }}"></script>
         <script src="{{ asset('js/pos-shortcuts.js') }}"></script>

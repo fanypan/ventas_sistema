@@ -3,7 +3,9 @@
 namespace Modules\{Module}\Http\Controllers;
 
 use App\Http\Controllers\Concerns\AuthorizesCrud;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
 use Modules\{Module}\Entities\{Model};
 use Modules\{Module}\Http\Requests\Store{Model}Request;
 use Modules\{Module}\Http\Requests\Update{Model}Request;
@@ -18,7 +20,7 @@ class {Module}Controller extends Controller
         $this->authorizeCrud('{model}');
     }
 
-    public function index()
+    public function index(): View
     {
         $x['title'] = '{Model}';
         $x['data'] = {Model}::query()->get();
@@ -26,7 +28,7 @@ class {Module}Controller extends Controller
         return view('{module}::index', $x);
     }
 
-    public function store(Store{Model}Request $request)
+    public function store(Store{Model}Request $request): RedirectResponse
     {
         try {
             ${model} = {Model}::create($request->validated());
@@ -39,7 +41,7 @@ class {Module}Controller extends Controller
         return back();
     }
 
-    public function update(Update{Model}Request $request, {Model} ${model})
+    public function update(Update{Model}Request $request, {Model} ${model}): RedirectResponse
     {
         try {
             ${model}->update($request->validated());
@@ -52,7 +54,7 @@ class {Module}Controller extends Controller
         return back();
     }
 
-    public function destroy({Model} ${model})
+    public function destroy({Model} ${model}): RedirectResponse
     {
         try {
             $name = ${model}->name;

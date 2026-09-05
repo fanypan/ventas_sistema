@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Exports\ProductsExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Financials\Entities\Gasto;
 use Modules\Products\Entities\Product;
 use Modules\Purchases\Entities\Purchase;
 use Modules\Sales\Entities\Sale;
 use Modules\Sales\Entities\SaleDetail;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ReportController extends Controller
 {
@@ -19,7 +22,7 @@ class ReportController extends Controller
         $this->middleware('permission:read report');
     }
 
-    public function index()
+    public function index(): View
     {
         $lowStockCount = Product::active()->lowStock()->count();
         $productsCount = Product::active()->count();
@@ -27,7 +30,7 @@ class ReportController extends Controller
         return view('admin.reports.index', compact('lowStockCount', 'productsCount'));
     }
 
-    public function productsPdf()
+    public function productsPdf(): Response
     {
         $products = Product::with('category')->active()->get();
         $inversion = $products->sum(fn ($p) => $p->stock * $p->cost);
@@ -41,13 +44,12 @@ class ReportController extends Controller
         return $pdf->stream('reporte_productos.pdf');
     }
 
-    public function productsExcel()
+    public function productsExcel(): BinaryFileResponse
     {
         return Excel::download(new ProductsExport, 'reporte_productos.xlsx');
     }
 
-    /** Reporte: Stock mínimo / Productos con bajo inventario **/
-    public function lowStockPdf(Request $request)
+    public function lowStockPdf(Request $request): Response
     {
         $threshold = (int) $request->get('threshold', 5);
         $products = Product::with('category')
@@ -61,8 +63,7 @@ class ReportController extends Controller
         return $pdf->stream('reporte_stock_minimo.pdf');
     }
 
-    /** Reporte: Ventas por tipo de pago **/
-    public function salesByPaymentPdf(Request $request)
+    public function salesByPaymentPdf(Request $request): Response
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
         $endDate = $request->end_date ?? now()->toDateString();
@@ -83,8 +84,7 @@ class ReportController extends Controller
         return $pdf->stream('ventas_por_tipo_pago.pdf');
     }
 
-    /** Reporte: Ventas por producto **/
-    public function salesByProductPdf(Request $request)
+    public function salesByProductPdf(Request $request): Response
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
         $endDate = $request->end_date ?? now()->toDateString();
@@ -101,8 +101,7 @@ class ReportController extends Controller
         return $pdf->stream('ventas_por_producto.pdf');
     }
 
-    /** Reporte: Ventas por rango de fechas **/
-    public function salesPdf(Request $request)
+    public function salesPdf(Request $request): Response
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
         $endDate = $request->end_date ?? now()->toDateString();
@@ -116,8 +115,7 @@ class ReportController extends Controller
         return $pdf->stream('reporte_ventas.pdf');
     }
 
-    /** Reporte: Compras por rango de fechas **/
-    public function purchasesPdf(Request $request)
+    public function purchasesPdf(Request $request): Response
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
         $endDate = $request->end_date ?? now()->toDateString();
@@ -131,8 +129,7 @@ class ReportController extends Controller
         return $pdf->stream('reporte_compras.pdf');
     }
 
-    /** Arqueo de Caja **/
-    public function cashPdf(Request $request)
+    public function cashPdf(Request $request): Response
     {
         $date = $request->date ?? now()->toDateString();
 
@@ -147,8 +144,7 @@ class ReportController extends Controller
         return $pdf->stream('arqueo_caja.pdf');
     }
 
-    /** Estado de Resultados **/
-    public function financialStatusPdf(Request $request)
+    public function financialStatusPdf(Request $request): Response
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
         $endDate = $request->end_date ?? now()->toDateString();
@@ -167,7 +163,7 @@ class ReportController extends Controller
         return $pdf->stream('estado_resultados.pdf');
     }
 
-    public function expensesPdf(Request $request)
+    public function expensesPdf(Request $request): Response
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
         $endDate = $request->end_date ?? now()->toDateString();

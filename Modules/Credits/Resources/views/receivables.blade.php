@@ -885,8 +885,8 @@
                     $('.container-fluid').first().prepend(alertHtml);
 
                     // Abrir recibo
-                    if (response.abono_id) {
-                        var receiptUrl = receiptBase.replace('___', response.abono_id);
+                    if (response.data && response.data.abono_id) {
+                        var receiptUrl = receiptBase.replace('___', response.data.abono_id);
                         window.open(receiptUrl, '_blank');
                     }
 

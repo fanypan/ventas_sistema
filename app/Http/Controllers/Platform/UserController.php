@@ -11,26 +11,28 @@ use App\Http\Requests\Platform\StorePlatformUserRequest;
 use App\Http\Requests\Platform\UpdatePlatformUserRequest;
 use App\Models\PlatformUser;
 use App\Support\PlatformAccess;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use RealRashid\SweetAlert\Facades\Alert;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $users = PlatformUser::with('roles')->orderBy('name')->get();
 
         return view('platform.users.index', compact('users'));
     }
 
-    public function create()
+    public function create(): View
     {
         $roles = Role::where('guard_name', PlatformAccess::GUARD)->orderBy('name')->get();
 
         return view('platform.users.create', compact('roles'));
     }
 
-    public function store(StorePlatformUserRequest $request, CreatePlatformUser $createUser)
+    public function store(StorePlatformUserRequest $request, CreatePlatformUser $createUser): RedirectResponse
     {
         $createUser->execute($request->validated());
 
@@ -39,7 +41,7 @@ class UserController extends Controller
         return redirect()->route('platform.users.index');
     }
 
-    public function edit(PlatformUser $platformUser)
+    public function edit(PlatformUser $platformUser): View
     {
         $roles = Role::where('guard_name', PlatformAccess::GUARD)->orderBy('name')->get();
 
@@ -49,7 +51,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(UpdatePlatformUserRequest $request, PlatformUser $platformUser, UpdatePlatformUser $updateUser)
+    public function update(UpdatePlatformUserRequest $request, PlatformUser $platformUser, UpdatePlatformUser $updateUser): RedirectResponse
     {
         try {
             $updateUser->execute($platformUser, $request->validated(), $request->user('platform'));
@@ -64,7 +66,7 @@ class UserController extends Controller
         return redirect()->route('platform.users.index');
     }
 
-    public function destroy(PlatformUser $platformUser, DeletePlatformUser $deleteUser)
+    public function destroy(PlatformUser $platformUser, DeletePlatformUser $deleteUser): RedirectResponse
     {
         try {
             $deleteUser->execute($platformUser, request()->user('platform'));

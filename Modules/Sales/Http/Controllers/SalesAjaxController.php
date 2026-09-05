@@ -2,16 +2,23 @@
 
 namespace Modules\Sales\Http\Controllers;
 
+use App\Http\Responses\JsonEnvelope;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\JsonApi\AnonymousResourceCollection;
 use Illuminate\Routing\Controller;
 use Modules\Customers\Entities\Customer;
+use Modules\Customers\Http\Resources\CustomerResource;
 use Modules\Products\Entities\Product;
+use Modules\Products\Http\Resources\ProductResource;
 use Modules\Sales\Actions\ProcessSale;
 use Modules\Sales\Http\Requests\AddToCartRequest;
 use Modules\Sales\Http\Requests\ProcessSaleRequest;
 use Modules\Sales\Http\Requests\RemoveFromCartRequest;
 use Modules\Sales\Http\Requests\StorePosCustomerRequest;
 use Modules\Sales\Http\Requests\UpdateCartItemRequest;
+use Modules\Sales\Http\Resources\SaleResource;
+use Modules\Sales\Http\Resources\TemporaryDetailResource;
 use Modules\Sales\Services\CartService;
 
 class SalesAjaxController extends Controller
@@ -22,7 +29,7 @@ class SalesAjaxController extends Controller
         $this->middleware('permission:create customer')->only(['storeCustomer']);
     }
 
-    public function searchProduct(Request $request)
+    public function searchProduct(Request $request): ProductResource|JsonResponse
     {
         $term = $request->term;
         $product = Product::active()
@@ -32,41 +39,41 @@ class SalesAjaxController extends Controller
             })->first();
 
         if ($product) {
-            return response()->json($product);
+            return new ProductResource($product);
         }
 
-        return response()->json(['error' => 'Not found'], 404);
+        return JsonEnvelope::error('Not found', null, 404);
     }
 
-    public function getCart()
+    public function getCart(): AnonymousResourceCollection
     {
-        return response()->json($this->cart->get($this->cartToken()));
+        return $this->cartResource($this->cart->get($this->cartToken()));
     }
 
-    public function addToCart(AddToCartRequest $request)
+    public function addToCart(AddToCartRequest $request): AnonymousResourceCollection
     {
         $data = $request->validated();
 
-        return response()->json($this->cart->add(
+        return $this->cartResource($this->cart->add(
             $this->cartToken(),
             (int) $data['product_id'],
             (int) $data['quantity'],
         ));
     }
 
-    public function removeFromCart(RemoveFromCartRequest $request)
+    public function removeFromCart(RemoveFromCartRequest $request): AnonymousResourceCollection
     {
-        return response()->json($this->cart->remove($this->cartToken(), $request->validated('id')));
+        return $this->cartResource($this->cart->remove($this->cartToken(), $request->validated('id')));
     }
 
-    public function clearCart()
+    public function clearCart(): JsonResponse
     {
         $this->cart->clear($this->cartToken());
 
-        return response()->json(['success' => true]);
+        return JsonEnvelope::success('Carrito vaciado.');
     }
 
-    public function searchCustomer(Request $request)
+    public function searchCustomer(Request $request): CustomerResource|JsonResponse
     {
         $term = $request->term;
         $customer = Customer::active()
@@ -76,18 +83,18 @@ class SalesAjaxController extends Controller
             })->first();
 
         if ($customer) {
-            return response()->json($customer);
+            return new CustomerResource($customer);
         }
 
-        return response()->json(['error' => 'Not found'], 404);
+        return JsonEnvelope::error('Not found', null, 404);
     }
 
-    public function listCustomers()
+    public function listCustomers(): AnonymousResourceCollection
     {
-        return response()->json(Customer::active()->orderBy('name')->get());
+        return CustomerResource::collection(Customer::active()->orderBy('name')->get());
     }
 
-    public function storeCustomer(StorePosCustomerRequest $request)
+    public function storeCustomer(StorePosCustomerRequest $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -100,14 +107,16 @@ class SalesAjaxController extends Controller
             'status' => 1,
         ]);
 
-        return response()->json($customer);
+        return (new CustomerResource($customer))
+            ->response()
+            ->setStatusCode(201);
     }
 
-    public function updateCartItem(UpdateCartItemRequest $request)
+    public function updateCartItem(UpdateCartItemRequest $request): AnonymousResourceCollection
     {
         $data = $request->validated();
 
-        return response()->json($this->cart->update(
+        return $this->cartResource($this->cart->update(
             $this->cartToken(),
             $data['id'],
             (int) $data['quantity'],
@@ -116,17 +125,31 @@ class SalesAjaxController extends Controller
         ));
     }
 
-    public function processSale(ProcessSaleRequest $request, ProcessSale $processSale)
+    public function processSale(ProcessSaleRequest $request, ProcessSale $processSale): JsonResponse
     {
-        return response()->json($processSale->execute(
+        $result = $processSale->execute(
             $this->cartToken(),
             $request->validated(),
             (int) auth()->id(),
-        ));
+        );
+
+        return (new SaleResource($result['sale'], $result['change']))
+            ->response()
+            ->setStatusCode(201);
     }
 
     private function cartToken(): string
     {
         return md5((string) auth()->id());
+    }
+
+    private function cartResource(array $cart): AnonymousResourceCollection
+    {
+        return TemporaryDetailResource::collection($cart['details'])
+            ->additional([
+                'meta' => [
+                    'sub_total' => $cart['sub_total'],
+                ],
+            ]);
     }
 }

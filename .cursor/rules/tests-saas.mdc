@@ -14,5 +14,5 @@ alwaysApply: false
 - No asumir MySQL/Postgres en tests: phpunit usa sqlite `:memory:` + archivos `database/tenant*`. Dev y prod usan **pgsql**.
 - El tearDown de `CleansTenantArtifacts` borra `database/tenant*` y `storage/tenant{id}` del tenant del test (no un glob de todo `storage/tenant*`).
 - Si agregás migraciones tenant con SQL no portable (`after()` es ignorado; `enum()` puede fallar), preferí DDL portable o salteá esa aserción.
-- Action/Service de escritura: Feature HTTP que cubra el contrato (status, claves JSON, toasts). Reglas puras (`app/Support`) van a Unit.
+- Action/Service de escritura: Feature HTTP que cubra el contrato (status, claves JSON, toasts). API: JSON:API (`data.attributes`) o envelope `{status, message, data}`. Errores JSON del framework (401, 403, 404, 422 de FormRequest) también van envelope; en 422 `data` es el mapa de errores. Reglas puras (`app/Support`) van a Unit.
 - Al extraer un controller gordo: tests de caracterización **antes** de mover código. No cambiar payloads del POS.

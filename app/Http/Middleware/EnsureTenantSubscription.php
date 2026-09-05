@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Responses\JsonEnvelope;
 use App\Models\Tenant;
 use Closure;
 use Illuminate\Http\Request;
@@ -24,16 +25,16 @@ class EnsureTenantSubscription
         }
 
         if ($tenant->isBlocked()) {
-            if ($request->expectsJson()) {
-                return response()->json(['error' => 'La cuenta está en pausa. Contactá a AranduTech.'], 403);
+            if (JsonEnvelope::wantsJson($request)) {
+                return JsonEnvelope::error('La cuenta está en pausa. Contactá a AranduTech.', null, 403);
             }
 
             return response()->view('tenant.suspended', ['tenant' => $tenant], 403);
         }
 
         if ($tenant->isReadOnly() && $this->isMutating($request)) {
-            if ($request->expectsJson()) {
-                return response()->json(['error' => 'La cuenta está en solo lectura hasta regularizar el pago.'], 403);
+            if (JsonEnvelope::wantsJson($request)) {
+                return JsonEnvelope::error('La cuenta está en solo lectura hasta regularizar el pago.', null, 403);
             }
 
             return back()->with('error', 'Tu cuenta está en solo lectura. Regularizá el pago para volver a vender.');

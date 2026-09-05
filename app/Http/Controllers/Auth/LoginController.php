@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -24,7 +25,7 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-    protected function authenticated(Request $request, $user)
+    protected function authenticated(Request $request, $user): RedirectResponse
     {
         if ($user instanceof User && $user->must_change_password) {
             $this->guard()->logout();
@@ -42,7 +43,7 @@ class LoginController extends Controller
         return to_route('dashboard');
     }
 
-    protected function sendFailedLoginResponse(Request $request)
+    protected function sendFailedLoginResponse(Request $request): never
     {
         $user = User::where('email', $request->input($this->username()))->first();
 

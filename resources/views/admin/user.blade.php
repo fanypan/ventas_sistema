@@ -102,12 +102,12 @@
                         id: id,
                         _token: "{{ csrf_token() }}"
                     },
-                    success: function(data) {
-                        var data = data.data;
-                        $("#name").val(data.name);
-                        $("#email").val(data.email);
-                        $("#old_email").val(data.email);
-                        $("#role").val(data.role);
+                    success: function(response) {
+                        var data = response.data;
+                        $("#name").val(data.attributes.name);
+                        $("#email").val(data.attributes.email);
+                        $("#old_email").val(data.attributes.email);
+                        $("#role").val(data.attributes.role);
                         $("#id").val(data.id);
                         $('#modal-loading').modal('hide');
                         $('#modal-edit').modal({backdrop: 'static', keyboard: false, show: true});

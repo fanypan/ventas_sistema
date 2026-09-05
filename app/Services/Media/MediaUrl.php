@@ -28,6 +28,19 @@ class MediaUrl
         return $this->rewriteInternalHost($url);
     }
 
+    public function settingDataUri(?string $value): ?string
+    {
+        $binary = $this->readSettingBinary($value);
+        if ($binary === null) {
+            return null;
+        }
+
+        $info = @getimagesizefromstring($binary);
+        $mime = is_array($info) ? ($info['mime'] ?? 'image/png') : 'image/png';
+
+        return 'data:'.$mime.';base64,'.base64_encode($binary);
+    }
+
     public function settingUrl(?string $value): string
     {
         if (! $value) {
@@ -81,5 +94,48 @@ class MediaUrl
         } catch (\Throwable) {
             return false;
         }
+    }
+
+    private function readSettingBinary(?string $value): ?string
+    {
+        if (! is_string($value) || $value === '') {
+            return null;
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return null;
+        }
+
+        $legacy = ltrim($value, '/');
+        $public = $this->publicDisk();
+
+        try {
+            if (Storage::disk($public)->exists($legacy)) {
+                return Storage::disk($public)->get($legacy);
+            }
+        } catch (\Throwable) {
+        }
+
+        $candidates = [
+            public_path($legacy),
+            storage_path('app/public/'.$legacy),
+        ];
+
+        if (str_starts_with($legacy, 'storage/')) {
+            $candidates[] = storage_path('app/public/'.substr($legacy, strlen('storage/')));
+        }
+
+        foreach ($candidates as $path) {
+            if (! is_file($path)) {
+                continue;
+            }
+
+            $contents = file_get_contents($path);
+            if ($contents !== false) {
+                return $contents;
+            }
+        }
+
+        return null;
     }
 }

@@ -3,10 +3,13 @@
 namespace Modules\Products\Http\Controllers;
 
 use App\Http\Controllers\Concerns\AuthorizesCrud;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Modules\Products\Entities\Brand;
+use Modules\Products\Http\Requests\StoreBrandRequest;
+use Modules\Products\Http\Requests\UpdateBrandRequest;
 
 class BrandController extends Controller
 {
@@ -17,65 +20,59 @@ class BrandController extends Controller
         $this->authorizeCrud('brand', extraUpdate: ['changeStatus']);
     }
 
-    public function index()
+    public function index(): View
     {
         $brands = Brand::latest()->get();
 
         return view('products::brands.index', compact('brands'));
     }
 
-    public function create()
+    public function create(): View
     {
         return view('products::brands.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreBrandRequest $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|unique:brands,name',
-        ]);
+        $data = $request->validated();
 
         Brand::create([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
-            'country' => $request->country,
-            'description' => $request->description,
-            'status' => $request->status ?? 1,
+            'name' => $data['name'],
+            'slug' => Str::slug($data['name']),
+            'country' => $data['country'] ?? null,
+            'description' => $data['description'] ?? null,
+            'status' => $data['status'] ?? 1,
         ]);
 
         return redirect()->route('brands.index')->with('success', 'Marca creada correctamente.');
     }
 
-    public function edit($id)
+    public function edit($id): View
     {
         $brand = Brand::findOrFail($id);
 
         return view('products::brands.edit', compact('brand'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateBrandRequest $request, $id): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|unique:brands,name,'.$id,
-        ]);
-
+        $data = $request->validated();
         $brand = Brand::findOrFail($id);
         $brand->update([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
-            'country' => $request->country,
-            'description' => $request->description,
-            'status' => $request->status ?? 1,
+            'name' => $data['name'],
+            'slug' => Str::slug($data['name']),
+            'country' => $data['country'] ?? null,
+            'description' => $data['description'] ?? null,
+            'status' => $data['status'] ?? 1,
         ]);
 
         return redirect()->route('brands.index')->with('success', 'Marca actualizada correctamente.');
     }
 
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         $brand = Brand::findOrFail($id);
 
-        // Verificar si la marca tiene productos asociados
         if ($brand->products()->count() > 0) {
             return redirect()->route('brands.index')->with('error', 'No se puede eliminar la marca porque tiene productos asociados.');
         }
@@ -85,7 +82,7 @@ class BrandController extends Controller
         return redirect()->route('brands.index')->with('success', 'Marca eliminada correctamente.');
     }
 
-    public function changeStatus($id)
+    public function changeStatus($id): RedirectResponse
     {
         $brand = Brand::findOrFail($id);
         $brand->status = $brand->status == 1 ? 0 : 1;

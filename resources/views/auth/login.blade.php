@@ -4,7 +4,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>Ingresar — {{ Setting::getValue('app_name') ?? ENV('APP_NAME') }}</title>
-        <link rel="icon" href="{{ Setting::getValue('app_favicon') ? setting_file_url(Setting::getValue('app_favicon')) : asset('favicon.png') }}" type="image/png" />
+        @include('pwa.favicon')
+        @include('pwa.meta')
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -82,6 +83,12 @@
                         </div>
                         <button type="submit" class="auth-submit">Iniciar sesión</button>
                     </form>
+                    <p class="auth-lead d-none" data-pwa-install style="margin-top:1rem">
+                        <button type="button" class="btn btn-link p-0 font-weight-bold">Instalá el sistema en este dispositivo</button>
+                    </p>
+                    <p class="auth-lead d-none" data-pwa-ios-hint style="margin-top:1rem">
+                        En el iPhone: tocá <strong>Compartir</strong> y después <strong>Agregar a inicio</strong> para usarlo como app.
+                    </p>
                 </div>
             </main>
         </div>
@@ -89,5 +96,6 @@
         <script src="{{ asset('template/admin/plugins/jquery/jquery.min.js') }}"></script>
         <script src="{{ asset('template/admin/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
         @include('auth.partials.password-toggle-script')
+        <script src="{{ asset('js/pwa.js') }}"></script>
     </body>
 </html>

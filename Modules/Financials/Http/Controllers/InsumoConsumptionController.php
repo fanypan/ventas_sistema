@@ -2,11 +2,14 @@
 
 namespace Modules\Financials\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Modules\Financials\Entities\ConsumoInsumo;
 use Modules\Financials\Entities\Insumo;
+use Modules\Financials\Http\Requests\StoreInsumoConsumptionRequest;
 
 class InsumoConsumptionController extends Controller
 {
@@ -15,7 +18,7 @@ class InsumoConsumptionController extends Controller
         $this->middleware('permission:consume insumo');
     }
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $from = $request->input('from', now()->subDays(30)->toDateString());
         $to = $request->input('to', now()->toDateString());
@@ -30,30 +33,25 @@ class InsumoConsumptionController extends Controller
         return view('financials::insumos.consume', compact('consumptions', 'insumos', 'from', 'to'));
     }
 
-    public function store(Request $request)
+    public function store(StoreInsumoConsumptionRequest $request): RedirectResponse
     {
-        $request->validate([
-            'insumo_id' => 'required|exists:insumos,id',
-            'quantity' => 'required|numeric|min:0.01',
-            'notes' => 'nullable|string|max:255',
-        ]);
+        $data = $request->validated();
+        $insumo = Insumo::findOrFail($data['insumo_id']);
 
-        $insumo = Insumo::findOrFail($request->insumo_id);
-
-        if ($request->quantity > $insumo->stock) {
+        if ($data['quantity'] > $insumo->stock) {
             return back()
                 ->withInput()
                 ->with('error', 'Stock insuficiente. Disponible: '.$insumo->stock);
         }
 
-        DB::transaction(function () use ($request, $insumo) {
+        DB::transaction(function () use ($data, $insumo) {
             ConsumoInsumo::create([
                 'insumo_id' => $insumo->id,
-                'quantity' => $request->quantity,
+                'quantity' => $data['quantity'],
                 'user_id' => auth()->id(),
-                'notes' => $request->notes,
+                'notes' => $data['notes'] ?? null,
             ]);
-            $insumo->decrement('stock', $request->quantity);
+            $insumo->decrement('stock', $data['quantity']);
         });
 
         return redirect()
@@ -61,7 +59,7 @@ class InsumoConsumptionController extends Controller
             ->with('success', 'Consumo registrado. Stock actualizado.');
     }
 
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         $consumo = ConsumoInsumo::with('insumo')->findOrFail($id);
 

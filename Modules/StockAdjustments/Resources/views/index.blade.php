@@ -199,20 +199,20 @@ $(document).ready(function() {
         }, function(res) {
             $('#adj_alert').removeClass('alert-danger').addClass('alert-success')
                 .html('<i class="fas fa-check mr-1"></i> ' + res.message).show();
-            $('#modal_current_stock').text(res.new_stock);
+            $('#modal_current_stock').text(res.data.new_stock);
 
             // Update card badge
             let productId = $('#modal_product_id').val();
             $(`[onclick*="${productId}"]`).closest('.product-item')
                 .find('.stock-badge-ok, .stock-badge-low')
-                .text(res.new_stock + ' en stock');
+                .text(res.data.new_stock + ' en stock');
 
             setTimeout(() => {
                 $('#adjustModal').modal('hide');
                 location.reload();
             }, 1500);
         }).fail(function(res) {
-            let msg = res.responseJSON ? res.responseJSON.error : 'Error al aplicar ajuste';
+            let msg = res.responseJSON ? res.responseJSON.message : 'Error al aplicar ajuste';
             $('#adj_alert').removeClass('alert-success').addClass('alert-danger')
                 .html('<i class="fas fa-times mr-1"></i> ' + msg).show();
             $('#btn_apply_adjustment').html('<i class="fas fa-check-circle mr-2"></i>APLICAR AJUSTE').prop('disabled', false);

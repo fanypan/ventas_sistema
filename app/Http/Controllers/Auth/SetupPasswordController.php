@@ -8,13 +8,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdminPasswordRequest;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class SetupPasswordController extends Controller
 {
-    public function show(Request $request)
+    public function show(Request $request): View|RedirectResponse|Response
     {
         $user = $this->adminUser();
 
@@ -41,7 +44,7 @@ class SetupPasswordController extends Controller
         ]);
     }
 
-    public function store(StoreAdminPasswordRequest $request, SetAdminPassword $setAdminPassword)
+    public function store(StoreAdminPasswordRequest $request, SetAdminPassword $setAdminPassword): RedirectResponse
     {
         $user = $this->adminUser();
 

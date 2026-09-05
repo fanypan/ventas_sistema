@@ -142,12 +142,19 @@ class TenantLogoService
 
     private function persistSetting(string $path, string $ext): void
     {
-        Setting::updateOrCreate(['key' => 'app_logo'], [
+        $file = [
             'value' => $path,
-            'name' => 'Application Logo',
             'type' => 'file',
             'ext' => $ext,
             'category' => 'information',
+        ];
+
+        Setting::updateOrCreate(['key' => 'app_logo'], $file + [
+            'name' => 'Application Logo',
+        ]);
+
+        Setting::updateOrCreate(['key' => 'app_favicon'], $file + [
+            'name' => 'Application Favicon',
         ]);
     }
 

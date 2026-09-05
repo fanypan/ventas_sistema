@@ -11,7 +11,9 @@ class FileManagerSecurityTest extends TenantTestCase
     public function test_guest_cannot_initialize_file_manager_on_tenant_host(): void
     {
         $this->getJson('http://demo.localhost/file-manager/initialize')
-            ->assertUnauthorized();
+            ->assertUnauthorized()
+            ->assertJson(['message' => 'Unauthenticated.'])
+            ->assertJsonMissingPath('status');
     }
 
     public function test_guest_cannot_list_file_manager_content_on_tenant_host(): void

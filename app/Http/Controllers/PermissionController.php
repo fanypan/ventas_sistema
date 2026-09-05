@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePermissionRequest;
 use App\Http\Requests\UpdatePermissionRequest;
+use App\Http\Resources\PermissionResource;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Nwidart\Modules\Facades\Module;
 use RealRashid\SweetAlert\Facades\Alert;
 use Spatie\Permission\Models\Permission;
-use Symfony\Component\HttpFoundation\Response;
 
 class PermissionController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $x['title'] = 'Permission';
         $x['data'] = Permission::get();
@@ -20,7 +22,7 @@ class PermissionController extends Controller
         return view('admin.permission', $x);
     }
 
-    public function store(StorePermissionRequest $request)
+    public function store(StorePermissionRequest $request): RedirectResponse
     {
         try {
             $permission = Permission::create($request->validated());
@@ -33,18 +35,14 @@ class PermissionController extends Controller
         return back();
     }
 
-    public function show(Request $request)
+    public function show(Request $request): PermissionResource
     {
-        $permission = Permission::find($request->id);
+        $permission = Permission::findOrFail($request->id);
 
-        return response()->json([
-            'status' => Response::HTTP_OK,
-            'message' => 'Data permission by id',
-            'data' => $permission,
-        ], Response::HTTP_OK);
+        return new PermissionResource($permission);
     }
 
-    public function update(UpdatePermissionRequest $request)
+    public function update(UpdatePermissionRequest $request): RedirectResponse
     {
         try {
             $permission = Permission::find($request->validated('id'));
@@ -58,7 +56,7 @@ class PermissionController extends Controller
         return back();
     }
 
-    public function destroy(Request $request)
+    public function destroy(Request $request): RedirectResponse
     {
         try {
             $permission = Permission::find($request->id);
@@ -73,7 +71,7 @@ class PermissionController extends Controller
         return back();
     }
 
-    public function reloadPermission()
+    public function reloadPermission(): RedirectResponse
     {
         try {
             $this->initModules();

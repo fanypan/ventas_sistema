@@ -8,19 +8,22 @@ use App\Models\ManualPayment;
 use App\Models\Tenant;
 use App\Services\Billing\SubscriptionService;
 use App\Services\Media\MediaUrl;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 use RealRashid\SweetAlert\Facades\Alert;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PaymentController extends Controller
 {
-    public function create(Tenant $tenant)
+    public function create(Tenant $tenant): View
     {
         $tenant->load('plan', 'subscription');
 
         return view('platform.payments.create', compact('tenant'));
     }
 
-    public function store(StoreManualPaymentRequest $request, Tenant $tenant, SubscriptionService $subscriptions)
+    public function store(StoreManualPaymentRequest $request, Tenant $tenant, SubscriptionService $subscriptions): RedirectResponse
     {
         $data = $request->validated();
 
@@ -47,7 +50,7 @@ class PaymentController extends Controller
         return redirect()->route('platform.tenants.show', $tenant);
     }
 
-    public function attachment(Tenant $tenant, ManualPayment $payment, MediaUrl $urls)
+    public function attachment(Tenant $tenant, ManualPayment $payment, MediaUrl $urls): RedirectResponse|StreamedResponse
     {
         abort_unless((string) $payment->tenant_id === (string) $tenant->id, 404);
         abort_unless($payment->attachment_path, 404);

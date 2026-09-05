@@ -32,8 +32,10 @@ class StockAdjustmentTest extends TenantTestCase
             ])
             ->assertOk()
             ->assertJson([
-                'success' => true,
-                'new_stock' => 7,
+                'status' => 'success',
+                'data' => [
+                    'new_stock' => 7,
+                ],
             ]);
 
         $this->tenant->run(function () use ($productId) {
@@ -55,7 +57,7 @@ class StockAdjustmentTest extends TenantTestCase
                 'reason' => 'Merma / Daño',
             ])
             ->assertOk()
-            ->assertJsonPath('new_stock', 6);
+            ->assertJsonPath('data.new_stock', 6);
 
         $this->tenant->run(function () use ($productId) {
             $this->assertSame(6, (int) Product::find($productId)->stock);
@@ -73,7 +75,11 @@ class StockAdjustmentTest extends TenantTestCase
                 'quantity' => 5,
             ])
             ->assertStatus(422)
-            ->assertJson(['error' => 'Stock insuficiente. Stock actual: 2']);
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'Stock insuficiente. Stock actual: 2',
+                'data' => null,
+            ]);
 
         $this->tenant->run(function () use ($productId) {
             $this->assertSame(2, (int) Product::find($productId)->stock);

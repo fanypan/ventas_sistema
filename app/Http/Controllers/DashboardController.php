@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Modules\Customers\Entities\Customer;
 use Modules\Products\Entities\Product;
 use Modules\Purchases\Entities\Purchase;
@@ -14,7 +15,7 @@ use Spatie\Permission\Models\Role;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $x['title'] = 'Dashboard';
         $x['user'] = User::get();

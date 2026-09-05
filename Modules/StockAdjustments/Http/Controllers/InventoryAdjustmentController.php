@@ -2,8 +2,11 @@
 
 namespace Modules\StockAdjustments\Http\Controllers;
 
+use App\Http\Responses\JsonEnvelope;
 use App\Models\InventoryAdjustment;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
 use Modules\Products\Entities\Category;
 use Modules\Products\Entities\Product;
 use Modules\StockAdjustments\Actions\AdjustInventory;
@@ -17,7 +20,7 @@ class InventoryAdjustmentController extends Controller
         $this->middleware('permission:create stock')->only(['store']);
     }
 
-    public function index()
+    public function index(): View
     {
         $products = Product::with('brand')->active()->get();
         $categories = Category::all();
@@ -28,8 +31,12 @@ class InventoryAdjustmentController extends Controller
         return view('stockadjustments::index', compact('products', 'categories', 'history'));
     }
 
-    public function store(StoreInventoryAdjustmentRequest $request, AdjustInventory $adjust)
+    public function store(StoreInventoryAdjustmentRequest $request, AdjustInventory $adjust): JsonResponse
     {
-        return response()->json($adjust->execute($request->validated(), (int) auth()->id()));
+        $result = $adjust->execute($request->validated(), (int) auth()->id());
+
+        return JsonEnvelope::success($result['message'], [
+            'new_stock' => $result['new_stock'],
+        ]);
     }
 }

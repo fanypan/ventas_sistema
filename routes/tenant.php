@@ -7,6 +7,7 @@ use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\PwaController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
@@ -15,6 +16,21 @@ use App\Http\Controllers\UserController;
 use App\Support\TenantMiddleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+
+Route::middleware([
+    InitializeTenancyByDomain::class,
+    PreventAccessFromCentralDomains::class,
+])->group(function () {
+    Route::get('/favicon.ico', [PwaController::class, 'favicon'])->name('pwa.favicon');
+    Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
+    Route::get('/sw.js', [PwaController::class, 'serviceWorker'])->name('pwa.service-worker');
+    Route::get('/pwa/icon-{size}.png', [PwaController::class, 'icon'])
+        ->whereIn('size', [32, 192, 512])
+        ->name('pwa.icon');
+    Route::get('/offline', [PwaController::class, 'offline'])->name('pwa.offline');
+});
 
 Route::middleware(TenantMiddleware::web())->group(function () {
     Auth::routes([

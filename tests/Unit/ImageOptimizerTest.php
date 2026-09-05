@@ -38,4 +38,28 @@ class ImageOptimizerTest extends TestCase
         $this->assertIsArray($info);
         $this->assertLessThanOrEqual(800, max($info[0], $info[1]));
     }
+
+    public function test_it_builds_a_square_png_icon(): void
+    {
+        $file = UploadedFile::fake()->image('logo.png', 80, 40);
+        $binary = file_get_contents($file->getRealPath());
+
+        $png = app(ImageOptimizer::class)->squarePng($binary, 192);
+
+        $info = getimagesizefromstring($png);
+        $this->assertIsArray($info);
+        $this->assertSame(192, $info[0]);
+        $this->assertSame(192, $info[1]);
+        $this->assertSame('image/png', $info['mime']);
+    }
+
+    public function test_it_builds_a_square_png_without_source(): void
+    {
+        $png = app(ImageOptimizer::class)->squarePng(null, 512);
+
+        $info = getimagesizefromstring($png);
+        $this->assertIsArray($info);
+        $this->assertSame(512, $info[0]);
+        $this->assertSame(512, $info[1]);
+    }
 }

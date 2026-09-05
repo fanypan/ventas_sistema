@@ -161,18 +161,20 @@ Todo se prende o apaga por `.env`. Vacío / `false` = off.
 | `SENTRY_TRACES_SAMPLE_RATE` | `0` | Traces APM (0.1 en prod si querés sampling). |
 | `HORIZON_ENABLED` | `false` | El contenedor `queue` corre Horizon en vez de `queue:work`. UI en `/{PLATFORM_PATH}/horizon` (solo staff). |
 | `TELESCOPE_ENABLED` | `false` | Debug local. Solo con `APP_ENV=local` y paquete require-dev. UI en `/{PLATFORM_PATH}/telescope`. |
-| `HEALTH_ENABLED` | `true` | `GET /up` (DB central + Redis + disco + MinIO). No recorre tenants. |
+| `HEALTH_ENABLED` | `true` | `GET /up` envelope `{status, message, data.checks}` (DB central + Redis + disco + MinIO). No recorre tenants. |
 | `HEALTH_CHECK_MINIO` | `true` | HEAD al disco público S3. Skip si el disco no es S3. |
 
 Sentry taguea `surface` (tenant/central) y `tenant` / `tenant_slug`. No manda PII (`send_default_pii=false`) y filtra passwords, tokens, API keys de FE.
 
 CI (GitHub Actions): Pint y PHPStan sobre `app/`, `Modules/`, `database/`, `routes/` y `tests/` (sin `_archive` ni migraciones). `php artisan test`, `composer audit` (informativo).
 
-Logs de Docker y uptime en local:
+Logs de Docker y uptime en local (no arrancan con un `up` normal):
 
 ```bash
 docker compose --profile obs up -d
 ```
+
+Bandeja de mails de prueba: `docker compose --profile mail up -d` y `MAIL_MAILER=smtp` (UI en http://localhost:8025).
 
 - Dozzle: http://localhost:9999 (socket de Docker; solo local)
 - Uptime Kuma: http://localhost:3001 — monitorá `http://app:8000/up`

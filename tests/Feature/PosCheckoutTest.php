@@ -30,7 +30,34 @@ class PosCheckoutTest extends TenantTestCase
                 'quantity' => 1,
             ])
             ->assertNotFound()
-            ->assertJson(['error' => 'Product not found']);
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'Product not found',
+                'data' => null,
+            ]);
+    }
+
+    public function test_guest_cannot_add_to_cart(): void
+    {
+        $this->tenantPost('/admin/sales/ajax/add-to-cart', [
+            'product_id' => 1,
+            'quantity' => 1,
+        ])
+            ->assertUnauthorized()
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'Tenés que iniciar sesión.',
+                'data' => null,
+            ]);
+    }
+
+    public function test_add_to_cart_rejects_invalid_payload(): void
+    {
+        $this->actingAs($this->tenantUser)
+            ->tenantPost('/admin/sales/ajax/add-to-cart', [])
+            ->assertStatus(422)
+            ->assertJsonPath('status', 'error')
+            ->assertJsonStructure(['status', 'message', 'data' => ['product_id', 'quantity']]);
     }
 
     public function test_add_to_cart_rejects_insufficient_stock(): void
@@ -43,7 +70,11 @@ class PosCheckoutTest extends TenantTestCase
                 'quantity' => 5,
             ])
             ->assertStatus(422)
-            ->assertJson(['error' => 'Stock insuficiente. Disponible: 2']);
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'Stock insuficiente. Disponible: 2',
+                'data' => null,
+            ]);
     }
 
     public function test_add_to_cart_reserves_stock_and_returns_cart(): void
@@ -56,8 +87,8 @@ class PosCheckoutTest extends TenantTestCase
                 'quantity' => 3,
             ])
             ->assertOk()
-            ->assertJsonPath('sub_total', 4500)
-            ->assertJsonCount(1, 'details');
+            ->assertJsonPath('meta.sub_total', 4500)
+            ->assertJsonCount(1, 'data');
 
         $this->tenant->run(function () use ($productId) {
             $this->assertSame(7, (int) Product::find($productId)->stock);
@@ -73,7 +104,11 @@ class PosCheckoutTest extends TenantTestCase
                 'payment_with' => 10000,
             ])
             ->assertStatus(422)
-            ->assertJson(['error' => 'El carrito está vacío']);
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'El carrito está vacío',
+                'data' => null,
+            ]);
     }
 
     public function test_process_sale_rejects_when_caja_is_closed(): void
@@ -93,7 +128,11 @@ class PosCheckoutTest extends TenantTestCase
                 'payment_with' => 10000,
             ])
             ->assertStatus(422)
-            ->assertJson(['error' => 'Abrí tu caja para vender. Finanzas → Cajas.']);
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'Abrí tu caja para vender. Finanzas → Cajas.',
+                'data' => null,
+            ]);
     }
 
     public function test_process_sale_rejects_cash_shortfall(): void
@@ -114,7 +153,11 @@ class PosCheckoutTest extends TenantTestCase
                 'payment_with' => 5000,
             ])
             ->assertStatus(422)
-            ->assertJson(['error' => 'El monto pagado no cubre el total']);
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'El monto pagado no cubre el total',
+                'data' => null,
+            ]);
     }
 
     public function test_process_sale_cash_creates_sale_and_clears_cart(): void
@@ -135,12 +178,9 @@ class PosCheckoutTest extends TenantTestCase
                 'payment_with' => 15000,
                 'discount' => 0,
             ])
-            ->assertOk()
-            ->assertJson([
-                'success' => true,
-                'change' => 5000,
-            ])
-            ->assertJsonStructure(['sale_id']);
+            ->assertCreated()
+            ->assertJsonPath('data.type', 'sales')
+            ->assertJsonPath('data.meta.change', 5000);
 
         $this->tenant->run(function () use ($productId) {
             $sale = Sale::first();
@@ -173,11 +213,9 @@ class PosCheckoutTest extends TenantTestCase
                 'frequency' => 'mensual',
                 'discount' => 0,
             ])
-            ->assertOk()
-            ->assertJson([
-                'success' => true,
-                'change' => 0,
-            ]);
+            ->assertCreated()
+            ->assertJsonPath('data.type', 'sales')
+            ->assertJsonPath('data.meta.change', 0);
 
         $this->tenant->run(function () {
             $sale = Sale::first();

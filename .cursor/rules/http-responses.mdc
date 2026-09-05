@@ -1,0 +1,83 @@
+---
+description: Respuestas HTTP Laravel 13 — JsonApiResource, envelope JSON y Blade
+globs: app/Http/**/*.php,Modules/**/Http/**/*.php
+alwaysApply: false
+---
+
+# Respuestas HTTP (Laravel 13)
+
+Código **nuevo** o que se migre sigue este estándar.
+
+## 1. Modelos / recursos (API)
+
+Prohibido `response()->json()` con arrays armados a mano para un Eloquent o una colección.
+
+Usá `Illuminate\Http\Resources\JsonApi\JsonApiResource` (JSON:API nativo). Generar:
+
+```bash
+php artisan make:resource PostResource --json-api
+```
+
+Ubicación: `app/Http/Resources/` (plataforma: `.../Platform/`), módulos: `Modules/{Name}/Http/Resources/`.
+
+Siempre declarar `$attributes` y `$relationships` (oficialmente `public`; tipados `array`):
+
+```php
+use Illuminate\Http\Resources\JsonApi\JsonApiResource;
+
+class PostResource extends JsonApiResource
+{
+    public array $attributes = ['title', 'body', 'created_at'];
+
+    public array $relationships = [
+        'author' => UserResource::class,
+        'comments',
+    ];
+}
+```
+
+El controller **retorna el recurso** (no lo envuelve en `json()`):
+
+```php
+public function show(Post $post): PostResource
+{
+    return new PostResource($post);
+}
+
+public function index(): AnonymousResourceCollection
+{
+    return PostResource::collection(Post::query()->paginate());
+}
+```
+
+Para 201: `(new PostResource($post))->response()->setStatusCode(201)`.
+
+## 2. Respuestas genéricas (mensaje / error de lógica)
+
+Si no mapea un modelo (delete OK, regla de negocio, 4xx, health `/up`): usá `App\Http\Responses\JsonEnvelope`.
+
+```php
+return JsonEnvelope::success('Texto descriptivo'); // data null, 200
+return JsonEnvelope::error('No encontrado', null, 404);
+return JsonEnvelope::success('Pago registrado', ['abono_id' => $id]);
+```
+
+Código HTTP correcto: `200`, `201`, `400`, `401`, `403`, `404`, `422`, `503`, etc.
+
+El exception handler (`bootstrap/app.php`) convierte a envelope los JSON de Laravel: 401, `abort()`, 404 de tenant, 419, 429, 500 y `ValidationException`. En 422, `data` es el mapa de errores por campo. HTML sigue igual: redirect con errors o páginas `errors/*`.
+
+`BusinessRuleException` en web: `back()` + flash. En JSON: envelope (`payload()`).
+
+## 3. Web (Blade)
+
+`view(...)` o `redirect()->route(...)->with(...)`. Return type `: View` o `: RedirectResponse`.
+
+## 4. Calidad
+
+- Return type explícito en **cada** método del controller (`PostResource`, `AnonymousResourceCollection`, `JsonResponse`, `View`, `RedirectResponse`).
+- Validación en `FormRequest`, nunca `$request->validate` / `Validator::make` en el controller.
+
+## Excepciones de spec (no envelope / no JSON:API)
+
+- Manifest PWA, service worker y PNG de iconos (`PwaController`)
+- JSON del file-manager (paquete alexusmai)

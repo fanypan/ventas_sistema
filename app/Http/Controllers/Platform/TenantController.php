@@ -16,19 +16,22 @@ use App\Models\Plan;
 use App\Models\Tenant;
 use App\Services\Billing\SubscriptionService;
 use App\Services\Media\TenantLogoService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 use RealRashid\SweetAlert\Facades\Alert;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TenantController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $tenants = Tenant::with(['plan', 'domains', 'subscription'])->latest()->paginate(20);
 
         return view('platform.tenants.index', compact('tenants'));
     }
 
-    public function create()
+    public function create(): View
     {
         $plans = Plan::active()->orderBy('sort_order')->get();
         $catalogSources = Tenant::catalogSources();
@@ -36,7 +39,7 @@ class TenantController extends Controller
         return view('platform.tenants.create', compact('plans', 'catalogSources'));
     }
 
-    public function store(StoreTenantRequest $request, CreateTenant $createTenant)
+    public function store(StoreTenantRequest $request, CreateTenant $createTenant): RedirectResponse
     {
         try {
             $tenant = $createTenant->execute($request->validated());
@@ -59,7 +62,7 @@ class TenantController extends Controller
         return redirect()->route('platform.tenants.show', $tenant);
     }
 
-    public function show(Tenant $tenant, TenantLogoService $logos)
+    public function show(Tenant $tenant, TenantLogoService $logos): View
     {
         $tenant->load(['plan', 'domains', 'subscription.plan', 'payments.staff', 'subscriptions.events']);
         $catalogSources = Tenant::catalogSources($tenant);
@@ -69,7 +72,7 @@ class TenantController extends Controller
         return view('platform.tenants.show', compact('tenant', 'catalogSources', 'hasCustomLogo'));
     }
 
-    public function updateLogo(UpdateTenantLogoRequest $request, Tenant $tenant, TenantLogoService $logos)
+    public function updateLogo(UpdateTenantLogoRequest $request, Tenant $tenant, TenantLogoService $logos): RedirectResponse
     {
         try {
             $logos->put($tenant, $request->file('logo'));
@@ -84,7 +87,7 @@ class TenantController extends Controller
         return back();
     }
 
-    public function destroyLogo(Tenant $tenant, TenantLogoService $logos)
+    public function destroyLogo(Tenant $tenant, TenantLogoService $logos): RedirectResponse
     {
         try {
             $logos->reset($tenant);
@@ -99,7 +102,7 @@ class TenantController extends Controller
         return back();
     }
 
-    public function logo(Tenant $tenant, TenantLogoService $logos)
+    public function logo(Tenant $tenant, TenantLogoService $logos): StreamedResponse
     {
         abort_unless($tenant->provisioned_at, 404);
 
@@ -114,7 +117,7 @@ class TenantController extends Controller
         });
     }
 
-    public function cloneCatalog(CloneCatalogRequest $request, Tenant $tenant, CloneCatalog $cloneCatalog)
+    public function cloneCatalog(CloneCatalogRequest $request, Tenant $tenant, CloneCatalog $cloneCatalog): RedirectResponse
     {
         try {
             $source = Tenant::findOrFail($request->validated('source_id'));
@@ -130,7 +133,7 @@ class TenantController extends Controller
         return back();
     }
 
-    public function invite(Tenant $tenant, SendAdminInvite $sendAdminInvite)
+    public function invite(Tenant $tenant, SendAdminInvite $sendAdminInvite): RedirectResponse
     {
         try {
             $sendAdminInvite->execute($tenant);
@@ -145,7 +148,7 @@ class TenantController extends Controller
         return back();
     }
 
-    public function suspend(Tenant $tenant, SubscriptionService $subscriptions)
+    public function suspend(Tenant $tenant, SubscriptionService $subscriptions): RedirectResponse
     {
         $subscriptions->suspend($tenant);
         Alert::warning('Suspendido', $tenant->name)->toToast();
@@ -153,7 +156,7 @@ class TenantController extends Controller
         return back();
     }
 
-    public function reactivate(Tenant $tenant, SubscriptionService $subscriptions)
+    public function reactivate(Tenant $tenant, SubscriptionService $subscriptions): RedirectResponse
     {
         $subscriptions->reactivate($tenant);
         Alert::success('Reactivado', $tenant->name)->toToast();
@@ -161,7 +164,7 @@ class TenantController extends Controller
         return back();
     }
 
-    public function cancel(Tenant $tenant, SubscriptionService $subscriptions)
+    public function cancel(Tenant $tenant, SubscriptionService $subscriptions): RedirectResponse
     {
         $subscriptions->cancel($tenant);
         Alert::info('Dado de baja', $tenant->name)->toToast();
@@ -169,7 +172,7 @@ class TenantController extends Controller
         return back();
     }
 
-    public function destroy(DestroyTenantRequest $request, Tenant $tenant, DeleteTenant $deleteTenant)
+    public function destroy(DestroyTenantRequest $request, Tenant $tenant, DeleteTenant $deleteTenant): RedirectResponse
     {
         try {
             $deleteTenant->execute($tenant);
