@@ -26,11 +26,13 @@ En Windows (PowerShell o Git Bash) el `cd` es el mismo. Si clonás con Git GUI, 
 
 Docker monta el repo en `/var/www/html` **adentro** del contenedor. En el host no hace falta `/var/www`.
 
-| Uso | Dónde |
-|---|---|
-| Desarrollo Linux | Cualquier carpeta nativa: `~/proyectos/ventas_sistema`, `~/Escritorio/Proyectos/…` |
-| Desarrollo Windows | **Adentro de WSL** (`\\wsl$\Ubuntu\home\…`), no en `C:\Users\…` ni `/mnt/c/…` |
-| Producción | `/opt/ventas_sistema` o `/srv/ventas_sistema`, dueño un usuario de deploy en el grupo `docker` |
+
+| Uso                | Dónde                                                                                          |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| Desarrollo Linux   | Cualquier carpeta nativa: `~/proyectos/ventas_sistema`, `~/Escritorio/Proyectos/…`             |
+| Desarrollo Windows | **Adentro de WSL** (`\\wsl$\Ubuntu\home\…`), no en `C:\Users\…` ni `/mnt/c/…`                  |
+| Producción         | `/opt/ventas_sistema` o `/srv/ventas_sistema`, dueño un usuario de deploy en el grupo `docker` |
+
 
 Evitá USB FAT/exFAT, discos de red y (en WSL) el filesystem de Windows: Composer y Postgres se vuelven lentos y `storage` queda con permisos raros. En Linux una ruta con `Escritorio` está bien.
 
@@ -83,7 +85,7 @@ WWWGROUP=1000
 
 (`id -u` e `id -g` si no sos uid 1000.)
 
-2. Levantá el stack:
+1. Levantá el stack:
 
 ```bash
 docker compose up -d --build
@@ -91,8 +93,8 @@ docker compose up -d --build
 
 Eso es el POS (app, cola, Postgres, Redis, MinIO). Mailpit y observabilidad no arrancan. Ver [qué servicios levantar](#qué-servicios-levantar).
 
-3. La app queda en **http://localhost:8090**  
-   MinIO (fotos y archivos): consola **http://localhost:9001** (`minioadmin` / `minioadmin`)  
+1. La app queda en **[http://localhost:8090](http://localhost:8090)**
+  MinIO (fotos y archivos): consola **[http://localhost:9001](http://localhost:9001)** (`minioadmin` / `minioadmin`)  
    Postgres desde el host: `127.0.0.1:5433` (usuario/clave `ventas` / `ventas`, base `ventas_central`).
 
 La primera vez el entrypoint corre `composer install`, migraciones y seed. El servicio `minio-init` crea los buckets; esperá a que termine (`docker compose ps`).
@@ -116,13 +118,15 @@ docker compose --profile obs up -d
 
 Se pueden combinar: `docker compose --profile mail --profile obs up -d`.
 
-| Servicio | Default `up` | Perfil | Para qué |
-|---|---|---|---|
-| `app` + `queue` | sí | — | POS, landing, staff, alta de cliente |
-| `postgres` + `redis` | sí | — | bases y colas |
-| `minio` + `minio-init` | sí | — | fotos y archivos |
-| `mailhog` (Mailpit) | no | `mail` | mails de prueba |
-| `dozzle` + `kuma` | no | `obs` | logs y uptime de desarrollo |
+
+| Servicio               | Default `up` | Perfil | Para qué                             |
+| ---------------------- | ------------ | ------ | ------------------------------------ |
+| `app` + `queue`        | sí           | —      | POS, landing, staff, alta de cliente |
+| `postgres` + `redis`   | sí           | —      | bases y colas                        |
+| `minio` + `minio-init` | sí           | —      | fotos y archivos                     |
+| `mailhog` (Mailpit)    | no           | `mail` | mails de prueba                      |
+| `dozzle` + `kuma`      | no           | `obs`  | logs y uptime de desarrollo          |
+
 
 Sin Mailpit, `MAIL_MAILER=log` (así viene `.env.example`): el enlace del alta queda en el log. Para verlo en bandeja: `MAIL_MAILER=smtp` y `--profile mail`.
 
@@ -145,7 +149,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-3. Abrí **http://localhost:8090** (MinIO: **http://localhost:9001**).
+1. Abrí **[http://localhost:8090](http://localhost:8090)** (MinIO: **[http://localhost:9001](http://localhost:9001)**).
 
 Dejá `DB_HOST=postgres` y `QUEUE_CONNECTION=redis` en `.env` (`postgres` es el nombre del servicio, no `127.0.0.1`).  
 `WWWUSER` / `WWWGROUP` en `1000` está bien con Docker Desktop + WSL 2.
@@ -210,7 +214,7 @@ En otra terminal, el worker de cola:
 php artisan queue:work redis --sleep=1 --tries=3
 ```
 
-App: **http://127.0.0.1:8000**
+App: **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
 ---
 
@@ -246,11 +250,13 @@ C:\laragon\bin\php\php-8.3.0-Win32-vs16-x64\php.exe artisan serve
 
 ### Cómo entrar (después del seed)
 
-| Superficie | URL (Docker local) | Usuario | Contraseña |
-|---|---|---|---|
-| Landing | http://localhost:8090 | — | — |
-| **Staff** (plataforma) | http://localhost:8090/plataforma/login | `plataforma@arandutech.com` | `plataforma` |
-| POS de un comercio | http://{slug}.localhost:8090 | el mail del alta | se muestra una vez y va por mail |
+
+| Superficie             | URL (Docker local)                                                               | Usuario                     | Contraseña                       |
+| ---------------------- | -------------------------------------------------------------------------------- | --------------------------- | -------------------------------- |
+| Landing                | [http://localhost:8090](http://localhost:8090)                                   | —                           | —                                |
+| **Staff** (plataforma) | [http://localhost:8090/plataforma/login](http://localhost:8090/plataforma/login) | `plataforma@arandutech.com` | `plataforma`                     |
+| POS de un comercio     | http://{slug}.localhost:8090                                                     | el mail del alta            | se muestra una vez y va por mail |
+
 
 Los usuarios `superadmin@` / `admin@` / `operator@` **ya no se siembran** en la base central. Cada comercio nace con un `admin` (el mail del alta) y el rol `operator` listo para asignar.
 
@@ -279,11 +285,11 @@ PLATFORM_PATH=a7k9m2p4
 PLATFORM_DOMAIN=admin.tudominio.com
 ```
 
-2. Confirmá que `queue` esté `Up` (sin worker el alta queda en `pending`).
-3. Entrá al panel staff → **Nuevo cliente**: nombre, RUC, slug, plan público (Starter / Negocio / …), período **mensual** o **anual**, mail del admin.
-4. El job crea `tenant_{slug}`, migra el POS, siembra roles y manda el mail con el enlace de 48 h para definir contraseña.
-5. En la ficha del cliente, **Registrar pago** para arrancar/renovar el período.
-6. El comercio opera en `https://{slug}.tudominio.com`. Staff en `https://admin.tudominio.com/{PLATFORM_PATH}/login`.
+1. Confirmá que `queue` esté `Up` (sin worker el alta queda en `pending`).
+2. Entrá al panel staff → **Nuevo cliente**: nombre, RUC, slug, plan público (Starter / Negocio / …), período **mensual** o **anual**, mail del admin.
+3. El job crea `tenant_{slug}`, migra el POS, siembra roles y manda el mail con el enlace de 48 h para definir contraseña.
+4. En la ficha del cliente, **Registrar pago** para arrancar/renovar el período.
+5. El comercio opera en `https://{slug}.tudominio.com`. Staff en `https://admin.tudominio.com/{PLATFORM_PATH}/login`.
 
 Opcional en el alta o en la ficha: **Copiar catálogo** desde otro comercio (stock en 0).
 
@@ -310,7 +316,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 Extras locales: [qué servicios levantar](#qué-servicios-levantar).
 
-2. En `.env`, apuntá al host del comercio (no hace falta wildcard si hay un solo POS):
+1. En `.env`, apuntá al host del comercio (no hace falta wildcard si hay un solo POS):
 
 ```env
 APP_URL=https://pos.minegocio.com
@@ -322,20 +328,23 @@ PLATFORM_DOMAIN=admin.minegocio.com
 
 Ejemplo LAN / sin DNS público: `TENANT_BASE_DOMAIN=localhost` y `CENTRAL_DOMAINS=localhost,127.0.0.1` (igual que en desarrollo).
 
-3. Con el seed (`RUN_SEED=true` la primera vez, o `php artisan db:seed`) queda el plan **Instalación propia**.
-4. Staff → **Nuevo cliente** → plan **Instalación propia**. El período se fuerza a **Sin vencimiento**. No registres pago mensual: `subscriptions:tick` no pausa este plan.
-5. El POS queda en `{slug}.{TENANT_BASE_DOMAIN}` (ej. slug `pos` → `pos.minegocio.com`). Si el comercio quiere entrar por el apex (`minegocio.com`), agregá ese host en la tabla `domains` del tenant (además del subdominio que crea el alta).
-6. Cambiá la clave del staff sembrado y poné `RUN_SEED=false`.
+1. Con el seed (`RUN_SEED=true` la primera vez, o `php artisan db:seed`) queda el plan **Instalación propia**.
+2. Staff → **Nuevo cliente** → plan **Instalación propia**. El período se fuerza a **Sin vencimiento**. No registres pago mensual: `subscriptions:tick` no pausa este plan.
+3. El POS queda en `{slug}.{TENANT_BASE_DOMAIN}` (ej. slug `pos` → `pos.minegocio.com`). Si el comercio quiere entrar por el apex (`minegocio.com`), agregá ese host en la tabla `domains` del tenant (además del subdominio que crea el alta).
+4. Cambiá la clave del staff sembrado y poné `RUN_SEED=false`.
+5. Backups SQL: con `docker-compose.prod.yml`, `mkdir -p backups` y sincronizá esa carpeta con Google Drive (o `BACKUP_HOST_PATH`). Hace falta el `scheduler`. En el compose de desarrollo los dumps van a `storage/app/backups/` y se corren a mano. [docs/SAAS.md](docs/SAAS.md#backups).
 
 No uses un plan “gratis” público para esto: canibaliza Starter/Negocio y aparece en la landing.
 
-| | SaaS | Instalación propia |
-|---|---|---|
-| Plan | público (Starter, Negocio, …) | `onprem` (interno) |
-| Período | mensual / anual | sin vencimiento |
-| Pago en panel | sí (renueva) | no (licencia afuera) |
-| DNS | wildcard `*.dominio` | un host o LAN alcanza |
-| Cantidad de comercios | muchos | uno (puede haber más, pero el caso típico es uno) |
+
+|                       | SaaS                          | Instalación propia                                |
+| --------------------- | ----------------------------- | ------------------------------------------------- |
+| Plan                  | público (Starter, Negocio, …) | `onprem` (interno)                                |
+| Período               | mensual / anual               | sin vencimiento                                   |
+| Pago en panel         | sí (renueva)                  | no (licencia afuera)                              |
+| DNS                   | wildcard `*.dominio`          | un host o LAN alcanza                             |
+| Cantidad de comercios | muchos                        | uno (puede haber más, pero el caso típico es uno) |
+
 
 ---
 
@@ -369,7 +378,7 @@ Healthcheck de la app: `GET /up`.
 
 Después del arranque, creá el primer comercio según el modo: [SaaS o instalación propia](#crear-comercios-saas-o-un-solo-comercio).
 
-`docker-compose.yml` es **solo desarrollo** (`php artisan serve`). En producción usá **`docker-compose.prod.yml`**: Nginx + PHP-FPM 8.3 + PostgreSQL 16 + Redis + MinIO + **worker de cola** + **scheduler**. El código va **dentro de la imagen** (no se monta el disco). Postgres, Redis y MinIO **no** se publican al host.
+`docker-compose.yml` es **solo desarrollo** (`php artisan serve`). En producción usá `**docker-compose.prod.yml`**: Nginx + PHP-FPM 8.3 + PostgreSQL 16 + Redis + MinIO + **worker de cola** + **scheduler**. El código va **dentro de la imagen** (no se monta el disco). Postgres, Redis y MinIO **no** se publican al host.
 
 Proyecto Compose aparte (`name: ventas_sistema_prod`): no pisa volúmenes ni red del stack local.
 
@@ -505,11 +514,13 @@ tudominio.com, www.tudominio.com, admin.tudominio.com, *.tudominio.com {
 
 `APP_URL` tiene que ser exactamente la URL pública (`https://tudominio.com`).
 
-| Host | Qué es |
-|---|---|
-| `tudominio.com` | landing y planes |
-| `admin.tudominio.com/{PLATFORM_PATH}` | panel staff |
-| `{slug}.tudominio.com` | POS del comercio |
+
+| Host                                  | Qué es           |
+| ------------------------------------- | ---------------- |
+| `tudominio.com`                       | landing y planes |
+| `admin.tudominio.com/{PLATFORM_PATH}` | panel staff      |
+| `{slug}.tudominio.com`                | POS del comercio |
+
 
 Opcional: restringir el panel staff por IP (`docker/nginx/platform-staff.conf.example`).
 
@@ -517,7 +528,7 @@ Si el proxy usa otro puerto publicado (`APP_PUBLISH_PORT=8080`), el `reverse_pro
 
 ### 5. Actualizar la app
 
-Los datos viven en volúmenes Docker y **no se borran** al rebuild: Postgres, Redis, `storage` (logs, backups SQL, cache) y **MinIO** (fotos de producto, gestor de archivos, comprobantes de pago).
+Los datos viven en volúmenes Docker y **no se borran** al rebuild: Postgres, Redis, `storage` (logs, cache), la carpeta `./backups` del host (dumps SQL) y **MinIO** (fotos de producto, gestor de archivos, comprobantes de pago).
 
 ```bash
 cd /opt/ventas_sistema
@@ -537,11 +548,14 @@ docker compose -f docker-compose.prod.yml logs -f php nginx queue scheduler post
 docker compose -f docker-compose.prod.yml exec php php artisan about
 docker compose -f docker-compose.prod.yml exec php php artisan permission:cache-reset
 
-# central.sql + un dump por tenant → storage/app/backups/{fecha}/
+# central.sql.gz + un dump por tenant → ./backups/{fecha}/ (o BACKUP_HOST_PATH)
+mkdir -p backups
 docker compose -f docker-compose.prod.yml exec php php artisan tenants:backup
 ```
 
-Un `pg_dump` solo de `ventas_central` **no** alcanza: cada comercio es otra base (`tenant_demo`, etc.).
+Un `pg_dump` solo de `ventas_central` **no** alcanza: cada comercio es otra base (`tenant_demo`, etc.). Restaurar: `gunzip -c archivo.sql.gz | psql ...`.
+
+On-prem en una PC: sincronizá `./backups` con Google Drive (o poné `BACKUP_HOST_PATH` a la carpeta de Drive y recreá `php` + `scheduler`). El scheduler tiene que estar `Up`. Detalle: [docs/SAAS.md](docs/SAAS.md#backups).
 
 Bases huérfanas (sin cliente en plataforma):
 
@@ -550,7 +564,7 @@ docker compose -f docker-compose.prod.yml exec php php artisan tenants:cleanup-o
 docker compose -f docker-compose.prod.yml exec php php artisan tenants:cleanup-orphans
 ```
 
-Backup de archivos: volumen `ventas_sistema_prod_storage_data` (logs/backups) **y** `ventas_sistema_prod_minio_data` (fotos y uploads). Un dump SQL no alcanza. Detalle: [docs/SAAS.md](docs/SAAS.md#minio-fotos-y-archivos).
+Backup de archivos: carpeta `./backups` (SQL, montada desde el host) **y** volumen `ventas_sistema_prod_minio_data` (fotos y uploads). Un dump SQL no alcanza. Detalle: [docs/SAAS.md](docs/SAAS.md#backups).
 
 Para bajar el stack **sin** borrar datos:
 
@@ -575,7 +589,7 @@ docker compose -f docker-compose.prod.yml down
 - [ ] `PLATFORM_ADMIN_PASSWORD` si sembrás staff en prod (no dejes `plataforma`)
 - [ ] `APP_URL` con `https://`
 - [ ] Puerto 5432/6379/9000/9001 no publicados
-- [ ] Copias de `tenants:backup`, del volumen `storage` y del volumen MinIO en otro disco/nube
+- [ ] Carpeta `./backups` (o `BACKUP_HOST_PATH`) sincronizada a otro disco/Drive; copias del volumen MinIO aparte
 
 ## Módulos de negocio
 
@@ -592,9 +606,10 @@ El stub ya sale tenant-safe (`TenantMiddleware`, sin `loadMigrationsFrom`). Desp
 2. Recargar permisos en el panel del comercio, o incluir el recurso en `BusinessPermissionSeeder`.
 3. `admin` ve el CRUD; `operator` solo lo que va a caja. No crear `superadmin` de tenant.
 
-Detalle: [`.cursor/skills/modulo-negocio/SKILL.md`](.cursor/skills/modulo-negocio/SKILL.md). No rearmar menús del POS.
+Detalle: `[.cursor/skills/modulo-negocio/SKILL.md](.cursor/skills/modulo-negocio/SKILL.md)`. No rearmar menús del POS.
 
 ```bash
 php artisan module:enable {Nombre}
 php artisan module:disable {Nombre}
 ```
+

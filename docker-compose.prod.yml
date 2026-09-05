@@ -68,6 +68,7 @@ services:
       FILEMANAGER_DRIVER: s3
     volumes:
       - storage_data:/var/www/html/storage
+      - "${BACKUP_HOST_PATH:-./backups}:/var/www/html/storage/app/backups"
     depends_on:
       postgres:
         condition: service_healthy
@@ -173,6 +174,7 @@ services:
       FILEMANAGER_DRIVER: s3
     volumes:
       - storage_data:/var/www/html/storage
+      - "${BACKUP_HOST_PATH:-./backups}:/var/www/html/storage/app/backups"
     depends_on:
       postgres:
         condition: service_healthy

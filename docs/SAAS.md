@@ -120,13 +120,46 @@ php artisan tenants:cleanup-orphans
 
 ## Backups
 
+El scheduler corre `tenants:backup` todos los días a las **02:30**. Tiene que estar el servicio `scheduler` en `Up` (`docker-compose.prod.yml`).
+
 ```bash
 php artisan tenants:backup
 # o
 ./scripts/backup-tenants.sh
 ```
 
-Quedan en `storage/app/backups/{fecha}/` (central.sql + un dump por tenant). El volumen MinIO (`minio_data`) se respalda aparte (snapshot del volumen o `mc mirror`).
+Cada corrida deja `central.sql.gz` y un `tenant_{slug}.sql.gz` en `storage/app/backups/{Y-m-d_His}/`. Se conservan `BACKUP_KEEP_DAYS` días (default 14; `0` = no borrar). Restaurar:
+
+```bash
+gunzip -c central.sql.gz | psql -h 127.0.0.1 -U ventas ventas_central
+gunzip -c tenant_demo.sql.gz | psql -h 127.0.0.1 -U ventas tenant_demo
+```
+
+### Carpeta del host (Google Drive / on-prem)
+
+En producción el compose monta `${BACKUP_HOST_PATH:-./backups}` sobre `storage/app/backups` (servicios `php` y `scheduler`). Creá la carpeta antes del `up`:
+
+```bash
+mkdir -p backups
+```
+
+En `.env`:
+
+```env
+BACKUP_HOST_PATH=./backups
+BACKUP_KEEP_DAYS=14
+BACKUP_COMPRESS=true
+```
+
+Para que el comercio sincronice con Google Drive (instalación en una PC):
+
+1. Confirmá que `scheduler` esté `Up`.
+2. En Drive para escritorio, agregá la carpeta `backups` (al lado del compose) **o** poné `BACKUP_HOST_PATH` a la carpeta de Drive, por ejemplo `/home/caja/Google Drive/POS-backups` o `D:\Google Drive\POS-backups`, y volvé a levantar `php` y `scheduler`.
+3. No hace falta API de Google: Drive copia lo que el artisan escribe.
+
+En el compose de desarrollo el código ya está montado: los dumps salen en `storage/app/backups/` del repo (no hay scheduler; el backup es a mano).
+
+El volumen MinIO (`minio_data`, fotos y uploads) se respalda aparte (snapshot del volumen o `mc mirror`). Un dump SQL no incluye esas fotos.
 
 ## MinIO (fotos y archivos)
 
