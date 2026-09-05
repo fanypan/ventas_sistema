@@ -19,6 +19,7 @@ use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustHosts;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Responses\JsonEnvelope;
+use App\Support\BackupSchedule;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
@@ -127,7 +128,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule) {
         $schedule->command('subscriptions:tick')->dailyAt('07:00');
-        $schedule->command('tenants:backup')->dailyAt('02:30');
+        foreach (BackupSchedule::times((string) config('backup.schedule')) as $at) {
+            $schedule->command('tenants:backup')->dailyAt($at);
+        }
         $schedule->command('horizon:snapshot')->everyFiveMinutes()->when(
             fn () => (bool) config('observability.horizon_enabled')
         );

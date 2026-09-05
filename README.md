@@ -121,7 +121,7 @@ Se pueden combinar: `docker compose --profile mail --profile obs up -d`.
 
 | Servicio               | Default `up` | Perfil | Para qué                             |
 | ---------------------- | ------------ | ------ | ------------------------------------ |
-| `app` + `queue`        | sí           | —      | POS, landing, staff, alta de cliente |
+| `app` + `queue` + `scheduler` | sí           | —      | POS, cola, dumps y `subscriptions:tick` |
 | `postgres` + `redis`   | sí           | —      | bases y colas                        |
 | `minio` + `minio-init` | sí           | —      | fotos y archivos                     |
 | `mailhog` (Mailpit)    | no           | `mail` | mails de prueba                      |
@@ -332,7 +332,7 @@ Ejemplo LAN / sin DNS público: `TENANT_BASE_DOMAIN=localhost` y `CENTRAL_DOMAIN
 2. Staff → **Nuevo cliente** → plan **Instalación propia**. El período se fuerza a **Sin vencimiento**. No registres pago mensual: `subscriptions:tick` no pausa este plan.
 3. El POS queda en `{slug}.{TENANT_BASE_DOMAIN}` (ej. slug `pos` → `pos.minegocio.com`). Si el comercio quiere entrar por el apex (`minegocio.com`), agregá ese host en la tabla `domains` del tenant (además del subdominio que crea el alta).
 4. Cambiá la clave del staff sembrado y poné `RUN_SEED=false`.
-5. Backups SQL: con `docker-compose.prod.yml`, `mkdir -p backups` y sincronizá esa carpeta con Google Drive (o `BACKUP_HOST_PATH`). Hace falta el `scheduler`. En el compose de desarrollo los dumps van a `storage/app/backups/` y se corren a mano. [docs/SAAS.md](docs/SAAS.md#backups).
+5. Backups SQL: `BACKUP_SCHEDULE` en `.env` con una hora **en la que el comercio esté abierto** (la PC tiene que estar prendida; p.ej. `17:00` o `13:00,19:30`). El default `02:30` solo sirve en un VPS que no se apaga. Con `docker-compose.prod.yml`, `mkdir -p backups` y sincronizá esa carpeta con Google Drive (o `BACKUP_HOST_PATH`). Hace falta el `scheduler`. Tras cambiar el horario, recreá `scheduler`. [docs/SAAS.md](docs/SAAS.md#backups).
 
 No uses un plan “gratis” público para esto: canibaliza Starter/Negocio y aparece en la landing.
 
@@ -484,7 +484,7 @@ docker compose -f docker-compose.prod.yml logs -f php nginx queue scheduler
 Cuando `php` esté healthy, Nginx responde en `http://SERVIDOR/` (puerto `APP_PUBLISH_PORT`, por defecto 80). Confirmá que `queue` y `scheduler` estén `Up`:
 
 - `queue` — alta de cliente y jobs de tenancy
-- `scheduler` — `subscriptions:tick` (07:00) y `tenants:backup` (02:30)
+- `scheduler` — `subscriptions:tick` (07:00) y `tenants:backup` (`BACKUP_SCHEDULE`: hora de atención del comercio; default `02:30` solo si el servidor no se apaga)
 
 Si `RUN_SEED=true` en ese primer arranque, definí `PLATFORM_ADMIN_PASSWORD` (en production el seeder no arranca sin eso). En local, si está vacío, queda `plataforma@arandutech.com` / `plataforma`. En el próximo reciclo poné `RUN_SEED=false`.
 
@@ -555,7 +555,7 @@ docker compose -f docker-compose.prod.yml exec php php artisan tenants:backup
 
 Un `pg_dump` solo de `ventas_central` **no** alcanza: cada comercio es otra base (`tenant_demo`, etc.). Restaurar: `gunzip -c archivo.sql.gz | psql ...`.
 
-On-prem en una PC: sincronizá `./backups` con Google Drive (o poné `BACKUP_HOST_PATH` a la carpeta de Drive y recreá `php` + `scheduler`). El scheduler tiene que estar `Up`. Detalle: [docs/SAAS.md](docs/SAAS.md#backups).
+On-prem en una PC: poné `BACKUP_SCHEDULE` al horario de atención (si apagan la caja al cerrar, `02:30` no corre). Sincronizá `./backups` con Google Drive (o poné `BACKUP_HOST_PATH` a la carpeta de Drive y recreá `php` + `scheduler`). El scheduler tiene que estar `Up`. Detalle: [docs/SAAS.md](docs/SAAS.md#backups).
 
 Bases huérfanas (sin cliente en plataforma):
 
@@ -589,6 +589,7 @@ docker compose -f docker-compose.prod.yml down
 - [ ] `PLATFORM_ADMIN_PASSWORD` si sembrás staff en prod (no dejes `plataforma`)
 - [ ] `APP_URL` con `https://`
 - [ ] Puerto 5432/6379/9000/9001 no publicados
+- [ ] `BACKUP_SCHEDULE` en horario de atención si la PC se apaga al cerrar (VPS 24/7: `02:30` alcanza)
 - [ ] Carpeta `./backups` (o `BACKUP_HOST_PATH`) sincronizada a otro disco/Drive; copias del volumen MinIO aparte
 
 ## Módulos de negocio

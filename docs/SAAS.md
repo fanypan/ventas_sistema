@@ -91,6 +91,7 @@ En LAN sin DNS público podés usar `TENANT_BASE_DOMAIN=localhost` y `CENTRAL_DO
 5. El alta crea el dominio `{slug}.{TENANT_BASE_DOMAIN}` (ej. slug `pos` → `pos.minegocio.com`). Si el comercio quiere el apex (`minegocio.com`) u otro host único, agregalo en la tabla `domains` de ese tenant; no hace falta wildcard DNS.
 6. La licencia se cobra afuera del panel. `subscriptions:tick` no pausa tenants `lifetime` / plan `onprem`.
 7. Después del primer arranque: `RUN_SEED=false` y cambiá la clave del staff sembrado.
+8. En la PC del comercio, poné `BACKUP_SCHEDULE` a una hora **dentro del horario de atención** (la máquina tiene que estar prendida). Default `02:30` solo sirve si el servidor no se apaga. Detalle: [Backups](#backups).
 
 No uses un plan “gratis” público: canibaliza Starter/Negocio y aparece en marketing.
 
@@ -120,7 +121,9 @@ php artisan tenants:cleanup-orphans
 
 ## Backups
 
-El scheduler corre `tenants:backup` todos los días a las **02:30**. Tiene que estar el servicio `scheduler` en `Up` (`docker-compose.prod.yml`).
+`BACKUP_SCHEDULE` define **a qué hora** corre `tenants:backup` (zona `America/Asuncion`, formato `HH:MM`, varias horas separadas por coma). Vacío = no programar (solo dumps a mano). Tiene que estar el servicio `scheduler` en `Up`. Después de cambiar la variable, recreá `scheduler` para que tome el `.env`.
+
+Elegí una hora en la que el comercio **esté abierto** (PC o servidor prendidos). El dump solo corre si el scheduler está vivo a esa hora: si la caja se apaga al cerrar, el default `02:30` nunca corre. Típico en mostrador: almuerzo o justo antes de cerrar (`13:00`, `17:00`, `19:30`). En un VPS 24/7 (SaaS) `02:30` está bien.
 
 ```bash
 php artisan tenants:backup
@@ -146,6 +149,14 @@ mkdir -p backups
 En `.env`:
 
 ```env
+# PC del comercio: horario de atención (ajustá al cierre real)
+BACKUP_SCHEDULE=17:00
+# o dos corridas: almuerzo y cierre
+# BACKUP_SCHEDULE=13:00,19:30
+# VPS que no se apaga:
+# BACKUP_SCHEDULE=02:30
+# solo a mano:
+# BACKUP_SCHEDULE=
 BACKUP_HOST_PATH=./backups
 BACKUP_KEEP_DAYS=14
 BACKUP_COMPRESS=true
@@ -157,7 +168,7 @@ Para que el comercio sincronice con Google Drive (instalación en una PC):
 2. En Drive para escritorio, agregá la carpeta `backups` (al lado del compose) **o** poné `BACKUP_HOST_PATH` a la carpeta de Drive, por ejemplo `/home/caja/Google Drive/POS-backups` o `D:\Google Drive\POS-backups`, y volvé a levantar `php` y `scheduler`.
 3. No hace falta API de Google: Drive copia lo que el artisan escribe.
 
-En el compose de desarrollo el código ya está montado: los dumps salen en `storage/app/backups/` del repo (no hay scheduler; el backup es a mano).
+En el compose de desarrollo el código ya está montado: los dumps salen en `storage/app/backups/` del repo. El servicio `scheduler` también arranca en el `up` local y respeta `BACKUP_SCHEDULE`.
 
 El volumen MinIO (`minio_data`, fotos y uploads) se respalda aparte (snapshot del volumen o `mc mirror`). Un dump SQL no incluye esas fotos.
 

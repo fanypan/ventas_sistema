@@ -109,6 +109,39 @@ services:
       - ventas
     command: ["sh", "/var/www/html/docker/php/queue-start.sh"]
 
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_ENV: local
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-ventas_central}
+      DB_USERNAME: ${DB_USERNAME:-ventas}
+      DB_PASSWORD: ${DB_PASSWORD:-ventas}
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      RUN_MIGRATIONS: "false"
+      RUN_SEED: "false"
+      WWWUSER: ${WWWUSER:-1000}
+      WWWGROUP: ${WWWGROUP:-1000}
+      <<: *minio-client
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ventas
+    command: ["php", "artisan", "schedule:work"]
+
   postgres:
     image: postgres:16-alpine
     environment:
