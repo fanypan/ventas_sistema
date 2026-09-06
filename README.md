@@ -320,6 +320,14 @@ docker compose -f docker-compose.prod.yml ps
 docker compose -f docker-compose.prod.yml logs -f php nginx queue scheduler
 ```
 
+Si `php` está `Exit` / `Restarting` y el resto dice `dependency php failed to start`, mirá **solo** PHP:
+
+```bash
+docker compose -f docker-compose.prod.yml logs php
+```
+
+Causas habituales: `APP_KEY` vacío, `PLATFORM_ADMIN_PASSWORD` vacío con `RUN_SEED=true`, o `chown` sobre la carpeta `backups` en Windows. El mensaje concreto está al final de ese log.
+
 Si en los logs aparece `Please provide a valid cache path`, el volumen `storage` arrancó vacío. En Ubuntu:
 
 ```bash
