@@ -123,6 +123,8 @@ services:
     volumes:
       - storage_data:/var/www/html/storage
     depends_on:
+      php:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
@@ -176,6 +178,8 @@ services:
       - storage_data:/var/www/html/storage
       - "${BACKUP_HOST_PATH:-./backups}:/var/www/html/storage/app/backups"
     depends_on:
+      php:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
@@ -185,7 +189,7 @@ services:
     networks:
       - ventas
     restart: unless-stopped
-    entrypoint: ["php", "artisan", "schedule:work"]
+    entrypoint: ["/usr/local/bin/scheduler-start.sh"]
 
   postgres:
     image: postgres:16-alpine

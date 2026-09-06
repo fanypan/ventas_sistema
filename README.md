@@ -320,6 +320,14 @@ docker compose -f docker-compose.prod.yml ps
 docker compose -f docker-compose.prod.yml logs -f php nginx queue scheduler
 ```
 
+Si en los logs aparece `Please provide a valid cache path`, el volumen `storage` arrancó vacío. En Ubuntu:
+
+```bash
+docker compose -f docker-compose.prod.yml exec php mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs
+docker compose -f docker-compose.prod.yml exec php php artisan config:clear
+docker compose -f docker-compose.prod.yml restart php queue scheduler
+```
+
 Cuando `php` esté healthy, Nginx responde en `http://SERVIDOR/` (puerto `APP_PUBLISH_PORT`, por defecto 80). Confirmá que `queue` y `scheduler` estén `Up`:
 
 - `queue` — alta de cliente y jobs de tenancy

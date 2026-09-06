@@ -1,6 +1,7 @@
 #!/bin/sh
 set -e
 cd /var/www/html
+/usr/local/bin/ensure-storage.sh
 
 if [ "${HORIZON_ENABLED:-false}" = "true" ]; then
   exec php artisan horizon

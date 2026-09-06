@@ -2,12 +2,7 @@
 set -e
 cd /var/www/html
 
-mkdir -p storage/framework/cache/data \
-  storage/framework/sessions \
-  storage/framework/views \
-  storage/logs \
-  storage/app/public \
-  bootstrap/cache
+/usr/local/bin/ensure-storage.sh
 
 if [ -d /opt/storage-defaults ]; then
   cp -an /opt/storage-defaults/. storage/app/public/ 2>/dev/null || true
