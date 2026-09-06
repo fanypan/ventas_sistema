@@ -73,6 +73,8 @@ DNS obligatorio en multi-tenant: wildcard `*.{TENANT_BASE_DOMAIN}` + TLS. Cada c
 
 Mismo compose de producción en el VPS o la LAN del comercio. Un tenant, plan interno **Instalación propia** (`onprem`): no sale en la landing, sin cupo de FE en el plan, sin tope de usuarios/cajas, **sin vencimiento**. Resumen instalable: [README](../README.md#b-un-solo-comercio--instalación-propia-on-prem).
 
+Cloná en `/opt/ventas_sistema` (Linux) o la misma ruta **dentro de WSL** en la PC Windows del comercio. No en el escritorio, `C:\Users` ni OneDrive. Detalle: [README — Dónde clonar](../README.md#dónde-clonar).
+
 1. Copiá `.env.example` → `.env` y ajustá `APP_URL`, claves de DB/Redis/MinIO, SMTP y dominios. Ejemplo típico:
 
 ```env

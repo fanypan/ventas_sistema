@@ -24,19 +24,20 @@ En Windows (PowerShell o Git Bash) el `cd` es el mismo. Si clonás con Git GUI, 
 
 ### Dónde clonar
 
-Docker monta el repo en `/var/www/html` **adentro** del contenedor. En el host no hace falta `/var/www`.
+Docker monta el repo en `/var/www/html` **adentro** del contenedor. En el host no hace falta `/var/www`. En producción el código entra **en la imagen**; la carpeta del servidor es solo para `git pull`, `.env`, Compose y dumps (`./backups`).
 
 
-| Uso                | Dónde                                                                                          |
-| ------------------ | ---------------------------------------------------------------------------------------------- |
-| Desarrollo Linux   | Cualquier carpeta nativa: `~/proyectos/ventas_sistema`, `~/Escritorio/Proyectos/…`             |
-| Desarrollo Windows | **Adentro de WSL** (`\\wsl$\Ubuntu\home\…`), no en `C:\Users\…` ni `/mnt/c/…`                  |
-| Producción         | `/opt/ventas_sistema` o `/srv/ventas_sistema`, dueño un usuario de deploy en el grupo `docker` |
+| Uso                         | Dónde |
+| --------------------------- | ----- |
+| Desarrollo Linux            | Cualquier carpeta nativa: `~/proyectos/ventas_sistema`, `~/Escritorio/Proyectos/…` |
+| Desarrollo Windows          | **Adentro de WSL** (`\\wsl$\Ubuntu\home\…`), no en `C:\Users\…` ni `/mnt/c/…` |
+| Prod Linux (VPS o PC)       | `/opt/ventas_sistema` (recomendado) o `/srv/ventas_sistema`. Dueño: usuario de deploy en el grupo `docker` |
+| Prod Windows (PC del comercio) | WSL 2: `/opt/ventas_sistema` en Ubuntu (`\\wsl$\Ubuntu\opt\ventas_sistema`). No `C:\Users\…`, OneDrive ni el escritorio |
 
 
-Evitá USB FAT/exFAT, discos de red y (en WSL) el filesystem de Windows: Composer y Postgres se vuelven lentos y `storage` queda con permisos raros. En Linux una ruta con `Escritorio` está bien.
+Evitá USB FAT/exFAT, discos de red y (en WSL) el filesystem de Windows: Composer y los volúmenes se vuelven lentos y `storage` queda con permisos raros. En Linux de **desarrollo** una ruta con `Escritorio` está bien; en **prod** no.
 
-En producción el código entra **en la imagen**; esa carpeta del servidor es solo para `git pull`, `.env` y Compose. No dejes el clone en el escritorio de un usuario.
+Los dumps SQL pueden vivir aparte (`BACKUP_HOST_PATH`, p.ej. la carpeta de Google Drive). El repo no.
 
 ### Permisos
 
@@ -384,14 +385,16 @@ Proyecto Compose aparte (`name: ventas_sistema_prod`): no pisa volúmenes ni red
 
 ### Qué tenés que tener
 
-- Un VPS **Linux** (Ubuntu 22.04/24.04) con Docker Engine + plugin Compose v2. El usuario de deploy tiene que estar en el grupo `docker` (`sudo usermod -aG docker $USER` y re-login).
-- El repo en `/opt/ventas_sistema` o `/srv/ventas_sistema` (no en el escritorio de un usuario).
+- Un VPS **Linux** (Ubuntu 22.04/24.04) con Docker Engine + plugin Compose v2, **o** la PC del comercio (Linux, o Windows con Docker Desktop + WSL 2). El usuario de deploy tiene que estar en el grupo `docker` (`sudo usermod -aG docker $USER` y re-login).
+- El repo en `/opt/ventas_sistema` o `/srv/ventas_sistema` (Linux). En Windows, la misma ruta **dentro de WSL**, no en `C:\`. Ver [dónde clonar](#dónde-clonar).
 - Dominio: en **SaaS**, DNS wildcard `*.tudominio.com` (POS = `{slug}.tudominio.com`). En **instalación propia**, alcanza un host o LAN; ver [crear comercios](#crear-comercios-saas-o-un-solo-comercio).
 - Un `.env` **de producción** en el servidor: no copies el `.env` de tu notebook con `APP_DEBUG=true` y claves `ventas/ventas`.
 
 Este compose sirve **HTTP en el puerto 80**. En internet poné un reverse proxy con certificado (Caddy, Nginx, Traefik o el panel del VPS) delante. Laravel confía solo en redes privadas (`TRUSTED_PROXIES=private`: Docker/LAN). No uses `*` en internet.
 
-### 1. Clonar en el servidor (Linux)
+### 1. Clonar en el servidor
+
+**Linux (VPS o PC del comercio):**
 
 ```bash
 sudo apt update && sudo apt install -y git ca-certificates curl
@@ -402,6 +405,18 @@ git clone https://github.com/fanypan/ventas_sistema.git /opt/ventas_sistema
 cd /opt/ventas_sistema
 cp .env.example .env
 ```
+
+**Windows (PC de la caja, Docker Desktop + WSL 2):** abrí Ubuntu y cloná en el disco de Linux, no en `C:\` ni OneDrive:
+
+```bash
+sudo mkdir -p /opt/ventas_sistema
+sudo chown "$USER:$USER" /opt/ventas_sistema
+git clone https://github.com/fanypan/ventas_sistema.git /opt/ventas_sistema
+cd /opt/ventas_sistema
+cp .env.example .env
+```
+
+Desde el Explorador esa carpeta es `\\wsl$\Ubuntu\opt\ventas_sistema`. Los dumps pueden ir a Drive con `BACKUP_HOST_PATH`; el repo se queda en `/opt`.
 
 ### 2. Configurar `.env`
 
