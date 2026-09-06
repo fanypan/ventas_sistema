@@ -25,7 +25,10 @@ chmod -R ug+rwx \
   || echo "[entrypoint] aviso: chmod incompleto (típico en Windows)"
 
 if [ -z "${APP_KEY}" ] || [ "${APP_KEY}" = "base64:" ]; then
-  echo "[entrypoint] APP_KEY vacío. Definilo en .env antes de levantar producción."
+  echo "[entrypoint] APP_KEY vacío. Definilo en .env (en esta carpeta: $(pwd)/.env) y recreá el contenedor:"
+  echo "  docker run --rm php:8.3-cli php -r \"echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;\""
+  echo "  # pegá el resultado en APP_KEY=  (sin espacios, una sola línea)"
+  echo "  docker compose -f docker-compose.prod.yml up -d --force-recreate php"
   exit 1
 fi
 

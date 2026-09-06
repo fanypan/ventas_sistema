@@ -153,6 +153,14 @@ Si ya lo habías clonado en `C:\Users\…`, no lo uses desde `/mnt/c`. Volvé a 
 cp .env.example .env
 ```
 
+Generá `APP_KEY` **en esa misma Ubuntu** (no copies el `.env` de la notebook) y pegalo en `.env` en `APP_KEY=`:
+
+```bash
+docker run --rm php:8.3-cli php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"
+grep '^APP_KEY=' .env
+# tiene que ser APP_KEY=base64:....  (no vacío)
+```
+
 6. En `.env` **no alcanza** con los dominios. `APP_ENV` y `APP_DEBUG` los pisa el compose (`production` / `false`): no hace falta tocarlos. Sí tenés que completar esto (el `.env.example` trae claves débiles o vacías):
 
 ```env
