@@ -18,7 +18,7 @@ class CompanySettingsSeeder extends Seeder
             [
                 'key' => 'company_name',
                 'name' => 'Nombre de la Empresa',
-                'value' => 'Sistema de Ventas Laravel',
+                'value' => config('saas.brand'),
                 'type' => 'text',
                 'category' => 'company',
                 'ext' => null,

@@ -105,7 +105,7 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
+    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'AranduTech Ventas'), '_').'_cache_'),
 
     /*
     | Laravel 13: no unserializar objetos arbitrarios desde cache.

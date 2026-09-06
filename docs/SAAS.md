@@ -73,7 +73,7 @@ DNS obligatorio en multi-tenant: wildcard `*.{TENANT_BASE_DOMAIN}` + TLS. Cada c
 
 Mismo compose de producción en el VPS o la LAN del comercio. Un tenant, plan interno **Instalación propia** (`onprem`): no sale en la landing, sin cupo de FE en el plan, sin tope de usuarios/cajas, **sin vencimiento**. Resumen instalable: [README](../README.md#b-un-solo-comercio--instalación-propia-on-prem).
 
-Cloná en `/opt/ventas_sistema` (Linux) o la misma ruta **dentro de WSL** en la PC Windows del comercio. No en el escritorio, `C:\Users` ni OneDrive. Detalle: [README — Dónde clonar](../README.md#dónde-clonar).
+Cloná en `/opt/ventas_sistema` (Linux) o `~/ventas_sistema` **dentro de Ubuntu/WSL** en la PC Windows (sin `sudo`; no uses PowerShell). No en el escritorio, `C:\Users` ni OneDrive. Detalle: [README — Dónde clonar](../README.md#dónde-clonar).
 
 1. Copiá `.env.example` → `.env` y ajustá `APP_URL`, claves de DB/Redis/MinIO, SMTP y dominios. Ejemplo típico:
 
@@ -85,9 +85,9 @@ PLATFORM_PATH=plataforma
 PLATFORM_DOMAIN=admin.minegocio.com
 ```
 
-En LAN sin DNS público podés usar `TENANT_BASE_DOMAIN=localhost` y `CENTRAL_DOMAINS=localhost,127.0.0.1` como en desarrollo.
+En LAN sin DNS público, en la **PC Windows** del comercio: dominio en `C:\Windows\System32\drivers\etc\hosts` (p.ej. `cliente.arandutech.com.py`) y `SESSION_SECURE_COOKIE=false`. Paso a paso: [README — Windows producción](../README.md#windows--producción). Alternativa: `TENANT_BASE_DOMAIN=localhost` y `CENTRAL_DOMAINS=localhost,127.0.0.1`.
 
-2. `docker compose -f docker-compose.prod.yml up -d --build` (o el compose de desarrollo en laboratorio).
+2. `docker compose -f docker-compose.prod.yml up -d --build`. Instalación paso a paso: [README — producción](../README.md#instalación-producción).
 3. Migrar y sembrar si el entrypoint no lo hizo: `php artisan migrate` + `php artisan db:seed` (trae el plan `onprem`). En prod con seed: definí `PLATFORM_ADMIN_PASSWORD`.
 4. Staff → Nuevo cliente → plan **Instalación propia**. El formulario fuerza período **Sin vencimiento**. No registres pago mensual.
 5. El alta crea el dominio `{slug}.{TENANT_BASE_DOMAIN}` (ej. slug `pos` → `pos.minegocio.com`). Si el comercio quiere el apex (`minegocio.com`) u otro host único, agregalo en la tabla `domains` de ese tenant; no hace falta wildcard DNS.

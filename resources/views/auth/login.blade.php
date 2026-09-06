@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-        <title>Ingresar — {{ Setting::getValue('app_name') ?? ENV('APP_NAME') }}</title>
+        <title>Ingresar — {{ Setting::getValue('app_name') ?? config('app.name') }}</title>
         @include('pwa.favicon')
         @include('pwa.meta')
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +25,7 @@
             if (session('status')) {
                 alert()->info('Listo', session('status'))->toToast();
             }
-            $appName = Setting::getValue('app_name') ?? 'SISVEN';
+            $appName = Setting::getValue('app_name') ?? config('app.name');
             $logo = Setting::getValue('app_logo');
         @endphp
         <div class="auth-split">

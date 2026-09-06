@@ -16,14 +16,14 @@ class SettingSeeder extends Seeder
     {
         Setting::create([
             'key' => 'app_name',
-            'value' => 'Sistema de Ventas',
+            'value' => config('app.name'),
             'name' => 'Application Short Name',
             'type' => 'text',
             'category' => 'information',
         ]);
         Setting::create([
             'key' => 'app_short_name',
-            'value' => 'Laravel',
+            'value' => config('app.name'),
             'name' => 'Application Name',
             'type' => 'text',
             'category' => 'information',
@@ -62,7 +62,7 @@ class SettingSeeder extends Seeder
             [
                 'key' => 'company_name',
                 'name' => 'Nombre de la Empresa',
-                'value' => 'Sistema de Ventas Laravel',
+                'value' => config('saas.brand'),
                 'type' => 'text',
                 'category' => 'company',
             ],

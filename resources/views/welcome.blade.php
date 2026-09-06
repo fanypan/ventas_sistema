@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ Setting::getValue('app_name') ?? 'Sistema de Ventas' }}</title>
+    <title>{{ Setting::getValue('app_name') ?? config('app.name') }}</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -177,12 +177,12 @@
                 <img src="{{ setting_file_url($logo) }}" alt="Logo" class="logo-img">
             @else
                 <div class="logo-img" style="display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #4f46e5; font-weight: bold;">
-                    {{ substr(Setting::getValue('app_name') ?? 'SV', 0, 2) }}
+                    {{ substr(Setting::getValue('app_name') ?? config('app.name'), 0, 2) }}
                 </div>
             @endif
         </div>
 
-        <h1>{{ Setting::getValue('app_name') ?? 'Sistema de Ventas' }}</h1>
+        <h1>{{ Setting::getValue('app_name') ?? config('app.name') }}</h1>
         <p>Bienvenido al sistema de gestión de ventas más avanzado para su negocio. Gestione inventarios, créditos y finanzas en un solo lugar.</p>
 
         <div class="btn-group">
