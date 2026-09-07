@@ -672,7 +672,7 @@ Sin Mailpit, `MAIL_MAILER=log` (así viene `.env.example`): el enlace del alta q
 | Superficie             | URL                                                                          | Usuario                     | Contraseña   |
 | ---------------------- | ---------------------------------------------------------------------------- | --------------------------- | ------------ |
 | Landing                | [http://localhost:8090](http://localhost:8090)                               | —                           | —            |
-| **Staff** (plataforma) | [http://localhost:8090/plataforma/login](http://localhost:8090/plataforma/login) | `plataforma@arandutech.com` | `plataforma` |
+| **Staff** (plataforma) | [http://localhost:8090/plataforma/login](http://localhost:8090/plataforma/login) | `plataforma@arandutech.com.py` | `plataforma` |
 | POS de un comercio     | http://{slug}.localhost:8090                                                 | el mail del alta            | por mail     |
 
 `*.localhost` resuelve solo. El tenant de prueba aparece después de dar de alta un cliente en el panel staff.

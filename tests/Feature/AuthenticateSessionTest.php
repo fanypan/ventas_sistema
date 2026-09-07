@@ -38,7 +38,7 @@ class AuthenticateSessionTest extends TenantTestCase
 
         $this->withoutMiddleware(PreventRequestForgery::class)
             ->post("/{$path}/login", [
-                'email' => 'plataforma@arandutech.com',
+                'email' => 'plataforma@arandutech.com.py',
                 'password' => 'plataforma',
             ])
             ->assertRedirect();

@@ -13,7 +13,7 @@ Look y tokens: [DESIGN.md](../DESIGN.md). Producto: [PRODUCT.md](../PRODUCT.md).
 En local, `*.localhost` resuelve solo:
 
 - http://localhost:8090 — landing
-- http://localhost:8090/plataforma/login — staff en dev (`plataforma@arandutech.com` / `plataforma`; cambiar `PLATFORM_PATH` en prod)
+- http://localhost:8090/plataforma/login — staff en dev (`plataforma@arandutech.com.py` / `plataforma`; cambiar `PLATFORM_PATH` en prod)
 - http://demo.localhost:8090/ — tenant de prueba (después del alta)
 
 Variables en `.env`:
@@ -48,7 +48,7 @@ Staff entra solo por `https://admin.tudominio.com/a7k9m2p4/login` (bookmark inte
 
 `docker-compose.prod.yml` no arranca sin `DB_PASSWORD` ni `REDIS_PASSWORD`; Redis usa `requirepass` y las cookies de sesión van con `Secure`. Nginx pisa `X-Forwarded-For` con la IP real y PHP solo confía en redes privadas (`TRUSTED_PROXIES=private`). En local, con `php artisan serve`, no se confía en esos headers.
 
-El seeder de staff en production exige `PLATFORM_ADMIN_PASSWORD`. En local, si está vacío, queda `plataforma@arandutech.com` / `plataforma`.
+El seeder de staff en production exige `PLATFORM_ADMIN_PASSWORD`. En local, si está vacío, queda `plataforma@arandutech.com.py` / `plataforma`.
 
 Roles del panel: Spatie en la DB central, guard `platform` (independiente del POS). Tras migrar, corré `php artisan db:seed --class=PlatformPermissionSeeder` para mapear `platform_users.role` a Spatie. **Equipo** (`/{PLATFORM_PATH}/equipo`) asigna roles. Defaults: `admin` (todo), `staff` (alta, cobros, suspender, ver planes), `billing` (ver clientes y registrar pagos). El rol `admin` no se borra ni se recorta. No uses el nombre `superadmin` acá.
 

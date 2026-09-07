@@ -34,7 +34,7 @@ class PlatformUserSeeder extends Seeder
         $this->call(PlatformPermissionSeeder::class);
 
         $user = PlatformUser::updateOrCreate(
-            ['email' => 'plataforma@arandutech.com'],
+            ['email' => 'plataforma@arandutech.com.py'],
             [
                 'name' => 'AranduTech',
                 'password' => Hash::make(self::password()),
