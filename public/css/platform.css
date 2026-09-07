@@ -555,6 +555,19 @@ body.platform-app {
     word-break: break-all;
 }
 
+.platform-invite {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: stretch;
+}
+
+.platform-invite .form-control {
+    flex: 1 1 16rem;
+    min-width: 0;
+    font-size: 0.88rem;
+}
+
 @media (max-width: 991.98px) {
     .platform-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));

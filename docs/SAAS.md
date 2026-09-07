@@ -60,7 +60,7 @@ Guía paso a paso también en el [README — Crear comercios](../README.md#crear
 
 1. Cierre por WhatsApp y cobro (transferencia o efectivo).
 2. Staff → Plataforma → Nuevo cliente (slug, plan público, período mensual/anual, mail del admin).
-3. El job crea la base `tenant_{slug}` (ej. `tenant_demo`), corre migraciones, semilla roles `admin`/`operator` y manda un enlace para que el admin defina su contraseña. Hace falta el worker `queue` en `Up`.
+3. El job crea la base `tenant_{slug}` (ej. `tenant_demo`), corre migraciones, semilla roles `admin`/`operator` y manda un enlace para que el admin defina su contraseña. Hace falta el worker `queue` en `Up`. En la ficha el staff puede copiar el enlace o mandarlo por WhatsApp si el mail no llega.
 4. Opcional: en el alta o en la ficha, **Copiar catálogo** desde otro comercio (categorías, marcas, productos y fotos; stock en 0; no pisa códigos que ya existan). Permiso `tenants.catalog` (staff y admin). Tras desplegar, `php artisan db:seed --class=PlatformPermissionSeeder`.
 5. Si falla el aprovisionamiento, se revierte solo: se borra la base y el registro central (podés reintentar con el mismo slug).
 6. Registrar el pago en la ficha del cliente para renovar el período.
@@ -89,7 +89,7 @@ En LAN sin DNS público, en la **PC Windows** del comercio: dominio en `C:\Windo
 
 2. `docker compose -f docker-compose.prod.yml up -d --build`. Instalación paso a paso: [README — producción](../README.md#instalación-producción).
 3. Migrar y sembrar si el entrypoint no lo hizo: `php artisan migrate` + `php artisan db:seed` (trae el plan `onprem`). En prod con seed: definí `PLATFORM_ADMIN_PASSWORD`.
-4. Staff → Nuevo cliente → plan **Instalación propia**. El formulario fuerza período **Sin vencimiento**. No registres pago mensual.
+4. Staff → Nuevo cliente → plan **Instalación propia**. El formulario fuerza período **Sin vencimiento**. No registres pago mensual. En la ficha: copiá el enlace de invitación o mandalo por WhatsApp (el mail no llega si `MAIL_MAILER=log`).
 5. El alta crea el dominio `{slug}.{TENANT_BASE_DOMAIN}` (ej. slug `pos` → `pos.minegocio.com`). Si el comercio quiere el apex (`minegocio.com`) u otro host único, agregalo en la tabla `domains` de ese tenant; no hace falta wildcard DNS.
 6. La licencia se cobra afuera del panel. `subscriptions:tick` no pausa tenants `lifetime` / plan `onprem`.
 7. Después del primer arranque: `RUN_SEED=false` y cambiá la clave del staff sembrado.

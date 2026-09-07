@@ -89,7 +89,11 @@ class AdminPasswordSetupTest extends TestCase
         $this->actingAs(PlatformUser::first(), 'platform')
             ->get('http://localhost/'.config('saas.platform_path').'/clientes/'.$tenant->id)
             ->assertOk()
-            ->assertSee('Reenviar invitación')
+            ->assertSee('Copiar enlace')
+            ->assertSee('Mandar por WhatsApp')
+            ->assertSee('wa.me', false)
+            ->assertSee('/activar', false)
+            ->assertSee('signature=', false)
             ->assertDontSee('Contraseña inicial');
     }
 
@@ -194,6 +198,24 @@ class AdminPasswordSetupTest extends TestCase
             ->assertRedirect();
 
         Mail::assertSent(TenantAdminInviteMail::class, 2);
+    }
+
+    public function test_ficha_hides_invite_link_after_password_is_set(): void
+    {
+        Mail::fake();
+        $tenant = $this->provisionTenant('sinlinkshop', 'admin@sinlink.test');
+        $path = config('saas.platform_path');
+
+        $tenant->run(function () use ($tenant) {
+            $user = User::where('email', $tenant->admin_email)->firstOrFail();
+            app(SetAdminPassword::class)->execute($user, 'ClaveNueva99');
+        });
+
+        $this->actingAs(PlatformUser::first(), 'platform')
+            ->get("http://localhost/{$path}/clientes/{$tenant->id}")
+            ->assertOk()
+            ->assertDontSee('Copiar enlace')
+            ->assertDontSee('Mandar por WhatsApp');
     }
 
     private function provisionTenant(string $slug, string $email): Tenant

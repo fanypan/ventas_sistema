@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('template/admin/plugins/fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('template/admin/dist/css/adminlte.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/platform.css') }}?v=20260901a">
+    <link rel="stylesheet" href="{{ asset('css/platform.css') }}?v=20260907a">
 </head>
 <body class="hold-transition layout-top-nav platform-app @auth('platform') layout-navbar-fixed @else platform-auth @endauth">
 <a class="skip-link" href="#contenido">Saltar al contenido</a>

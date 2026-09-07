@@ -174,7 +174,7 @@ AWS_PUBLIC_ENDPOINT=http://arandutech.com.py/media
 CENTRAL_DOMAINS=arandutech.com.py,www.arandutech.com.py,admin.arandutech.com.py
 TENANT_BASE_DOMAIN=arandutech.com.py
 PLATFORM_PATH=plataforma
-PLATFORM_DOMAIN=admin.arandutech.com.py
+PLATFORM_DOMAIN=
 PLATFORM_ADMIN_PASSWORD=una-clave-staff
 
 RUN_MIGRATIONS=true
@@ -184,6 +184,8 @@ MAIL_MAILER=log
 ```
 
 `APP_KEY` puede quedar vacío: el primer arranque la genera. `DB_PASSWORD`, `REDIS_PASSWORD` y `MINIO_ROOT_PASSWORD` no pueden quedar `ventas` / vacíos: el compose no arranca. `PLATFORM_ADMIN_PASSWORD` es la clave del staff al sembrar (esa sí la elegís vos, una palabra alcanza). `cliente.arandutech.com.py` **no** va en `CENTRAL_DOMAINS`.
+
+En la PC de la caja dejá `PLATFORM_DOMAIN=` vacío: el login queda en `http://arandutech.com.py/plataforma/login`. Si lo ponés en `admin.arandutech.com.py`, **solo** abre ahí (y `admin` tiene que estar en `CENTRAL_DOMAINS` **y** en `hosts`). `www..../plataforma/login` da 404.
 
 El resto (`DB_HOST=postgres`, Redis, MinIO interno) ya viene bien en `.env.example` o lo fuerza el compose. SMTP no hace falta en LAN si `MAIL_MAILER=log` (el enlace de alta queda en `docker compose logs`).
 
@@ -230,21 +232,62 @@ No instales `docker.io` con `apt` dentro de Ubuntu.
 
 **No** instales Laragon, XAMPP ni Composer. **No** corras `php artisan` ni `sudo` en PowerShell.
 
+#### Al encender la notebook
+
+**Ubuntu no hace falta abrirlo** para que el POS funcione. WSL corre atrás: la ventana de Ubuntu es solo para clonar, editar `.env` o un `compose` a mano.
+
+**Docker Desktop sí tiene que estar corriendo** (el motor). No hace falta la ventana grande del Dashboard: alcanza el icono de la ballena en la bandeja (abajo a la derecha). Si Docker Desktop está cerrado, no hay contenedores.
+
+Para que arranque **al iniciar sesión** (no hace falta abrir Ubuntu ni pegar `docker compose` cada mañana):
+
+1. Docker Desktop → Settings (engranaje) → **General**:
+   - Activá **Start Docker Desktop when you sign in to your computer**
+   - Desactivá **Open Docker Dashboard when Docker Desktop starts** (si no, te sale la ventana cada vez)
+2. **Resources → Advanced**: desactivá **Resource Saver**. Si queda en 5 min, Docker se duerme y el POS se cae.
+3. Levantá el stack **una vez** (`docker compose -f docker-compose.prod.yml up -d --build`). Los servicios tienen `restart: unless-stopped`: cuando el motor vuelve, los contenedores vuelven solos.
+
+Límite de Windows: Docker Desktop arranca **después de que alguien entra a la cuenta**, no en la pantalla de login. En la PC de la caja, iniciá sesión (o poné inicio de sesión automático de Windows si la máquina es solo de ese comercio). Un corte de luz + login alcanza; no hace falta volver a clonar.
+
+Si un día el POS no abre: mirá que la ballena esté en la bandeja y que no esté “starting…”. Cuando esté verde, `http://arandutech.com.py`.
+
 Después del alta (plan **Instalación propia**, slug `cliente`):
 
 | Superficie | URL en el navegador de Windows |
 | --- | --- |
 | Landing | `http://arandutech.com.py` |
-| Staff | `http://admin.arandutech.com.py/plataforma/login` |
+| Staff | `http://arandutech.com.py/plataforma/login` |
 | POS | `http://cliente.arandutech.com.py` |
 
-**`http://localhost` da 404 a propósito.** Con `PLATFORM_DOMAIN` y `CENTRAL_DOMAINS` de arriba, ni la landing ni el staff escuchan `localhost` / `127.0.0.1`. Usá los nombres del archivo `hosts`, con **http** (no https) y **sin puerto** (prod es 80, no 8090).
+Usá **http** (no https) y **sin puerto**. El nombre es **`arandutech.com.py`**, no `arandutech.com`.
 
-`http://cliente.arandutech.com.py` también da 404 hasta que el staff cree el comercio con slug `cliente`.
+Chrome **“No se puede acceder a este sitio web”** = ese nombre **no está** en `hosts` (Windows lo busca en internet). Tiene que haber una línea con **los cuatro** nombres, guardada como administrador, y después `ipconfig /flushdns`.
 
-Para ver si Nginx/PHP responden: `http://127.0.0.1/up` tiene que devolver JSON `"status":"success"`. Si eso falla, el contenedor no está sirviendo; no es un tema de dominios.
+Esto da 404 o no abre, a propósito:
 
-Si los hosts también dan 404: en PowerShell `ipconfig /flushdns`, confirmá que `hosts` se guardó como administrador, y recreá PHP (`docker compose -f docker-compose.prod.yml up -d --build --force-recreate php nginx`).
+- `http://www.arandutech.com.py/plataforma/login` — el staff no está en `www`
+- `http://admin.arandutech.com.py/plataforma/login` — solo si `PLATFORM_DOMAIN=admin.arandutech.com.py` **y** `admin` está en `CENTRAL_DOMAINS` y en `hosts`
+- `http://192.168.x.x/` — no atiende por IP
+- `/plataformas` — es `/plataforma/login`
+- `http://localhost` — 404 cuando `CENTRAL_DOMAINS` ya es `arandutech.com.py` (eso está bien)
+- `http://cliente.arandutech.com.py` — 404 hasta crear el comercio con slug `cliente`
+
+Otra PC de la LAN (esta notebook): el archivo `hosts` de **esa** máquina, no el de la caja:
+
+```
+192.168.100.227  arandutech.com.py www.arandutech.com.py admin.arandutech.com.py cliente.arandutech.com.py
+```
+
+Después: `http://arandutech.com.py` y `http://arandutech.com.py/plataforma/login`. La IP sola nunca va a servir.
+
+En Ubuntu de la caja, el `.env` tiene que tener **exactamente** esos nombres. Si los cambiaste después del primer `up`:
+
+```bash
+cd ~/ventas_sistema
+grep CENTRAL_DOMAINS .env
+docker compose -f docker-compose.prod.yml up -d --force-recreate php nginx
+```
+
+`CENTRAL_DOMAINS` tiene que listar `arandutech.com.py,www.arandutech.com.py,admin.arandutech.com.py`. Si sale `localhost,127.0.0.1`, los hosts no sirven de nada.
 
 Siguiente: [primer arranque](#primer-arranque) (confirmar `queue` y `scheduler` `Up`) y [crear el comercio](#b-un-solo-comercio--instalación-propia-on-prem).
 
@@ -369,7 +412,7 @@ ALTER ROLE ventas CREATEDB;
 | **Staff** (plataforma) | `https://admin.tudominio.com/{PLATFORM_PATH}/login`          | el mail del seed (`plataforma@…`) | `PLATFORM_ADMIN_PASSWORD` |
 | POS de un comercio     | `https://{slug}.tudominio.com`                               | el mail del alta                | enlace de 48 h por mail      |
 
-**PC Windows en LAN** (archivo `hosts`, sin TLS): landing `http://arandutech.com.py`, staff `http://admin.arandutech.com.py/plataforma/login`, POS `http://cliente.arandutech.com.py`. Detalle: [Windows — producción](#windows--producción).
+**PC Windows en LAN** (archivo `hosts`, sin TLS): landing `http://arandutech.com.py`, staff `http://arandutech.com.py/plataforma/login`, POS `http://cliente.arandutech.com.py`. Detalle: [Windows — producción](#windows--producción).
 
 Los usuarios `superadmin@` / `admin@` / `operator@` **ya no se siembran** en la base central. Cada comercio nace con un `admin` (el mail del alta) y el rol `operator` listo para asignar.
 
@@ -512,9 +555,10 @@ En la **PC Windows** del comercio, sin DNS público: dominio en `C:\Windows\Syst
 
 2. Con el seed (`RUN_SEED=true` la primera vez) queda el plan **Instalación propia**.
 3. Staff → **Nuevo cliente** → plan **Instalación propia**. El período se fuerza a **Sin vencimiento**. No registres pago mensual: `subscriptions:tick` no pausa este plan.
-4. El POS queda en `{slug}.{TENANT_BASE_DOMAIN}` (ej. slug `pos` → `pos.minegocio.com`). Si el comercio quiere entrar por el apex (`minegocio.com`), agregá ese host en la tabla `domains` del tenant (además del subdominio que crea el alta).
-5. Cambiá la clave del staff sembrado y poné `RUN_SEED=false`.
-6. Backups SQL: `BACKUP_SCHEDULE` en `.env` con una hora **en la que el comercio esté abierto** (la PC tiene que estar prendida; p.ej. `17:00` o `13:00,19:30`). El default `02:30` solo sirve en un VPS que no se apaga. `mkdir -p backups` y sincronizá esa carpeta con Google Drive (o `BACKUP_HOST_PATH`). Hace falta el `scheduler`. Tras cambiar el horario, recreá `scheduler`. [docs/SAAS.md](docs/SAAS.md#backups).
+4. En la ficha del cliente: **Copiar enlace** o **Mandar por WhatsApp** para que el admin defina la clave (con `MAIL_MAILER=log` el mail no llega a una bandeja).
+5. El POS queda en `{slug}.{TENANT_BASE_DOMAIN}` (ej. slug `pos` → `pos.minegocio.com`). Si el comercio quiere entrar por el apex (`minegocio.com`), agregá ese host en la tabla `domains` del tenant (además del subdominio que crea el alta).
+6. Cambiá la clave del staff sembrado y poné `RUN_SEED=false`.
+7. Backups SQL: `BACKUP_SCHEDULE` en `.env` con una hora **en la que el comercio esté abierto** (la PC tiene que estar prendida; p.ej. `17:00` o `13:00,19:30`). El default `02:30` solo sirve en un VPS que no se apaga. `mkdir -p backups` y sincronizá esa carpeta con Google Drive (o `BACKUP_HOST_PATH`). Hace falta el `scheduler`. Tras cambiar el horario, recreá `scheduler`. [docs/SAAS.md](docs/SAAS.md#backups).
 
 No uses un plan “gratis” público para esto: canibaliza Starter/Negocio y aparece en la landing.
 

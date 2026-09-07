@@ -16,6 +16,7 @@ use App\Models\Plan;
 use App\Models\Tenant;
 use App\Services\Billing\SubscriptionService;
 use App\Services\Media\TenantLogoService;
+use App\Support\AdminInvite;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -56,7 +57,7 @@ class TenantController extends Controller
 
         Alert::success(
             'Cliente creado',
-            'Mandamos un enlace a '.$tenant->admin_email.' para definir la contraseña.'
+            'Mandamos un enlace a '.$tenant->admin_email.'. Si no llega el mail, copiá el de la ficha y mandalo por WhatsApp.'
         )->toToast();
 
         return redirect()->route('platform.tenants.show', $tenant);
@@ -68,8 +69,21 @@ class TenantController extends Controller
         $catalogSources = Tenant::catalogSources($tenant);
         $logoPath = $logos->currentPath($tenant);
         $hasCustomLogo = TenantLogoService::isCustomPath($logoPath);
+        $inviteUrl = null;
+        $inviteWhatsappUrl = null;
 
-        return view('platform.tenants.show', compact('tenant', 'catalogSources', 'hasCustomLogo'));
+        if ($tenant->adminNeedsPassword()) {
+            $inviteUrl = AdminInvite::url($tenant);
+            $inviteWhatsappUrl = AdminInvite::whatsappUrl($tenant, $inviteUrl);
+        }
+
+        return view('platform.tenants.show', compact(
+            'tenant',
+            'catalogSources',
+            'hasCustomLogo',
+            'inviteUrl',
+            'inviteWhatsappUrl',
+        ));
     }
 
     public function updateLogo(UpdateTenantLogoRequest $request, Tenant $tenant, TenantLogoService $logos): RedirectResponse
@@ -143,7 +157,7 @@ class TenantController extends Controller
             return back();
         }
 
-        Alert::success('Invitación enviada', 'Mandamos un enlace a '.$tenant->admin_email.'.')->toToast();
+        Alert::success('Invitación enviada', 'Mandamos un enlace a '.$tenant->admin_email.'. El de la ficha también vale para WhatsApp.')->toToast();
 
         return back();
     }

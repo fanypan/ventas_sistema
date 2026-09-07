@@ -15,7 +15,7 @@ Flujo humano + panel (no hay self-serve):
 2. Staff en `/plataforma` → **Nuevo cliente** (nombre, RUC, slug, plan, mail admin).
 3. Verificar que existan `domains.domain` = `{slug}.{TENANT_BASE_DOMAIN}` y `provisioned_at`.
 4. Opcional: copiar el catálogo desde otro comercio (alta o ficha → **Copiar catálogo**). Stock en 0; no pisa códigos existentes. Permiso `tenants.catalog`.
-5. El comercio recibe un mail con un enlace de 48 h para definir la contraseña (staff puede reenviar desde la ficha).
+5. El comercio recibe un mail con un enlace de 48 h para definir la contraseña. En la ficha también está el enlace para copiarlo o mandarlo por WhatsApp (útil si el mail no llega). El staff puede reenviar el mail desde la ficha.
 6. **Registrar pago** para arrancar/renovar el período (salvo plan **Instalación propia**: no vence, no hay cobro mensual).
 
 ## Estados

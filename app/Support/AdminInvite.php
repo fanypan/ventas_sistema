@@ -28,4 +28,13 @@ final class AdminInvite
             URL::forceScheme(null);
         }
     }
+
+    public static function whatsappUrl(Tenant $tenant, string $setupUrl): string
+    {
+        $hours = (int) config('saas.admin_invite_hours', 48);
+
+        return 'https://wa.me/?text='.rawurlencode(
+            "Hola, para entrar al POS definí tu contraseña (vale {$hours} h):\n{$setupUrl}\nUsuario: {$tenant->admin_email}"
+        );
+    }
 }

@@ -1,13 +1,19 @@
 @extends('platform.layout')
 @section('title', $tenant->name)
 @section('content')
-@if ($tenant->adminNeedsPassword())
+@if ($tenant->adminNeedsPassword() && $inviteUrl)
     <div class="alert alert-info" role="status">
-        El admin todavía no definió su contraseña. Le mandamos un enlace a <strong>{{ $tenant->admin_email }}</strong> (vale 48 horas).
+        <p class="mb-2">El admin todavía no definió su contraseña. Si no les llega el mail a <strong>{{ $tenant->admin_email }}</strong> (pasa en la PC del comercio), copiá el enlace o mandalo por WhatsApp. Vale {{ (int) config('saas.admin_invite_hours', 48) }} horas.</p>
+        <label class="sr-only" for="invite-url">Enlace de invitación</label>
+        <div class="platform-invite">
+            <input class="form-control platform-password" id="invite-url" type="text" value="{{ $inviteUrl }}" readonly>
+            <button class="btn btn-primary" type="button" id="btn-copy-invite">Copiar enlace</button>
+            <a class="btn btn-outline-secondary" href="{{ $inviteWhatsappUrl }}" target="_blank" rel="noopener noreferrer">Mandar por WhatsApp</a>
+        </div>
         @if (platform_can('tenants.update'))
             <form method="POST" action="{{ route('platform.tenants.invite', $tenant) }}" class="mt-2 mb-0">
                 @csrf
-                <button class="btn btn-sm btn-primary" type="submit">Reenviar invitación</button>
+                <button class="btn btn-sm btn-outline-secondary" type="submit">Reenviar por mail</button>
             </form>
         @endif
     </div>
@@ -264,6 +270,43 @@
     @if ($errors->has('password'))
         askPassword(@json($errors->first('password')));
     @endif
+})();
+</script>
+@endpush
+@endif
+
+@if ($inviteUrl)
+@push('scripts')
+<script>
+(function () {
+    var input = document.getElementById('invite-url');
+    var button = document.getElementById('btn-copy-invite');
+    if (!input || !button) {
+        return;
+    }
+
+    button.addEventListener('click', function () {
+        var label = button.textContent;
+        var done = function () {
+            button.textContent = 'Copiado';
+            window.setTimeout(function () {
+                button.textContent = label;
+            }, 2000);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(input.value).then(done).catch(function () {
+                input.select();
+                document.execCommand('copy');
+                done();
+            });
+            return;
+        }
+
+        input.select();
+        document.execCommand('copy');
+        done();
+    });
 })();
 </script>
 @endpush
