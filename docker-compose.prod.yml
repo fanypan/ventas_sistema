@@ -37,6 +37,11 @@ services:
       APP_ENV: production
       APP_DEBUG: "false"
       APP_KEY: ${APP_KEY:-}
+      APP_URL: ${APP_URL:-http://localhost}
+      CENTRAL_DOMAINS: ${CENTRAL_DOMAINS:-localhost,127.0.0.1}
+      TENANT_BASE_DOMAIN: ${TENANT_BASE_DOMAIN:-localhost}
+      PLATFORM_PATH: ${PLATFORM_PATH:-plataforma}
+      PLATFORM_DOMAIN: ${PLATFORM_DOMAIN:-}
       LOG_CHANNEL: stderr
       LOG_LEVEL: error
       DB_CONNECTION: pgsql
@@ -94,6 +99,11 @@ services:
       APP_ENV: production
       APP_DEBUG: "false"
       APP_KEY: ${APP_KEY:-}
+      APP_URL: ${APP_URL:-http://localhost}
+      CENTRAL_DOMAINS: ${CENTRAL_DOMAINS:-localhost,127.0.0.1}
+      TENANT_BASE_DOMAIN: ${TENANT_BASE_DOMAIN:-localhost}
+      PLATFORM_PATH: ${PLATFORM_PATH:-plataforma}
+      PLATFORM_DOMAIN: ${PLATFORM_DOMAIN:-}
       LOG_CHANNEL: stderr
       DB_CONNECTION: pgsql
       DB_HOST: postgres
@@ -151,6 +161,11 @@ services:
       APP_ENV: production
       APP_DEBUG: "false"
       APP_KEY: ${APP_KEY:-}
+      APP_URL: ${APP_URL:-http://localhost}
+      CENTRAL_DOMAINS: ${CENTRAL_DOMAINS:-localhost,127.0.0.1}
+      TENANT_BASE_DOMAIN: ${TENANT_BASE_DOMAIN:-localhost}
+      PLATFORM_PATH: ${PLATFORM_PATH:-plataforma}
+      PLATFORM_DOMAIN: ${PLATFORM_DOMAIN:-}
       LOG_CHANNEL: stderr
       DB_CONNECTION: pgsql
       DB_HOST: postgres

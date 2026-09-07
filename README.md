@@ -238,6 +238,14 @@ Después del alta (plan **Instalación propia**, slug `cliente`):
 | Staff | `http://admin.arandutech.com.py/plataforma/login` |
 | POS | `http://cliente.arandutech.com.py` |
 
+**`http://localhost` da 404 a propósito.** Con `PLATFORM_DOMAIN` y `CENTRAL_DOMAINS` de arriba, ni la landing ni el staff escuchan `localhost` / `127.0.0.1`. Usá los nombres del archivo `hosts`, con **http** (no https) y **sin puerto** (prod es 80, no 8090).
+
+`http://cliente.arandutech.com.py` también da 404 hasta que el staff cree el comercio con slug `cliente`.
+
+Para ver si Nginx/PHP responden: `http://127.0.0.1/up` tiene que devolver JSON `"status":"success"`. Si eso falla, el contenedor no está sirviendo; no es un tema de dominios.
+
+Si los hosts también dan 404: en PowerShell `ipconfig /flushdns`, confirmá que `hosts` se guardó como administrador, y recreá PHP (`docker compose -f docker-compose.prod.yml up -d --build --force-recreate php nginx`).
+
 Siguiente: [primer arranque](#primer-arranque) (confirmar `queue` y `scheduler` `Up`) y [crear el comercio](#b-un-solo-comercio--instalación-propia-on-prem).
 
 ### Configurar `.env`
