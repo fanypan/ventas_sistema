@@ -24,7 +24,7 @@
         <!-- DataTables -->
         <link rel="stylesheet" href="{{ asset('template/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
         <!-- Premium UI CSS -->
-        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260907b">
+        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260907c">
         <script>
             (function () {
                 var pref = 'system';
