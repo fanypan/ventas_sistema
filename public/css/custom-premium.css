@@ -119,8 +119,51 @@ body {
 
 .brand-link {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-    padding: 1.5rem 1rem !important;
+    padding: 0.65rem 0.75rem !important;
+    min-height: auto;
     background: linear-gradient(to right, #1e293b, #334155) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.premium-sidebar .brand-link .brand-image {
+    float: none;
+    margin: 0;
+    max-height: 36px;
+    max-width: 36px;
+    opacity: 1 !important;
+}
+
+.premium-sidebar .brand-link .brand-text,
+.main-header .navbar-brand .brand-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.main-header .navbar-brand {
+    max-width: 48px;
+    margin-right: 0.35rem !important;
+}
+
+.main-header .navbar-brand .brand-image {
+    margin-right: 0;
+    max-height: 32px;
+    max-width: 32px;
+    opacity: 1 !important;
+}
+
+.premium-sidebar .user-panel {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
 /* Small Boxes / Stat Cards */
@@ -562,9 +605,118 @@ body {
     transition: all 0.2s;
 }
 
-.layout-top-nav .nav-item.dropdown:hover .dropdown-menu {
-    display: block;
-    margin-top: 0;
+.main-header .navbar-nav .dropdown-menu {
+    z-index: 1034;
+}
+
+.main-header .navbar-nav .nav-link {
+    font-size: 0.95rem !important;
+    padding: 0.55rem 0.8rem !important;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.main-header .navbar-nav .nav-link i {
+    font-size: 0.9rem;
+}
+
+@media (min-width: 1400px) {
+    .layout-top-nav .nav-item.dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+    }
+
+    .layout-top-nav .nav-link {
+        padding-left: 0.65rem !important;
+        padding-right: 0.65rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+/* POS: menú apilado hasta 1400px — evita ítems cortados en laptops y zoom de Windows */
+@media (max-width: 1399.98px) {
+    .navbar-pos.navbar-expand-xl .navbar-toggler {
+        display: block;
+    }
+
+    .navbar-pos .container-fluid {
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .navbar-pos.navbar-expand-xl .navbar-collapse:not(.show) {
+        display: none !important;
+    }
+
+    .navbar-pos.navbar-expand-xl .navbar-collapse.show {
+        display: block !important;
+        flex-basis: 100%;
+        max-height: calc(100vh - 3.5rem);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .navbar-pos .navbar-nav {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .navbar-pos .navbar-nav .nav-link {
+        white-space: normal;
+        font-size: 0.95rem !important;
+        padding: 0.75rem 0.9rem !important;
+        border-radius: 10px;
+    }
+
+    .navbar-pos .navbar-nav .dropdown-menu {
+        position: static !important;
+        float: none;
+        width: 100%;
+        margin-top: 0.35rem;
+        border-radius: 10px !important;
+    }
+
+    .navbar-pos .navbar-nav .dropdown-item {
+        white-space: normal;
+        padding-top: 0.7rem !important;
+        padding-bottom: 0.7rem !important;
+    }
+
+    .navbar-pos .nav-item.dropdown:hover .dropdown-menu {
+        display: none;
+    }
+
+    .navbar-pos .nav-item.dropdown.show .dropdown-menu {
+        display: block;
+    }
+
+    .navbar-pos .navbar-collapse {
+        background: rgba(30, 41, 59, 0.98);
+        border-radius: 12px;
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+    }
+
+    .navbar-pos .navbar-no-expand {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .navbar-pos .navbar-no-expand .nav-link {
+        padding-left: 0.6rem !important;
+        padding-right: 0.6rem !important;
+    }
+}
+
+@media (min-width: 1400px) {
+    .navbar-pos.navbar-expand-xl .navbar-toggler {
+        display: none;
+    }
+
+    .navbar-pos.navbar-expand-xl .navbar-collapse {
+        display: flex !important;
+    }
 }
 
 .dropdown-menu {
@@ -643,71 +795,6 @@ img {
     .content-header .m-0 {
         font-size: 1.4rem !important;
         line-height: 1.25;
-    }
-
-    .main-header .container-fluid {
-        align-items: center;
-    }
-
-    .navbar-brand {
-        max-width: calc(100% - 60px);
-        margin-right: 0.5rem !important;
-        display: flex !important;
-        align-items: center;
-    }
-
-    .navbar-brand .brand-image {
-        margin-right: 0.5rem;
-    }
-
-    .navbar-brand .brand-text {
-        display: inline-block;
-        max-width: 180px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .navbar-collapse {
-        background: rgba(30, 41, 59, 0.98);
-        border-radius: 12px;
-        margin-top: 0.75rem;
-        padding: 0.75rem;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
-    }
-
-    .navbar-nav {
-        gap: 0.25rem;
-    }
-
-    .main-header .navbar-nav .nav-link {
-        font-size: 0.95rem !important;
-        padding: 0.75rem 0.9rem !important;
-        border-radius: 10px;
-    }
-
-    .navbar-nav .dropdown-menu {
-        position: static !important;
-        float: none;
-        width: 100%;
-        margin-top: 0.35rem;
-        border-radius: 10px !important;
-    }
-
-    .navbar-nav .dropdown-item {
-        white-space: normal;
-        padding-top: 0.7rem !important;
-        padding-bottom: 0.7rem !important;
-    }
-
-    .navbar-no-expand {
-        flex-direction: row;
-        align-items: center;
-    }
-
-    .navbar-no-expand .nav-link {
-        padding-left: 0.6rem !important;
-        padding-right: 0.6rem !important;
     }
 
     .form-group {

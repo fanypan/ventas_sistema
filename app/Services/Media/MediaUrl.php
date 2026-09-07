@@ -53,6 +53,14 @@ class MediaUrl
 
         $legacy = ltrim($value, '/');
         if (str_starts_with($legacy, 'storage/')) {
+            if ($this->legacyStorageFileExists($legacy)) {
+                return asset($legacy);
+            }
+
+            if ($this->isDefaultBrandingPath($legacy)) {
+                return $this->defaultBrandingUrl($legacy);
+            }
+
             return asset($legacy);
         }
 
@@ -85,6 +93,27 @@ class MediaUrl
     private function publicDisk(): string
     {
         return (string) config('media.public_disk', 'public');
+    }
+
+    private function legacyStorageFileExists(string $legacy): bool
+    {
+        $relative = substr($legacy, strlen('storage/'));
+
+        return is_file(public_path($legacy))
+            || is_file(storage_path('app/public/'.$relative));
+    }
+
+    private function isDefaultBrandingPath(string $legacy): bool
+    {
+        return in_array($legacy, ['storage/logo.png', 'storage/favicon.png'], true);
+    }
+
+    private function defaultBrandingUrl(string $legacy): string
+    {
+        return match ($legacy) {
+            'storage/favicon.png' => asset((string) config('media.default_favicon', 'brand/favicon.png')),
+            default => asset((string) config('media.default_logo', 'brand/logo.png')),
+        };
     }
 
     private function existsOn(string $disk, string $path): bool

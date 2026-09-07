@@ -33,6 +33,13 @@ return [
 
     'placeholder' => 'images/product-placeholder.svg',
 
+    /*
+    | Logo y favicon por defecto del comercio (public/, no depende del symlink storage).
+    */
+    'default_logo' => 'brand/logo.png',
+
+    'default_favicon' => 'brand/favicon.png',
+
     'logo_max_edge' => (int) env('MEDIA_LOGO_MAX_EDGE', 800),
 
     /*

@@ -24,7 +24,7 @@
         <!-- DataTables -->
         <link rel="stylesheet" href="{{ asset('template/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
         <!-- Premium UI CSS -->
-        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260905a">
+        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260907b">
         <script>
             (function () {
                 var pref = 'system';
@@ -55,7 +55,7 @@
         <div class="wrapper">
             <!-- Preloader -->
             <div class="preloader flex-column justify-content-center align-items-center">
-                <img class="animation__shake" src="{{ setting_file_url(Setting::getValue('app_logo')) }}" alt="{{ Setting::getName('app_name') }}" height="60" width="60">
+                <img class="animation__shake" src="{{ setting_file_url(Setting::getValue('app_logo')) }}" alt="{{ brand_name() }}" height="60" width="60">
             </div>
 
             <!-- Navbar -->

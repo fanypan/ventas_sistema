@@ -1,8 +1,8 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4 premium-sidebar">
     <!-- Brand Logo -->
     <a href="{{ route('dashboard') }}" class="brand-link">
-    <img src="{{ setting_file_url(Setting::getValue('app_logo')) }}" alt="{{ Setting::getName('app_name') }}" class="brand-image img-circle elevation-3 brand-glow" style="opacity: .8">
-    <span class="brand-text font-weight-bold">{{ Setting::getValue('app_name') }}</span>
+    <img src="{{ setting_file_url(Setting::getValue('app_logo')) }}" alt="{{ brand_name() }}" class="brand-image img-circle elevation-3 brand-glow">
+    <span class="brand-text font-weight-bold">{{ brand_name() }}</span>
     </a>
 
     <!-- Sidebar -->

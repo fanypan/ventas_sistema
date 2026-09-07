@@ -88,3 +88,10 @@ if (! function_exists('setting_file_url')) {
         return app(MediaUrl::class)->settingUrl($value);
     }
 }
+
+if (! function_exists('brand_name')) {
+    function brand_name(): string
+    {
+        return (string) (SettingHelper::getValue('app_name') ?: config('app.name'));
+    }
+}

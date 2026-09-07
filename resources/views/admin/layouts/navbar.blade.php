@@ -1,42 +1,13 @@
-<nav class="main-header navbar navbar-expand-md navbar-dark">
-    <style>
-        .main-header .navbar-nav .dropdown-menu {
-            z-index: 1034;
-        }
-        @media (max-width: 991.98px) {
-            .layout-navbar-fixed .main-header .navbar-collapse.show {
-                max-height: calc(100vh - 3.5rem);
-                overflow-y: auto;
-            }
-        }
-        .main-header .navbar-nav .nav-link {
-            font-size: 0.95rem !important;
-            padding: 0.55rem 0.8rem !important;
-            letter-spacing: 0;
-            white-space: nowrap;
-        }
-        .main-header .navbar-nav .nav-link i {
-            font-size: 0.9rem;
-        }
-        @media (max-width: 991.98px) {
-            .main-header .navbar-nav .nav-link {
-                font-size: 0.95rem !important;
-                padding: 0.75rem 0.9rem !important;
-            }
-            .main-header .navbar-nav .nav-link i {
-                font-size: 0.9rem;
-            }
-        }
-    </style>
+<nav class="main-header navbar navbar-expand-xl navbar-dark navbar-pos">
     <div class="container-fluid">
         <!-- Brand -->
         <a href="{{ route('dashboard') }}" class="navbar-brand">
-            <img src="{{ setting_file_url(Setting::getValue('app_logo')) }}" alt="{{ Setting::getName('app_name') }}" class="brand-image img-circle elevation-3 brand-glow" style="opacity: .8">
-            <span class="brand-text font-weight-bold ml-2">{{ Setting::getValue('app_name') }}</span>
+            <img src="{{ setting_file_url(Setting::getValue('app_logo')) }}" alt="{{ brand_name() }}" class="brand-image img-circle elevation-3 brand-glow">
+            <span class="brand-text font-weight-bold ml-2">{{ brand_name() }}</span>
         </a>
 
         <!-- Toggler -->
-        <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler order-2" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Abrir menú">
             <span class="navbar-toggler-icon"></span>
         </button>
 
