@@ -3,6 +3,7 @@ set -e
 cd /var/www/html
 
 /usr/local/bin/ensure-storage.sh
+. /usr/local/bin/ensure-app-key.sh
 
 if [ -d /opt/storage-defaults ]; then
   cp -an /opt/storage-defaults/. storage/app/public/ 2>/dev/null || true
@@ -23,14 +24,6 @@ chmod -R ug+rwx \
   storage/app/public \
   bootstrap/cache \
   || echo "[entrypoint] aviso: chmod incompleto (típico en Windows)"
-
-if [ -z "${APP_KEY}" ] || [ "${APP_KEY}" = "base64:" ]; then
-  echo "[entrypoint] APP_KEY vacío. Definilo en .env (en esta carpeta: $(pwd)/.env) y recreá el contenedor:"
-  echo "  docker run --rm php:8.3-cli php -r \"echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;\""
-  echo "  # pegá el resultado en APP_KEY=  (sin espacios, una sola línea)"
-  echo "  docker compose -f docker-compose.prod.yml up -d --force-recreate php"
-  exit 1
-fi
 
 if [ ! -L public/storage ] && [ ! -e public/storage ]; then
   echo "[entrypoint] storage:link..."

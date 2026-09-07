@@ -40,11 +40,13 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-di
     && rm -f /usr/bin/composer
 
 COPY docker/php/ensure-storage.sh /usr/local/bin/ensure-storage.sh
+COPY docker/php/ensure-app-key.sh /usr/local/bin/ensure-app-key.sh
 COPY docker/php/entrypoint.prod.sh /usr/local/bin/entrypoint.prod.sh
 COPY docker/php/queue-start.sh /usr/local/bin/queue-start.sh
 COPY docker/php/scheduler-start.sh /usr/local/bin/scheduler-start.sh
-RUN chmod +x /usr/local/bin/ensure-storage.sh /usr/local/bin/entrypoint.prod.sh \
-    /usr/local/bin/queue-start.sh /usr/local/bin/scheduler-start.sh
+RUN chmod +x /usr/local/bin/ensure-storage.sh /usr/local/bin/ensure-app-key.sh \
+    /usr/local/bin/entrypoint.prod.sh /usr/local/bin/queue-start.sh \
+    /usr/local/bin/scheduler-start.sh
 
 EXPOSE 9000
 

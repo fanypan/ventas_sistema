@@ -153,20 +153,14 @@ Si ya lo habías clonado en `C:\Users\…`, no lo uses desde `/mnt/c`. Volvé a 
 cp .env.example .env
 ```
 
-Generá `APP_KEY` **en esa misma Ubuntu** (no copies el `.env` de la notebook) y pegalo en `.env` en `APP_KEY=`:
-
-```bash
-docker run --rm php:8.3-cli php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"
-grep '^APP_KEY=' .env
-# tiene que ser APP_KEY=base64:....  (no vacío)
-```
+**No hace falta generar ni pegar `APP_KEY`.** Dejala vacía (`APP_KEY=`). El primer `up` la crea solo.
 
 6. En `.env` **no alcanza** con los dominios. `APP_ENV` y `APP_DEBUG` los pisa el compose (`production` / `false`): no hace falta tocarlos. Sí tenés que completar esto (el `.env.example` trae claves débiles o vacías):
 
 ```env
 APP_NAME="AranduTech Ventas"
 APP_URL=http://arandutech.com.py
-APP_KEY=base64:...
+APP_KEY=
 APP_PUBLISH_PORT=80
 SESSION_SECURE_COOKIE=false
 
@@ -189,7 +183,7 @@ BACKUP_SCHEDULE=17:00
 MAIL_MAILER=log
 ```
 
-`APP_KEY` se genera **antes** del `up` (comando en [configurar `.env`](#configurar-env)). `DB_PASSWORD`, `REDIS_PASSWORD` y `MINIO_ROOT_PASSWORD` no pueden quedar `ventas` / vacíos: el compose no arranca. `PLATFORM_ADMIN_PASSWORD` es la clave del staff al sembrar. `cliente.arandutech.com.py` **no** va en `CENTRAL_DOMAINS`.
+`APP_KEY` puede quedar vacío: el primer arranque la genera. `DB_PASSWORD`, `REDIS_PASSWORD` y `MINIO_ROOT_PASSWORD` no pueden quedar `ventas` / vacíos: el compose no arranca. `PLATFORM_ADMIN_PASSWORD` es la clave del staff al sembrar (esa sí la elegís vos, una palabra alcanza). `cliente.arandutech.com.py` **no** va en `CENTRAL_DOMAINS`.
 
 El resto (`DB_HOST=postgres`, Redis, MinIO interno) ya viene bien en `.env.example` o lo fuerza el compose. SMTP no hace falta en LAN si `MAIL_MAILER=log` (el enlace de alta queda en `docker compose logs`).
 
@@ -250,18 +244,12 @@ Siguiente: [primer arranque](#primer-arranque) (confirmar `queue` y `scheduler` 
 
 Un `.env` **de producción**: no copies el de un notebook con `APP_DEBUG=true` y claves `ventas/ventas`.
 
-Generá `APP_KEY` **antes** de levantar. El entrypoint de producción **no arranca** si la key está vacía. En el host no hace falta PHP:
-
-```bash
-docker run --rm php:8.3-cli php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"
-```
-
-Pegá el resultado en `APP_KEY`. Variables importantes:
+`APP_KEY` puede quedar vacío: el primer `up` de producción la genera y la guarda en el volumen. No la regeneres después de tener datos.
 
 ```env
 APP_NAME="AranduTech Ventas"
 APP_URL=https://tudominio.com
-APP_KEY=base64:...
+APP_KEY=
 APP_PUBLISH_PORT=80
 PLATFORM_ADMIN_PASSWORD=una-clave-staff
 
@@ -334,7 +322,7 @@ Si `php` está `Exit` / `Restarting` y el resto dice `dependency php failed to s
 docker compose -f docker-compose.prod.yml logs php
 ```
 
-Causas habituales: `APP_KEY` vacío, `PLATFORM_ADMIN_PASSWORD` vacío con `RUN_SEED=true`, o `chown` sobre la carpeta `backups` en Windows. El mensaje concreto está al final de ese log.
+Causas habituales: `PLATFORM_ADMIN_PASSWORD` vacío con `RUN_SEED=true`, o `chown` sobre la carpeta `backups` en Windows. El mensaje concreto está al final de ese log.
 
 Si en los logs aparece `Please provide a valid cache path`, el volumen `storage` arrancó vacío. En Ubuntu:
 

@@ -27,6 +27,7 @@ list_tables.php
 *.sql.gz
 /backups
 storage/app/.docker_seeded
+storage/app/.app_key
 /database/tenant*
 /storage/tenant*
 

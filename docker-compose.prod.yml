@@ -3,7 +3,8 @@
 #
 # Uso:
 #   docker compose -f docker-compose.prod.yml up -d --build
-# Requiere APP_KEY, DB_PASSWORD y REDIS_PASSWORD en `.env` (sin fallback).
+# Requiere DB_PASSWORD y REDIS_PASSWORD en `.env` (sin fallback).
+# APP_KEY puede ir vacío: el primer arranque la genera y la guarda en el volumen.
 # No publicar Postgres/Redis al host.
 
 name: ventas_sistema_prod
@@ -35,7 +36,7 @@ services:
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
-      APP_KEY: ${APP_KEY:?APP_KEY is required}
+      APP_KEY: ${APP_KEY:-}
       LOG_CHANNEL: stderr
       LOG_LEVEL: error
       DB_CONNECTION: pgsql
@@ -91,7 +92,7 @@ services:
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
-      APP_KEY: ${APP_KEY:?APP_KEY is required}
+      APP_KEY: ${APP_KEY:-}
       LOG_CHANNEL: stderr
       DB_CONNECTION: pgsql
       DB_HOST: postgres
@@ -148,7 +149,7 @@ services:
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
-      APP_KEY: ${APP_KEY:?APP_KEY is required}
+      APP_KEY: ${APP_KEY:-}
       LOG_CHANNEL: stderr
       DB_CONNECTION: pgsql
       DB_HOST: postgres
