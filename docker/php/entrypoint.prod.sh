@@ -7,6 +7,11 @@ cd /var/www/html
 
 if [ -d /opt/storage-defaults ]; then
   cp -an /opt/storage-defaults/. storage/app/public/ 2>/dev/null || true
+  for asset in logo.png favicon.png loading.gif; do
+    if [ ! -f "storage/app/public/${asset}" ] && [ -f "/opt/storage-defaults/${asset}" ]; then
+      cp -a "/opt/storage-defaults/${asset}" "storage/app/public/${asset}"
+    fi
+  done
 fi
 
 # No tocar storage/app/backups: en Docker Desktop (Windows) el bind mount

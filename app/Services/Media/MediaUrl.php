@@ -53,15 +53,19 @@ class MediaUrl
 
         $legacy = ltrim($value, '/');
         if (str_starts_with($legacy, 'storage/')) {
-            if ($this->legacyStorageFileExists($legacy)) {
-                return asset($legacy);
-            }
-
             if ($this->isDefaultBrandingPath($legacy)) {
                 return $this->defaultBrandingUrl($legacy);
             }
 
+            if ($this->legacyStorageFileExists($legacy)) {
+                return asset($legacy);
+            }
+
             return asset($legacy);
+        }
+
+        if ($this->isDefaultBrandingPath($legacy)) {
+            return $this->defaultBrandingUrl($legacy);
         }
 
         $private = config('media.private_disk');
@@ -105,15 +109,25 @@ class MediaUrl
 
     private function isDefaultBrandingPath(string $legacy): bool
     {
-        return in_array($legacy, ['storage/logo.png', 'storage/favicon.png'], true);
+        return in_array($legacy, [
+            'storage/logo.png',
+            'storage/favicon.png',
+            'brand/logo.png',
+            'brand/favicon.png',
+        ], true);
+    }
+
+    private function defaultBrandingRelative(string $legacy): string
+    {
+        return match ($legacy) {
+            'storage/favicon.png', 'brand/favicon.png' => (string) config('media.default_favicon', 'brand/favicon.png'),
+            default => (string) config('media.default_logo', 'brand/logo.png'),
+        };
     }
 
     private function defaultBrandingUrl(string $legacy): string
     {
-        return match ($legacy) {
-            'storage/favicon.png' => asset((string) config('media.default_favicon', 'brand/favicon.png')),
-            default => asset((string) config('media.default_logo', 'brand/logo.png')),
-        };
+        return asset($this->defaultBrandingRelative($legacy));
     }
 
     private function existsOn(string $disk, string $path): bool
@@ -136,6 +150,17 @@ class MediaUrl
         }
 
         $legacy = ltrim($value, '/');
+
+        if ($this->isDefaultBrandingPath($legacy)) {
+            $brandPath = public_path($this->defaultBrandingRelative($legacy));
+
+            if (is_file($brandPath)) {
+                $contents = file_get_contents($brandPath);
+
+                return $contents !== false ? $contents : null;
+            }
+        }
+
         $public = $this->publicDisk();
 
         try {

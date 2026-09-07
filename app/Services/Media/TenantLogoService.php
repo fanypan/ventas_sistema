@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class TenantLogoService
 {
-    public const DEFAULT_PATH = 'storage/logo.png';
+    public const DEFAULT_PATH = 'brand/logo.png';
 
     public function __construct(private ImageOptimizer $optimizer) {}
 
@@ -110,7 +110,7 @@ class TenantLogoService
 
         $legacy = ltrim($value, '/');
 
-        return ! str_starts_with($legacy, 'storage/');
+        return ! str_starts_with($legacy, 'storage/') && ! str_starts_with($legacy, 'brand/');
     }
 
     public function forgetPending(Tenant $tenant): void

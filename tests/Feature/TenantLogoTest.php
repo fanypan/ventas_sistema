@@ -75,7 +75,7 @@ class TenantLogoTest extends TenantTestCase
             ->assertSessionHasErrors('logo');
 
         $this->tenant->run(function () {
-            $this->assertSame('storage/logo.png', SettingHelper::getValue('app_logo'));
+            $this->assertSame(TenantLogoService::DEFAULT_PATH, SettingHelper::getValue('app_logo'));
         });
     }
 
