@@ -9,6 +9,11 @@
 
     var deferredPrompt = null;
 
+    function isStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+    }
+
     function show(selector) {
         document.querySelectorAll(selector).forEach(function (el) {
             el.classList.remove('d-none');
@@ -22,24 +27,61 @@
         });
     }
 
+    function installHint() {
+        var text = 'Para instalar el POS en este equipo:\n\n'
+            + '• Brave o Chrome: menú del navegador (⋮) → “Instalar…” o “Crear acceso directo…”\n'
+            + '• En la PC de caja con HTTP local puede no aparecer “Instalar”; igual podés crear un acceso directo.\n'
+            + '• En el celular: menú → “Agregar a pantalla de inicio”.';
+
+        if (window.Swal && typeof window.Swal.fire === 'function') {
+            window.Swal.fire({
+                title: 'Instalar POS',
+                text: text,
+                icon: 'info',
+                confirmButtonText: 'Entendido',
+            });
+
+            return;
+        }
+
+        window.alert(text);
+    }
+
+    function syncInstallUi() {
+        if (isStandalone()) {
+            hide('[data-pwa-install]');
+
+            return;
+        }
+
+        show('[data-pwa-install]');
+    }
+
     window.addEventListener('beforeinstallprompt', function (event) {
         event.preventDefault();
         deferredPrompt = event;
-        show('[data-pwa-install]');
+        syncInstallUi();
     });
 
     document.addEventListener('click', function (event) {
         var trigger = event.target.closest('[data-pwa-install]');
-        if (!trigger || !deferredPrompt) {
+        if (!trigger) {
             return;
         }
 
         event.preventDefault();
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.finally(function () {
-            deferredPrompt = null;
-            hide('[data-pwa-install]');
-        });
+
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.finally(function () {
+                deferredPrompt = null;
+                syncInstallUi();
+            });
+
+            return;
+        }
+
+        installHint();
     });
 
     window.addEventListener('appinstalled', function () {
@@ -47,11 +89,11 @@
         hide('[data-pwa-install]');
     });
 
-    var standalone = window.matchMedia('(display-mode: standalone)').matches
-        || window.navigator.standalone === true;
+    window.addEventListener('load', syncInstallUi);
+
     var ios = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 
-    if (ios && !standalone) {
+    if (ios && !isStandalone()) {
         show('[data-pwa-ios-hint]');
     }
 })();

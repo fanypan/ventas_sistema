@@ -228,6 +228,41 @@ body {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
     background: linear-gradient(135deg, var(--dark), #334155) !important;
     backdrop-filter: blur(8px);
+    overflow: visible !important;
+}
+
+.navbar-pos .container-fluid {
+    overflow: visible !important;
+}
+
+.navbar-pos .navbar-no-expand {
+    position: relative;
+    z-index: 1036;
+    overflow: visible;
+    flex-shrink: 0;
+}
+
+.navbar-pos .navbar-no-expand > .nav-item {
+    position: static;
+}
+
+.navbar-pos .navbar-no-expand .dropdown-menu,
+.navbar-pos .navbar-no-expand .user-menu > .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+    float: none;
+    width: auto;
+    min-width: 11rem;
+    margin-top: 0.125rem;
+    transform: none !important;
+}
+
+.navbar-pos .navbar-no-expand .user-menu > .dropdown-menu {
+    width: 280px !important;
+    min-width: 280px;
+    max-width: min(280px, calc(100vw - 1rem));
 }
 
 /* Content Wrapper */
@@ -692,10 +727,16 @@ body {
 
     .navbar-pos .navbar-no-expand .dropdown-menu {
         position: absolute !important;
-        top: 100%;
+        top: 100% !important;
         width: auto;
         min-width: 11rem;
-        margin-top: 0;
+        margin-top: 0.125rem;
+    }
+
+    .navbar-pos .navbar-no-expand .user-menu > .dropdown-menu {
+        width: 280px !important;
+        min-width: 280px;
+        max-width: min(280px, calc(100vw - 1rem));
     }
 
     .navbar-pos .navbar-no-expand .nav-item.dropdown.show .dropdown-menu {
@@ -718,6 +759,23 @@ body {
     .navbar-pos .navbar-no-expand .nav-link {
         padding-left: 0.6rem !important;
         padding-right: 0.6rem !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .navbar-pos .navbar-no-expand .dropdown-menu,
+    .navbar-pos .navbar-no-expand .user-menu > .dropdown-menu {
+        left: auto !important;
+        right: 0 !important;
+    }
+
+    .navbar-pos .navbar-no-expand .nav-link {
+        padding-left: 0.45rem !important;
+        padding-right: 0.45rem !important;
+    }
+
+    .navbar-pos .navbar-no-expand .user-menu .user-image {
+        margin-right: 0;
     }
 }
 

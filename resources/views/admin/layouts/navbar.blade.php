@@ -7,11 +7,11 @@
         </a>
 
         <!-- Toggler -->
-        <button class="navbar-toggler order-2" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Abrir menú">
+        <button class="navbar-toggler order-3" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Abrir menú">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse order-3" id="navbarCollapse">
+        <div class="collapse navbar-collapse order-4" id="navbarCollapse">
             <!-- Left navbar links -->
             <ul class="navbar-nav ml-auto mr-auto">
                 <!-- Dashboard -->
@@ -210,17 +210,17 @@
         </div>
 
         <!-- Right navbar links (Profile, Theme, etc) -->
-        <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+        <ul class="navbar-nav navbar-no-expand ml-auto order-2">
             <li class="nav-item d-none" data-pwa-install>
                 <button type="button" class="nav-link bg-transparent border-0" title="Instalar en este dispositivo" aria-label="Instalar en este dispositivo">
                     <i class="fas fa-download"></i>
-                    <span class="d-none d-xl-inline ml-1">Instalar</span>
+                    <span class="d-none d-lg-inline ml-1">Instalar</span>
                 </button>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('help.index') ? 'active' : '' }}" href="{{ route('help.index') }}" title="Ayuda del POS" aria-label="Ayuda del POS">
                     <i class="fas fa-question-circle"></i>
-                    <span class="d-none d-xl-inline ml-1">Ayuda</span>
+                    <span class="d-none d-lg-inline ml-1">Ayuda</span>
                 </a>
             </li>
             <li class="nav-item dropdown">

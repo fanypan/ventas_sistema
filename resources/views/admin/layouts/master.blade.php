@@ -24,7 +24,7 @@
         <!-- DataTables -->
         <link rel="stylesheet" href="{{ asset('template/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
         <!-- Premium UI CSS -->
-        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260907c">
+        <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}?v=20260907d">
         <script>
             (function () {
                 var pref = 'system';
@@ -80,7 +80,7 @@
         <!-- ./wrapper -->
         <!-- jQuery -->
         <script src="{{ asset('js/theme.js') }}"></script>
-        <script src="{{ asset('js/pwa.js') }}"></script>
+        <script src="{{ asset('js/pwa.js') }}?v=20260907d"></script>
         <script src="{{ asset('template/admin/plugins/jquery/jquery.min.js') }}"></script>
         <script src="{{ asset('js/product-grid-filter.js') }}"></script>
         <script src="{{ asset('js/pos-shortcuts.js') }}"></script>
