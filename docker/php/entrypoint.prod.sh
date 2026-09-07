@@ -30,6 +30,9 @@ if [ ! -L public/storage ] && [ ! -e public/storage ]; then
   php artisan storage:link --no-interaction
 fi
 
+echo "[entrypoint] config:clear..."
+php artisan config:clear --no-interaction || true
+
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   echo "[entrypoint] migrate..."
   php artisan migrate --force --no-interaction

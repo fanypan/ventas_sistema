@@ -20,7 +20,7 @@ return [
     | Contraseña del usuario staff al sembrar (PlatformUserSeeder).
     | Vacío en local/testing → "plataforma". En production hay que definirla.
     */
-    'platform_admin_password' => env('PLATFORM_ADMIN_PASSWORD'),
+    'platform_admin_password' => trim((string) env('PLATFORM_ADMIN_PASSWORD', '')),
 
     'tenant_base_domain' => env('TENANT_BASE_DOMAIN', 'localhost'),
     'whatsapp' => env('SAAS_WHATSAPP', '595981000000'),

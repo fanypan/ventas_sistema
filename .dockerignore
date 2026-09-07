@@ -16,3 +16,4 @@ storage/framework/views
 *.tar.gz
 .env
 .env.backup
+bootstrap/cache/*.php

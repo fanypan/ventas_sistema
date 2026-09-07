@@ -10,9 +10,13 @@ class PlatformUserSeeder extends Seeder
 {
     public static function password(): string
     {
-        $password = config('saas.platform_admin_password');
+        $password = trim((string) (
+            config('saas.platform_admin_password')
+            ?: getenv('PLATFORM_ADMIN_PASSWORD')
+            ?: ''
+        ));
 
-        if (is_string($password) && $password !== '') {
+        if ($password !== '') {
             return $password;
         }
 
